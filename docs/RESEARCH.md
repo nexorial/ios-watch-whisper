@@ -15,7 +15,7 @@ Apple 文档允许独立 Watch-only App。项目中的 `WatchWhisper` iOS contai
 
 蓝牙的连接参数、后台调度由系统管理。这里只承诺前台发现和重连；没有通过假音频、假运动会话维持后台运行。Mac 休眠时不能保证连接，也没有实现远程唤醒。
 
-## 按键与声音
+## 按键与声音（0.1 方案，已被下方 0.2 更新替代）
 
 | 操作 | 映射 |
 | --- | --- |
@@ -57,3 +57,11 @@ Claude 仅预留桌面版的滚动／Enter 目标（`com.anthropic.claudefordesk
 - [Meet watchOS 10](https://developer.apple.com/videos/play/wwdc2023/10026/)：侧边按钮打开控制中心／Wallet。
 - [Watch Connectivity](https://developer.apple.com/documentation/watchconnectivity)：与配对 iPhone 的通信框架。
 - [OpenAI / ChatGPT Commands](https://learn.chatgpt.com/docs/reference/commands)、[Features](https://learn.chatgpt.com/docs/features)：官方产品参考，未据此宣称存在音频注入 API。
+
+## 0.2：按用户真机反馈修订
+
+用户明确选择继续用 Codex 内置听写，但声音必须来自 Watch。采用独立安装的 BlackHole 2ch 作为虚拟音频设备，接收端通过 Core Audio 定向输出，不更改 Codex 私有接口、不调用转写服务。BlackHole 官方说明其输出可被接收应用作为输入：[官方项目](https://github.com/ExistentialAudio/BlackHole)。驱动未嵌入、未修改，安装包单独准备；此处仅记录本机开发测试依赖，不据此判断未来捆绑分发的许可条件。
+
+Watch 使用 AVAudioEngine tap 和 AVAudioConverter 取得 16 kHz PCM，编码为独立 ADPCM 帧，经已有加密 BLE 连接传输。watchOS 不支持 `setPreferredInput`，因此校验实际输入是 `builtInMic`，不把外接设备或 Mac 麦克风当作 Watch 麦克风。Mac 解码后通过 AVAudioPlayerNode 输出到明确的 BlackHole 设备；链路、签名、会话和队列均有边界检查。
+
+用户实测 0.1 时滚动与听写均报输入框／按钮找不到。滚动代码原先强制 `composer()` 成功，现已移除；听写会激活目标并聚焦编辑器。安装包静态源码显示编辑器为 ProseMirror multiline textbox，优先识别该编辑器；对 Chromium 请求 AXManualAccessibility，并优先遍历页面末端控件。该更改仍需要用户在真实 Codex 中复测，不能以构建通过宣称定位问题已解决。

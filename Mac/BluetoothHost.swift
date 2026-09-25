@@ -11,6 +11,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     @Published var pairedCount = 0
     private var manager: CBPeripheralManager!
     private var statusCharacteristic: CBMutableCharacteristic!
+    let audio = WatchAudioOutput()
     private let controller: AgentController
     private var sessions: [UUID: Session] = [:]
     private var pairingUntil = Date.distantPast
@@ -22,7 +23,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     private var draining = false
     private var pendingNotifications: [(Data, CBCentral)] = []
     private let demo: Bool
-    private struct Session { var key: Data; var nonce: Data; var gate = ReplayGate() }
+    private struct Session { var key: Data; var nonce: Data; var gate = ReplayGate(); var audioGate: AudioGate? }
 
     init(controller: AgentController, demo: Bool = false) {
         self.controller = controller; self.demo = demo
@@ -62,7 +63,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         guard peripheral.state == .poweredOn else {
             connection = peripheral.state == .unauthorized ? "请在系统设置允许蓝牙" : "请打开 Mac 蓝牙"
-            sessions = [:]; work = []; owner = nil
+            audio.stop(); sessions = [:]; work = []; owner = nil
             Task { _ = await controller.perform(.cancelDictation) }
             return
         }
@@ -71,7 +72,9 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         let challenge = CBMutableCharacteristic(type: CBUUID(string: Wire.challenge), properties: [.read], value: nil, permissions: [.readable])
         let command = CBMutableCharacteristic(type: CBUUID(string: Wire.command), properties: [.write], value: nil, permissions: [.writeable, .writeEncryptionRequired])
         statusCharacteristic = CBMutableCharacteristic(type: CBUUID(string: Wire.status), properties: [.notify, .notifyEncryptionRequired], value: nil, permissions: [.readable])
-        service.characteristics = [pair, challenge, command, statusCharacteristic]
+        let audioStream = CBMutableCharacteristic(type: CBUUID(string: AudioWire.characteristic),
+            properties: [.writeWithoutResponse], value: nil, permissions: [.writeable, .writeEncryptionRequired])
+        service.characteristics = [pair, challenge, command, statusCharacteristic, audioStream]
         peripheral.removeAllServices(); peripheral.add(service)
     }
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
@@ -116,6 +119,9 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         } catch { peripheral.respond(to: request, withResult: .unlikelyError); connection = "配对数据不可用" }
     }
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+        for request in requests where request.characteristic.uuid == CBUUID(string: AudioWire.characteristic) { receiveAudio(request) }
+        let requests = requests.filter { $0.characteristic.uuid != CBUUID(string: AudioWire.characteristic) }
+        guard !requests.isEmpty else { return }
         // Watch sends one 20-byte write-with-response at a time.
         guard requests.count == 1, let request = requests.first else {
             if let first = requests.first { peripheral.respond(to: first, withResult: .invalidAttributeValueLength) }; return
@@ -134,6 +140,25 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
             drain()
         } catch { peripheral.respond(to: request, withResult: .insufficientAuthorization) }
     }
+    private func receiveAudio(_ request: CBATTRequest) {
+        let id = request.central.identifier
+        guard owner == id, controller.isRecording, request.offset == 0,
+              let data = request.value, var session = sessions[id], var gate = session.audioGate else { return }
+        do {
+            let frame = try AudioWire.decode(data, key: session.key, challenge: session.nonce)
+            let gap = try gate.accept(frame)
+            session.audioGate = gate; sessions[id] = session
+            if gap > 0 { try audio.enqueue([Int16](repeating: 0, count: gap)) }
+            try audio.enqueue(frame.samples)
+        } catch WireError.replay { return }
+        catch {
+            audio.stop(); sessions[id]?.audioGate = nil
+            Task {
+                _ = await controller.perform(.cancelDictation)
+                controller.phase = .failed; controller.detail = "Watch 音频传输失败：\(error.localizedDescription)"
+            }
+        }
+    }
     private func drain() {
         guard !draining else { return }; draining = true
         Task {
@@ -144,9 +169,35 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
                 if controller.isRecording, let owner, owner != central.identifier {
                     phase = .unavailable
                 } else {
-                    if command.action == .beginDictation { owner = central.identifier }
-                    phase = await controller.perform(command.action, value: command.value)
-                    if !controller.isRecording { owner = nil }
+                    if command.action == .beginDictation {
+                        do {
+                            try audio.start()
+                            phase = await controller.perform(command.action, value: command.value)
+                            if phase == .listening {
+                                owner = central.identifier
+                                sessions[central.identifier]?.audioGate = AudioGate(stream: command.sequence)
+                            } else { audio.stop() }
+                        } catch {
+                            audio.stop(); controller.phase = .failed; controller.detail = error.localizedDescription
+                            phase = .failed
+                        }
+                    } else if command.action == .finishDictation, owner == central.identifier {
+                        do {
+                            guard sessions[central.identifier]?.audioGate?.ended == true else {
+                                throw WatchAudioOutput.AudioFailure("手表音频未完整结束，已取消听写，请重试。")
+                            }
+                            try await audio.drain()
+                            phase = await controller.perform(.finishDictation)
+                        } catch {
+                            _ = await controller.perform(.cancelDictation)
+                            controller.phase = .failed; controller.detail = error.localizedDescription; phase = .failed
+                        }
+                        audio.stop(); sessions[central.identifier]?.audioGate = nil
+                    } else {
+                        phase = await controller.perform(command.action, value: command.value)
+                    }
+                    if !controller.isRecording { owner = nil; audio.stop() }
+
                 }
                 if let data = try? Wire.status(phase, sequence: command.sequence, key: session.key, challenge: session.nonce) {
                     if !manager.updateValue(data, for: statusCharacteristic, onSubscribedCentrals: [central]) {
@@ -169,6 +220,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         work.removeAll { $0.0.identifier == central.identifier }
         pendingNotifications.removeAll { $0.1.identifier == central.identifier }
         if owner == central.identifier {
+            audio.stop()
             Task { _ = await controller.perform(.cancelDictation); owner = nil }
         }
         connection = "手表已断开 · 等待自动重连"

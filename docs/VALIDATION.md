@@ -22,6 +22,17 @@
 - 「手表已连接」状态由 Mac 成功解码、认证并处理手表指令后更新；这次结果支持真机蓝牙通信与认证指令链路已打通，但不代表 Codex 听写、正文滚动或 Enter 已通过实测。已请用户在手表操作并反馈滚动／听写结果。
 - 本次安装、应用查询和签名核验记录保存在本机 `artifacts/ultra4-connected-*`；先前准备的 TestFlight 文件保持原状，本次直接安装未经过 TestFlight 上传。
 
+## 0.2 Watch 麦克风更新
+
+- 用户实测 0.1 后报告：表冠滚动与听写都提示找不到输入框。用户明确要求滚动正文、自动定位输入框、使用 Watch 麦克风，并选择保留 Codex 内置听写。
+- 0.2 移除滚动对输入框的硬依赖，增加目标激活、ProseMirror 优先匹配和 Chromium AX 初始化。实际 Codex 定位与正文落点尚待复测。
+- 新增 Watch 麦克风、16 kHz ADPCM 音频传输和 Mac 定向 BlackHole 输出；没有调用其他转写服务。
+- `swift test --scratch-path /tmp/watch-whisper-tests`：**21 项测试，0 失败**。新增语音频段编码误差、64/185/512 字节 ATT 包容量、每个字节篡改、跨连接／跨录音重放、缺帧恢复、结束边界、半秒缺口拒绝。
+- Mac Debug、watchOS arm64 / arm64_32 真机构建均通过。Mac 已签名安装并重启，真实 UI 显示新增的「Watch 麦克风」区域，已有配对保持为 1 块。
+- 真表已安装并启动 **0.2.0 (2)**，独立已安装应用查询确认版本。日志位于 `artifacts/watch-mic-*`。
+- Mac 当前没有 BlackHole。官方 **0.7.1** 安装包已下载；SHA-256 与 Homebrew Cask 一致，`pkgutil --check-signature` 确認 Apple 可信签名及 notarization。安装脚本写入 `/Library/Audio/Plug-Ins/HAL`，安装器声明需要重启。尚未安装驱动、改动音频输入或重启系统。
+- **完整语音链路、实际手表收音、虚拟音频播放、Codex 转写尚未通过真机验收。** 下一步需要用户确认系统驱动安装和音频输入设置，以及手表首次麦克风授权。
+
 ## 已解决的开发连接阻塞与历史排查
 
 - 用户指定的 **Apple Watch Ultra 4** 已完成 PIN 开发配对，CoreDevice 已识别到这块新表（Product Type: `Watch8,1`，watchOS **27.2**）。旧 Series 4 记录不是目标设备。

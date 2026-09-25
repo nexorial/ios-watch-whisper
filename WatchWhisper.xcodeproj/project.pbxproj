@@ -9,12 +9,15 @@
 /* Begin PBXBuildFile section */
 		003164C1F5AF1DA033C3A635 /* BluetoothHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D373DE9F6EF75A1F0FE86D /* BluetoothHost.swift */; };
 		04E107EC87D1C4591F788634 /* WatchConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66045390888B8D237B61C4A3 /* WatchConnection.swift */; };
+		2A054FB7408B5F907B97A1D3 /* WatchMicrophone.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1AC96BE6DFDF526FF0A8E2 /* WatchMicrophone.swift */; };
 		3471D6D48F1C90A1A91B0C0D /* Watch Whisper Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 61542ED69989041D5450B536 /* Watch Whisper Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		640C98E6BE7518FCD41D50C0 /* AgentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F88732BF367A20E2254DF0CB /* AgentController.swift */; };
 		74C902B726311520622E9FFD /* WatchWhisperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BEC50347DE86A98024179B9 /* WatchWhisperApp.swift */; };
 		9ED27EA051C2E78811EC33F0 /* WhisperCore in Frameworks */ = {isa = PBXBuildFile; productRef = A9D66D1ED769965B001DB7CA /* WhisperCore */; };
+		C2DCB8CC3801ECA3DAD35773 /* WatchAudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC616450452ABD5F1DD931B7 /* WatchAudioOutput.swift */; };
 		E847B1DD6792C271CAA6D5E2 /* WatchWhisperMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9284A1A1858BCBCE6C67442 /* WatchWhisperMacApp.swift */; };
 		EECF08CC98A084339E610303 /* WhisperCore in Frameworks */ = {isa = PBXBuildFile; productRef = F2CB382A3466BB02A82B80F0 /* WhisperCore */; };
+		F9F7B00ADC446B52A03E580C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 65304C6637A076FA81216284 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,12 +48,15 @@
 		2BEC50347DE86A98024179B9 /* WatchWhisperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWhisperApp.swift; sourceTree = "<group>"; };
 		2C8DFE93DD6860DBE1B46034 /* Watch Whisper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Whisper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		61542ED69989041D5450B536 /* Watch Whisper Watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Whisper Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		65304C6637A076FA81216284 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		66045390888B8D237B61C4A3 /* WatchConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnection.swift; sourceTree = "<group>"; };
 		6B0D3796E82F22A60EF1D4D8 /* WatchWhisper.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WatchWhisper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2D373DE9F6EF75A1F0FE86D /* BluetoothHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothHost.swift; sourceTree = "<group>"; };
+		AC616450452ABD5F1DD931B7 /* WatchAudioOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAudioOutput.swift; sourceTree = "<group>"; };
 		B9284A1A1858BCBCE6C67442 /* WatchWhisperMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWhisperMacApp.swift; sourceTree = "<group>"; };
 		C7B1F17E7096A11D1B5C59EB /* ios-watch-whisper */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "ios-watch-whisper"; path = .; sourceTree = SOURCE_ROOT; };
 		F88732BF367A20E2254DF0CB /* AgentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentController.swift; sourceTree = "<group>"; };
+		FA1AC96BE6DFDF526FF0A8E2 /* WatchMicrophone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMicrophone.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +84,7 @@
 			children = (
 				F88732BF367A20E2254DF0CB /* AgentController.swift */,
 				A2D373DE9F6EF75A1F0FE86D /* BluetoothHost.swift */,
+				AC616450452ABD5F1DD931B7 /* WatchAudioOutput.swift */,
 				B9284A1A1858BCBCE6C67442 /* WatchWhisperMacApp.swift */,
 			);
 			path = Mac;
@@ -106,7 +113,9 @@
 		DBD73DA9D731A8B5BE216651 /* Watch */ = {
 			isa = PBXGroup;
 			children = (
+				65304C6637A076FA81216284 /* Assets.xcassets */,
 				66045390888B8D237B61C4A3 /* WatchConnection.swift */,
+				FA1AC96BE6DFDF526FF0A8E2 /* WatchMicrophone.swift */,
 				2BEC50347DE86A98024179B9 /* WatchWhisperApp.swift */,
 			);
 			path = Watch;
@@ -128,6 +137,7 @@
 			buildConfigurationList = FFB8C49A2244DEAA1A5C2F5E /* Build configuration list for PBXNativeTarget "WatchWhisperWatch" */;
 			buildPhases = (
 				03502C430A18EA7EB0757AD3 /* Sources */,
+				C1D4E8E740C5AF6E9E496DB2 /* Resources */,
 				88522E2726533BEF4064B6F1 /* Frameworks */,
 			);
 			buildRules = (
@@ -227,12 +237,24 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		C1D4E8E740C5AF6E9E496DB2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9F7B00ADC446B52A03E580C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		03502C430A18EA7EB0757AD3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				04E107EC87D1C4591F788634 /* WatchConnection.swift in Sources */,
+				2A054FB7408B5F907B97A1D3 /* WatchMicrophone.swift in Sources */,
 				74C902B726311520622E9FFD /* WatchWhisperApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -250,6 +272,7 @@
 			files = (
 				640C98E6BE7518FCD41D50C0 /* AgentController.swift in Sources */,
 				003164C1F5AF1DA033C3A635 /* BluetoothHost.swift in Sources */,
+				C2DCB8CC3801ECA3DAD35773 /* WatchAudioOutput.swift in Sources */,
 				E847B1DD6792C271CAA6D5E2 /* WatchWhisperMacApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -300,7 +323,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -321,7 +344,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -444,7 +467,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -459,7 +482,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

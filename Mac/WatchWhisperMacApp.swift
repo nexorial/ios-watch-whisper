@@ -82,6 +82,7 @@ private struct HostView: View {
                     }
                 }.padding(8)
             }
+            AudioRouteView(audio: host.audio)
             HStack {
                 Picker("控制目标", selection: $controller.target) {
                     ForEach(AgentController.Target.allCases) { Text($0.rawValue).tag($0) }
@@ -91,7 +92,7 @@ private struct HostView: View {
             }
             VStack(alignment: .leading, spacing: 6) {
                 Label("表冠滚动 · 按住说话 · 右滑锁定 · Enter 发送", systemImage: "hand.draw")
-                Text("语音由 Mac 当前麦克风采集，交给 Codex 自带听写。手表不录音。录音最长 2 分钟；连接中断会请求停止。")
+                Text("语音由 Watch 麦克风采集，经 BlackHole 送入 Codex 自带听写。录音最长 2 分钟；连接中断会请求停止。")
                     .foregroundStyle(.secondary)
             }.font(.caption)
             if demo {
@@ -103,7 +104,26 @@ private struct HostView: View {
             }
         }.padding(28).frame(width: 470).tint(.mint)
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-                controller.objectWillChange.send()
+                controller.objectWillChange.send(); host.audio.refresh()
             }
+    }
+}
+
+private struct AudioRouteView: View {
+    @ObservedObject var audio: WatchAudioOutput
+    var body: some View {
+        GroupBox("3 · Watch 麦克风") {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(audio.status).font(.callout)
+                Text("安装 BlackHole 2ch 后，在系统声音设置中选择它作为输入，并让 Codex 使用默认输入或 BlackHole 2ch。其他使用默认麦克风的应用也会使用这一输入。")
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Button("检查音频设备") { audio.refresh() }
+                    Button("打开声音设置") {
+                        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Sound-Settings.extension")!)
+                    }
+                }
+            }.frame(maxWidth: .infinity, alignment: .leading).padding(8)
+        }
     }
 }

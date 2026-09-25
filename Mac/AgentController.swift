@@ -23,6 +23,7 @@ final class AgentController: ObservableObject {
     private var lease = RecordingLease()
     private var leaseTask: Task<Void, Never>?
     private let demo: Bool
+    private var accessibilityPreparedPID: pid_t?
 
     init(demo: Bool = false) {
         self.demo = demo
@@ -97,8 +98,12 @@ final class AgentController: ObservableObject {
     private func begin() async throws {
         guard target == .codex else { throw Failure(.unavailable, "Claude 听写尚未适配。请使用 Codex，Claude 目前仅支持滚动和 Enter。") }
         if recordingWindow != nil { refresh(); return }
-        let (app, window) = try frontWindow()
+        let (app, window) = try await activateTargetWindow()
         let elements = descendants(window)
+        let editor = try composer(elements)
+        guard AXUIElementSetAttributeValue(editor, kAXFocusedAttribute as CFString, kCFBooleanTrue) == .success else {
+            throw Failure(.unavailable, "无法聚焦 Codex 任务输入框。")
+        }
         guard buttons(elements, matching: AgentLabels.stop.union(AgentLabels.transcribing).union(AgentLabels.starting)).isEmpty else {
             throw Failure(.unavailable, "目标已有听写或转写，请先在 Mac 完成。")
         }
@@ -113,7 +118,7 @@ final class AgentController: ObservableObject {
             let stops = buttons(descendants(window), matching: AgentLabels.stop)
             if stops.count == 1 {
                 stopControl = stops[0]; phase = .listening; recordingConfirmed = true
-                detail = "Codex 正在通过 Mac 当前选择的麦克风收音。"
+                detail = "Watch 麦克风经 BlackHole 送入 Codex 听写。"
                 return
             }
         }
@@ -164,6 +169,7 @@ final class AgentController: ObservableObject {
             } else if pendingTranscription { phase = .transcribing }
             return
         }
+        if phase == .failed || phase == .unavailable { return }
         do { _ = try frontWindow(); phase = .ready }
         catch let failure as Failure { phase = failure.phase }
         catch { phase = .failed }
@@ -198,25 +204,47 @@ final class AgentController: ObservableObject {
         let (app, window) = try frontWindow()
         guard let windowRect = rect(window) else { throw Failure(.unavailable, "无法定位任务窗口。") }
         let elements = descendants(window)
-        let editor = try composer(elements)
-        guard let editorRect = rect(editor) else { throw Failure(.unavailable, "无法定位任务输入框。") }
-        // Use the conversation's horizontal position, never the pointer's current position.
-        let x = editorRect.midX
+        // Scrolling belongs to the conversation, and never requires an editor.
+        let editorRect = (try? composer(elements)).flatMap { rect($0) }
         let candidates = elements.filter { string($0, kAXRoleAttribute) == kAXScrollAreaRole }
             .compactMap { element -> CGRect? in
-                guard let r = rect(element), r.width > 200, r.height > 100,
-                      x >= r.minX, x <= r.maxX, r.maxY <= editorRect.maxY,
+                guard let r = rect(element), r.width > 240, r.height > 120,
                       r.intersects(windowRect) else { return nil }
-                return r.intersection(windowRect)
+                let visible = r.intersection(windowRect)
+                if let editorRect {
+                    guard visible.contains(CGPoint(x: editorRect.midX, y: visible.midY)),
+                          visible.minY < editorRect.minY - 60 else { return nil }
+                }
+                return visible
             }
         let area = candidates.max { $0.width * $0.height < $1.width * $1.height }
-        let point = CGPoint(x: x, y: area?.midY ?? windowRect.minY + windowRect.height * 0.42)
+        let point = CGPoint(x: editorRect?.midX ?? area?.midX ?? windowRect.midX,
+                            y: area.map { min($0.midY, editorRect.map { $0.minY - 40 } ?? $0.midY) }
+                                ?? windowRect.minY + windowRect.height * 0.4)
         guard let event = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 1,
                                   wheel1: -Int32(pixels), wheel2: 0, wheel3: 0) else {
             throw Failure(.failed, "无法创建滚动事件。")
         }
+        guard NSWorkspace.shared.frontmostApplication?.processIdentifier == app.processIdentifier else {
+            throw Failure(.targetInactive, "Codex 已离开前台，未执行滚动。")
+        }
         event.location = point; event.postToPid(app.processIdentifier)
-        detail = pixels >= 0 ? "向下浏览" : "向上浏览"
+        if !isRecording { phase = .ready }
+        detail = pixels >= 0 ? "向下浏览 Codex 对话正文" : "向上浏览 Codex 对话正文"
+    }
+
+    private func activateTargetWindow() async throws -> (NSRunningApplication, AXUIElement) {
+        guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: target.bundleID).first else {
+            throw Failure(.targetInactive, "请先打开 \(target.rawValue) 的任务。")
+        }
+        app.activate(options: [.activateIgnoringOtherApps])
+        for _ in 0..<12 {
+            try await Task.sleep(nanoseconds: 80_000_000)
+            if let result = try? frontWindow(), !descendants(result.1).filter({
+                string($0, kAXRoleAttribute) == kAXTextAreaRole
+            }).isEmpty { return result }
+        }
+        return try frontWindow()
     }
 
     private func frontWindow() throws -> (NSRunningApplication, AXUIElement) {
@@ -224,6 +252,12 @@ final class AgentController: ObservableObject {
             throw Failure(.targetInactive, "请把 \(target.rawValue) 的任务窗口放在前台。不会把按键发给其他应用。")
         }
         let root = AXUIElementCreateApplication(app.processIdentifier)
+        if accessibilityPreparedPID != app.processIdentifier {
+            // Chromium only creates its complete web accessibility tree when an
+            // assistive client requests it. This uses the user's existing AX grant.
+            _ = AXUIElementSetAttributeValue(root, "AXManualAccessibility" as CFString, kCFBooleanTrue)
+            accessibilityPreparedPID = app.processIdentifier
+        }
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(root, kAXFocusedWindowAttribute as CFString, &value) == .success,
               let value, CFGetTypeID(value) == AXUIElementGetTypeID() else {
@@ -233,12 +267,21 @@ final class AgentController: ObservableObject {
     }
     private func composer(_ elements: [AXUIElement]) throws -> AXUIElement {
         let editors = elements.filter {
-            string($0, kAXRoleAttribute) == kAXTextAreaRole && rect($0).map { $0.width > 150 && $0.height > 15 } == true
+            [kAXTextAreaRole, kAXTextFieldRole].contains(string($0, kAXRoleAttribute))
+                && rect($0).map { $0.width > 150 && $0.height > 15 } == true
         }
-        guard editors.count == 1 else {
-            throw Failure(.unavailable, "无法唯一识别任务输入框。请关闭搜索框、终端或其他编辑面板后重试。")
+        // ProseMirror is the editor used by the installed Codex composer. Prefer
+        // that identity over unrelated search, terminal, and code editor fields.
+        let composers = editors.filter { element in
+            var value: CFTypeRef?
+            _ = AXUIElementCopyAttributeValue(element, "AXDOMClassList" as CFString, &value)
+            let classes = value as? [String] ?? []
+            return classes.contains("ProseMirror")
         }
-        return editors[0]
+        if composers.count == 1 { return composers[0] }
+        let multiline = editors.filter { string($0, kAXRoleAttribute) == kAXTextAreaRole }
+        if multiline.count == 1 { return multiline[0] }
+        throw Failure(.unavailable, "尚未定位任务输入框。请保持 Codex 任务页面可见；搜索框或多个编辑面板可能造成歧义。")
     }
     private func clearRecording() {
         lease.finish(); recordingWindow = nil; recordingPID = nil; recordingTitle = nil
@@ -246,9 +289,12 @@ final class AgentController: ObservableObject {
         recordingConfirmed = false
     }
     private func descendants(_ root: AXUIElement) -> [AXUIElement] {
-        var queue = [root]; var output: [AXUIElement] = []; var index = 0
-        while index < queue.count && index < 2500 {
-            let element = queue[index]; index += 1; output.append(element)
+        var queue = [root]; var output: [AXUIElement] = []
+        // Visit the last children first: the composer comes after the transcript.
+        // Do not spend the traversal budget on every character in long messages.
+        while let element = queue.popLast(), output.count < 6000 {
+            output.append(element)
+            if [kAXStaticTextRole, kAXTextAreaRole, kAXButtonRole].contains(string(element, kAXRoleAttribute)) { continue }
             var value: CFTypeRef?
             if AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &value) == .success,
                let children = value as? [AXUIElement] { queue.append(contentsOf: children) }

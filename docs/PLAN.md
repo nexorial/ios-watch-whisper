@@ -2,7 +2,7 @@
 
 ## 目标与验收
 
-独立 watchOS App + macOS 菜单栏接收端，无自建 iPhone 程序（仅 Apple 的分发 stub）。首次由 Mac 明确允许配对，之后手表启动时自动寻找已配对 Mac。Digital Crown 控制 Mac 的任务正文滚动；屏幕按钮控制 Codex 自带听写；按住说话，右滑锁定，再点停止；提供独立 Enter。先使用 Mac 当前音频输入，不用 OpenAI API、不另做转写。
+独立 watchOS App + macOS 菜单栏接收端，无自建 iPhone 程序（仅 Apple 的分发 stub）。首次由 Mac 明确允许配对，之后手表启动时自动寻找已配对 Mac。Digital Crown 控制 Mac 的任务正文滚动；屏幕按钮控制 Codex 自带听写；按住说话，右滑锁定，再点停止；提供独立 Enter。用户在 2026-09-25 真机测试后明确要求使用 Watch 麦克风，并选择保留 Codex 内置听写。更新为 Watch 录音 → BLE 音频流 → BlackHole 2ch → Codex；不用 OpenAI API、不另做转写。Mac 麦克风方案已被替代。
 
 默认手动 Enter，避免异步转写未完成时发送。第一版不自动 Enter。普通侧边按钮与表冠按压不重映射，离开前台停止听写，断线有超时保护。
 
@@ -25,5 +25,10 @@
 - [x] 16 项单元测试、双端构建、40mm 模拟器安装与界面验证
 - [x] Mac 签名安装与真实蓝牙广播
 - [x] 当前 Apple Watch Ultra 4 的 PIN 开发配对（watchOS 27.2）
-- [ ] 建立调试网络通道、真机安装与真实 Codex 联调（当前 tunnel timeout）
+- [x] 开发连接恢复，真表安装并启动，应用内 BLE 配对与一次自动重连
+- [x] 依据用户实测移除滚动对输入框的依赖；增加 Codex 激活、编辑器聚焦与 Chromium AX 初始化
+- [x] Watch 麦克风、认证音频分包、Mac BlackHole 输出；21 项逻辑测试和双端构建通过
+- [x] 0.2.0 (2) 真表安装，Mac 接收端更新并保留配对
+- [ ] 用户确认安装系统音频驱动，选择输入设备，允许 Watch 麦克风
+- [ ] 复测正文滚动、自动聚焦、Watch 收音及 Codex 转写、手动 Enter、锁定和中断保护
 - [x] 记录证据与缺口、Git 提交与推送到私有仓库

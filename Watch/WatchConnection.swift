@@ -27,6 +27,17 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     private var pairAttempts = 0
     private var active = true
     private var lastError: String?
+    private let microphone = WatchMicrophone()
+    private var microphoneTask: Task<Void, Never>?
+    private var audioStream: UInt32 = 0
+    private var audioSequence: UInt32 = 0
+    private var audioOffset: UInt32 = 0
+    private var audioSamples: [Int16] = []
+    private var audioPackets: [Data] = []
+    private var audioAccepted = false
+    private var recordingRequested = false
+    private var finishRequested = false
+    private var audioTimeout: Task<Void, Never>?
     private var savedID: UUID? {
         get { UserDefaults.standard.string(forKey: "macID").flatMap(UUID.init(uuidString:)) }
         set { UserDefaults.standard.set(newValue?.uuidString, forKey: "macID") }
@@ -71,12 +82,91 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         if active { if !connected && !demo { discover() } }
         else {
             // Stop intent is sent even if start acknowledgement is still pending.
-            if connected { send(.finishDictation) }
+            if connected { send(.cancelDictation) }
             central?.stopScan()
             retryTask?.cancel()
         }
     }
     func send(_ action: RemoteAction, value: Int16 = 0) {
+        guard connected, !demo else { sendCommand(action, value: value); return }
+        if action == .beginDictation {
+            guard !recordingRequested else { return }
+            guard characteristics[CBUUID(string: AudioWire.characteristic)] != nil,
+                  let peripheral, peripheral.maximumWriteValueLength(for: .withoutResponse) >= 64 else {
+                status = "请更新 Mac 接收端；当前连接不支持手表音频。"; phase = .failed; return
+            }
+            clearAudio(); recordingRequested = true; status = "正在开启 Watch 麦克风…"
+            microphoneTask = Task { [weak self] in
+                guard let self else { return }
+                do {
+                    try await self.microphone.start { [weak self] in self?.capture($0) }
+                    guard !Task.isCancelled, self.recordingRequested else { self.microphone.stop(); return }
+                    self.sendCommand(.beginDictation)
+                } catch {
+                    guard !Task.isCancelled else { return }
+                    self.clearAudio(); self.status = error.localizedDescription; self.phase = .failed
+                }
+            }
+        } else if action == .finishDictation || (action == .enter && recordingRequested) {
+            guard recordingRequested else { sendCommand(action, value: value); return }
+            guard !finishRequested else { return }
+            microphone.stop(); finishRequested = true
+            if audioStream == 0 { microphoneTask?.cancel(); clearAudio(); return }
+            flushAudio(ending: true); drainAudio()
+            audioTimeout?.cancel()
+            audioTimeout = Task { [weak self] in
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                guard !Task.isCancelled, let self, self.finishRequested else { return }
+                self.send(.cancelDictation); self.status = "音频发送超时，请重试。"; self.phase = .failed
+            }
+        } else if action == .cancelDictation {
+            clearAudio(); sendCommand(action)
+        } else { sendCommand(action, value: value) }
+    }
+    private func capture(_ samples: [Int16]) {
+        guard recordingRequested, !finishRequested else { return }
+        guard Int(audioOffset) + audioSamples.count + samples.count <= AudioWire.sampleRate * 120,
+              audioSamples.count + samples.count <= 32000, audioPackets.count < 100 else {
+            send(.cancelDictation); status = "录音达到上限或蓝牙积压，已停止。"; phase = .failed; return
+        }
+        audioSamples.append(contentsOf: samples); flushAudio(); drainAudio()
+    }
+    private func flushAudio(ending: Bool = false) {
+        guard audioStream > 0, let peripheral, let key, let challenge else { return }
+        let capacity = min(512, (peripheral.maximumWriteValueLength(for: .withoutResponse) - AudioWire.overhead) * 2)
+        guard capacity > 0 else { return }
+        do {
+            while audioSamples.count >= capacity || (ending && !audioSamples.isEmpty) {
+                let count = min(capacity, audioSamples.count)
+                let samples = Array(audioSamples.prefix(count)); audioSamples.removeFirst(count); audioSequence += 1
+                audioPackets.append(try AudioWire.encode(samples: samples, stream: audioStream, sequence: audioSequence,
+                                                       offset: audioOffset, key: key, challenge: challenge))
+                audioOffset += UInt32(count)
+            }
+            if ending {
+                audioSequence += 1
+                audioPackets.append(try AudioWire.encode(samples: [], stream: audioStream, sequence: audioSequence,
+                                                       offset: audioOffset, ended: true, key: key, challenge: challenge))
+            }
+        } catch { send(.cancelDictation); status = "音频编码失败"; phase = .failed }
+    }
+    private func drainAudio() {
+        guard audioAccepted, let peripheral, let characteristic = characteristics[CBUUID(string: AudioWire.characteristic)] else { return }
+        while peripheral.canSendWriteWithoutResponse && !audioPackets.isEmpty {
+            peripheral.writeValue(audioPackets.removeFirst(), for: characteristic, type: .withoutResponse)
+        }
+        if finishRequested && audioPackets.isEmpty {
+            finishRequested = false; recordingRequested = false; audioTimeout?.cancel()
+            sendCommand(.finishDictation)
+        }
+    }
+    func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) { drainAudio() }
+    private func clearAudio() {
+        microphoneTask?.cancel(); microphoneTask = nil; microphone.stop(); audioTimeout?.cancel()
+        audioStream = 0; audioSequence = 0; audioOffset = 0; audioSamples = []; audioPackets = []
+        audioAccepted = false; recordingRequested = false; finishRequested = false
+    }
+    private func sendCommand(_ action: RemoteAction, value: Int16 = 0) {
         guard connected else { return }
         if demo {
             switch action {
@@ -113,6 +203,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         do {
             let data = try Wire.encode(command, key: key, challenge: challenge)
             inflight = command
+            if command.action == .beginDictation { audioStream = command.sequence; flushAudio() }
             peripheral.writeValue(data, for: characteristic, type: .withResponse)
             timeout?.cancel()
             timeout = Task { [weak self] in
@@ -123,11 +214,13 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         } catch { fail("无法认证指令，请重新配对") }
     }
     private func reset() {
+        clearAudio()
         connected = false; key = nil; challenge = nil; sequence = 0
         queue = []; inflight = nil; characteristics = [:]
         timeout?.cancel(); timeout = nil; phase = .ready; pairAttempts = 0
     }
     private func fail(_ message: String) {
+        clearAudio()
         lastError = message; status = message; connected = false
         queue = []; inflight = nil; timeout?.cancel()
         WKInterfaceDevice.current().play(.failure)
@@ -245,6 +338,10 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
                 guard let current = inflight, seq == current.sequence else { return }
                 timeout?.cancel(); inflight = nil; phase = newPhase
                 status = newPhase.caption
+                if current.action == .beginDictation {
+                    if newPhase == .listening { audioAccepted = true; drainAudio() }
+                    else { clearAudio() }
+                } else if [.failed, .unavailable, .permissionRequired].contains(newPhase) { clearAudio() }
                 if [.permissionRequired, .targetInactive, .unavailable, .failed].contains(newPhase), current.action != .heartbeat {
                     WKInterfaceDevice.current().play(.failure)
                 } else if current.action == .beginDictation && newPhase == .listening { WKInterfaceDevice.current().play(.start) }

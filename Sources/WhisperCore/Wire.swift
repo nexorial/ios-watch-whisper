@@ -11,7 +11,7 @@ public enum HostPhase: UInt8, Sendable {
     public var caption: String {
         switch self {
         case .ready: return "准备好了"
-        case .listening: return "Mac 正在听"
+        case .listening: return "Watch 正在收音"
         case .transcribing: return "正在转写…"
         case .permissionRequired: return "请在 Mac 允许辅助功能"
         case .targetInactive: return "请在 Mac 打开目标任务"
