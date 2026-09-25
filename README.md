@@ -1,6 +1,6 @@
 # Watch Whisper
 
-用 Apple Watch 的表冠和屏幕按钮遥控 Mac 上的 Codex。原生 SwiftUI，独立 Watch App；无需 iPhone 伴侣 App。当前是首个可构建原型，真实手表 → 蓝牙 → Codex 联调仍待完成。
+用 Apple Watch 的表冠和屏幕按钮遥控 Mac 上的 Codex。原生 SwiftUI，独立 Watch App；无需 iPhone 伴侣 App。当前原型已在真实 Ultra 4 安装并启动，手表 → 蓝牙 → Codex 联调仍待完成。
 
 ## 这版能做什么
 
