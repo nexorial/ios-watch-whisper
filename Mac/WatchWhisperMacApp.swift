@@ -102,5 +102,8 @@ private struct HostView: View {
                 }
             }
         }.padding(28).frame(width: 470).tint(.mint)
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+                controller.objectWillChange.send()
+            }
     }
 }

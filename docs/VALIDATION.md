@@ -1,6 +1,6 @@
 # 验证记录
 
-日期：2026-09-25。Xcode 27.0 / Swift 6.3 编译器（Swift 5 语言模式）；应用最低 watchOS 9 / macOS 13。
+日期：2026-09-25。Xcode 27.0 / Swift 6.4 编译器（Swift 5 语言模式）；应用最低 watchOS 9 / macOS 13。
 
 ## 已通过
 
