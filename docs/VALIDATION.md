@@ -17,8 +17,11 @@
 
 - 用户当前 iPhone 已通过 USB 连接，Developer Mode 已开启。
 - Mac 之前记录的 `Sihang’s Apple Watch`（Series 4）仍离线。用户已确认 **这不是现在使用的那块手表**；它的注册／签名情况不能作为当前手表可安装的证据。
-- 当前这块新手表尚未出现在 Xcode 的可用开发设备列表。已请用户在新表开启 Developer Mode；如没有开关，需要手表型号与 watchOS 版本继续定位。
-- Watch Whisper 的 Mac 辅助功能权限需要由用户在系统设置确认。
+- 用户已明确指定当前手表是 **Apple Watch Ultra 4**。本次重新检查 CoreDevice、Xcode 设备列表及附近开发配对服务，仍只发现已连接的 iPhone 和旧 Series 4 记录，没有 Ultra 4 真机。
+- 用户确认 Ultra 4 上没有 Developer Mode 选项。Apple 官方说明指出，首次开发配对开始前该开关可能不存在。
+- 已通过官方 `devicectl manage pair` 再次完成现有 iPhone 的开发配对，但 Ultra 4 仍未出现在设备列表。
+- 已通过 Activity Monitor 正常退出并重新启动 Device Hub；新进程的电脑操作接口仍返回 `timeoutReached`，因此尚未能自动点击首次配对入口。已请用户在 Mac 完成「＋ → Pair Nearby Device… → Apple Watch」这一处操作，随后继续处理安装。
+- 已在 macOS 系统设置实际读取并确认：Watch Whisper 的 Device Control and Data Access（辅助功能）开关为 on；Xcode 的 Local Network 开关也为 on。没有修改其他应用权限。
 
 ## 尚未验证，不能宣称完成
 

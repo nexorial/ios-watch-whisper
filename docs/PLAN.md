@@ -8,7 +8,7 @@
 
 ## 实现边界
 
-- watchOS 9 起，适配系统发现的 Watch4,2（Apple Watch Series 4）。Mac 13 起。
+- watchOS 9 起，Mac 13 起。当前用户指定安装到 Apple Watch Ultra 4；旧 Watch4,2 记录不是目标设备。
 - BLE：手表 CBCentralManager，Mac CBPeripheralManager。Mac 批准 + 加密特征读取交换每设备随机密钥；持久化到 Keychain。
 - 固定 20 字节命令（兼容最小 ATT payload），HMAC-SHA256 截断 96 位，随机连接 challenge + 单调序号，拒绝重放和篡改；每条有认证状态回执。
 - 收到写入回执不代表目标 App 已执行；成功执行之后才回传状态。连接/听写/错误在两端显示。
