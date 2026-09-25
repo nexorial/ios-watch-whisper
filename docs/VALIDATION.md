@@ -11,7 +11,8 @@
 - **Mac / Watch 0.3.0 (4) 构建通过**。Mac 已签名更新并启动，UI 显示 `Wi-Fi 已就绪 · 192.168.31.99`。Watch 构建的地址与完整证书摘要已独立核验匹配本机身份。
 - 真表安装先返回 **CoreDeviceError 4016 / unavailable**；随后设备恢复 available，安装通道仍返回 **RemotePairingError 1007 / CBErrorDomain 15**。当前手表最后确认安装的是 0.2.1 (3)，**0.3.0 尚未安装；真实 Watch HTTPS、收音和 Codex 控制仍未通过验收**。
 - 已完成 Release archive 与内部 TestFlight 导出（0.3.0 (4)，755524 字节），验证导出包 Watch-only 结构、Mac 证书摘要匹配、不含私有身份，以及 `codesign --verify --deep --strict`。导出配置确认 `testFlightInternalTestingOnly=true`、`destination=export`。
-- **尚未上传 Apple，也未创建／分配任何测试者或发起 App Review。** 私有 TestFlight 作为绕过 Mac 调试安装通道的备选路径，等待用户明确批准上传范围。
+- 用户已明确批准仅本人内部 TestFlight。App Store Connect 记录 `6816016796` 已创建；2026-09-25 17:28:59 Xcode / ContentDelivery 确认 **0.3.0 (4) 上传成功**，随后 Apple 在处理阶段以 **ITMS-90683** 拒绝外层分发包缺少麦克风用途说明。已补齐、递增为 Build 5，重新归档、导出、实际包与签名校验均通过；上传和处理结果见 `docs/TESTFLIGHT.md`。内部组 James 仅含账号持有人，关闭自动分发；没有发起 App Review。
+- **0.3.0 (5)** 于 17:37:57 上传成功，17:39:40 收到 Apple 处理完成通知；网页显示 `Complete`。保存仅使用系统加密的问卷信息后，构建变为 `Ready to Test`；加入 James 组并刷新，仍显示 **Testing / James / 1 invite**。真表安装和实际控制功能仍待确认。
 - 证据在本机 `artifacts/wifi-*`；TLS 私有身份仅在 App Support 的 0700 目录，未提交 Git。实现边界见 `docs/WIFI-TRANSPORT.md`。
 
 ## 0.2.1 蓝牙连接修复记录

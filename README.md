@@ -2,7 +2,7 @@
 
 用 Apple Watch 的表冠和屏幕按钮遥控 Mac 上的 Codex。原生 SwiftUI，独立 Watch App；无需 iPhone 伴侣 App。
 
-当前 0.3 本机开发版采用 **HTTPS Wi-Fi 直连**，蓝牙保留为备用。Mac 0.3.0 (4) 已运行，手表构建与内部 TestFlight 安装包已准备好，但本地安装通道同样被蓝牙加密错误阻塞；尚未上传 Apple，真表安装与端到端验收待完成。0.2.1 (3) 真表仍报告系统蓝牙加密超时，详情见 [Wi-Fi 方案与证据](docs/WIFI-TRANSPORT.md)。
+当前 0.3 本机开发版采用 **HTTPS Wi-Fi 直连**，蓝牙保留为备用。Mac 0.3.0 (4) 已运行；因本地安装通道也被蓝牙加密错误阻塞，已转为仅本人内部 TestFlight。**0.3.0 (5) 已通过 Apple 处理并显示 Testing，仅分配本人内部组**；真表安装与端到端验收待完成。进度见 [TestFlight 记录](docs/TESTFLIGHT.md)，连接实现见 [Wi-Fi 方案与证据](docs/WIFI-TRANSPORT.md)。
 
 ## 这版能做什么
 

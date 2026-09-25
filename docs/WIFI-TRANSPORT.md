@@ -29,7 +29,7 @@
 - `bash scripts/test-wifi-security.sh`：真实 TLS/HTTP/配对服务通过本机集成测试，包括错误证书拒绝、关闭配对窗口、错误票据拒绝、认证会话／回执、重放拒绝和撤销后拒绝。使用独立测试凭据及 demo controller，不操作 Codex。
 - Mac 和 Watch 0.3.0 (4) 构建通过。Mac 已签名更新并运行，原生 UI 显示 Wi-Fi 已就绪。手表包的地址与完整证书摘要已和当前 Mac 独立比对一致。
 - 手表安装先返回 CoreDeviceError 4016 / unavailable；恢复 available 后，安装通道又返回 CoreDeviceError 4 / RemotePairingError 1007 / CBErrorDomain 15。尚未把 0.3.0 装到真表，真实 HTTPS、Watch 麦克风、滚动和 Codex 转写不能宣称通过。
-- Release 归档和仅内部 TestFlight 导出完成。已核验 0.3.0 (4)、Watch-only stub、权限说明、Mac 地址与证书摘要、无私有 TLS 身份，以及导出包代码签名。**仅有本地 IPA，尚未上传到 Apple、处理或分配测试者。**
+- Release 归档和仅内部 TestFlight 导出完成。已核验 Watch-only stub、Mac 地址与证书摘要、无私有 TLS 身份，以及导出包代码签名。用户随后批准仅本人内部测试；Build 4 上传后被 Apple 以外层包缺少麦克风说明拒绝，已补齐并重新导出 Build 5。内部组 James 仅含账号持有人。上传、处理、分配与安装的分层证据见 `TESTFLIGHT.md`。
 
 此版本的 HTTPS 需要 macOS 15+（进程内 TLS 身份导入）；蓝牙源码仍保留 macOS 13 基线。证书私钥和保护密码只在 Mac 的 `~/Library/Application Support/WatchWhisper/tls`，目录 0700、私密文件 0600，不写入仓库；Watch 只携带公开摘要。
 
@@ -41,4 +41,4 @@ Apple 的 [TN3135](https://developer.apple.com/documentation/technotes/tn3135-lo
 
 本次已准备 `artifacts/testflight-0.3.0/WatchWhisper.ipa`（755524 字节），SHA-256：`a6d2c51d29a66003c9015c51f7ad9f2bbbfb8fe8df1c212b437f0ffb3bc1d4c5`。
 
-后续可以用 `bash scripts/prepare-testflight.sh <新输出目录>` 重现准备流程；脚本只导出，不上传，并拒绝覆盖已有输出。上传、创建 App Store Connect 记录及内部测试者分配需要单独授权；本次建议仅给用户本人内部测试。
+后续可以用 `bash scripts/prepare-testflight.sh <新输出目录>` 重现准备流程；脚本只导出，不上传，并拒绝覆盖已有输出。用户已授权本次创建记录、上传及仅本人内部测试；此范围不包括外部测试者或 App Review。
