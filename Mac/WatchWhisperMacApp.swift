@@ -118,6 +118,7 @@ private struct AudioRouteView: View {
                 Text("安装 BlackHole 2ch 后，在系统声音设置中选择它作为输入，并让 Codex 使用默认输入或 BlackHole 2ch。其他使用默认麦克风的应用也会使用这一输入。")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 HStack {
+                    Button("设为听写输入") { audio.useForDictation() }.disabled(!audio.installed)
                     Button("检查音频设备") { audio.refresh() }
                     Button("打开声音设置") {
                         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Sound-Settings.extension")!)

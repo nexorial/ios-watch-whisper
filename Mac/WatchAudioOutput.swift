@@ -1,6 +1,5 @@
 import AVFoundation
 import CoreAudio
-import WhisperCore
 
 /// Sends only authenticated Watch samples to the loopback device. Never uses
 /// the Mac microphone, the default speaker, or a third party transcription API.
@@ -20,6 +19,18 @@ final class WatchAudioOutput: ObservableObject {
     func refresh() {
         guard let id = loopbackDevice() else { status = "需要安装 BlackHole 2ch 虚拟麦克风"; return }
         status = defaultInput() == id ? "Watch 音频 → BlackHole 2ch" : "请将听写音频输入设为 BlackHole 2ch"
+    }
+    /// Only invoked by the explicitly labelled setup button, never by connecting
+    /// a Watch or starting a recording. Global input changes remain a user action.
+    func useForDictation() {
+        guard engine == nil else { status = "请先结束当前听写，再更改输入设备。"; return }
+        guard var id = loopbackDevice() else { refresh(); return }
+        var address = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultInputDevice,
+                                                 mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+        let result = AudioObjectSetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil,
+                                                UInt32(MemoryLayout<AudioDeviceID>.size), &id)
+        guard result == noErr else { status = "系统未接受输入切换（\(result)），请在声音设置中选择。"; return }
+        refresh()
     }
     func start() throws {
         stop()

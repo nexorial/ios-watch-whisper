@@ -5,7 +5,7 @@
 ## 本机准备
 
 1. 安装 [BlackHole 2ch 官方驱动](https://github.com/ExistentialAudio/BlackHole)。已准备的 0.7.1 安装包在本机 `artifacts/BlackHole2ch-0.7.1.pkg`。它是系统音频组件，安装需要管理员授权，安装器声明需要重启；由用户确认后执行。
-2. 系统「声音 → 输入」选择 **BlackHole 2ch**。Codex 的音频输入选择默认输入或 BlackHole 2ch。其他使用默认输入的应用也会受到影响；使用完毕可切回原麦克风。接收端不会自动修改默认输入，也不会修改扬声器输出。
+2. 在 Mac Watch Whisper 点击 **「设为听写输入」**，或在系统「声音 → 输入」选择 **BlackHole 2ch**。Codex 的音频输入选择默认输入或 BlackHole 2ch。其他使用默认输入的应用也会受到影响；使用完毕可切回原麦克风。接收端仅在明确点击设置按钮时修改默认输入，不会因连接手表或开始听写而自动切换；不会修改扬声器输出。
 3. Mac Watch Whisper 点击「检查音频设备」，应显示 **Watch 音频 → BlackHole 2ch**。
 4. 首次在 Watch 按住说话，确认系统麦克风授权。等「Watch 正在收音」出现后说话。
 5. 松开后，音频队列播放完毕再结束 Codex 听写。先核对转写文字，手动点 Enter。
@@ -27,3 +27,16 @@
 - 短按锁定和右滑锁定、松开停止、结束标记／尾音、手动 Enter 分别验收。
 - 手表退后台、蓝牙中断、音频设备切换、两分钟上限：停止录音，不能自动发送。
 - 安装、编码测试、蓝牙连通都不能代替以上端到端验收。
+
+## Mac 虚拟通道实测
+
+2026-09-25 重启后，系统已加载 BlackHole 2ch 0.7.1。用户授权后用接收端按钮切换，独立系统查询确认默认输入为 BlackHole 2ch、输出仍为 DELL U2718Q。
+
+以下测试直接编译生产输出类，向 BlackHole 播放一秒 16 kHz 单声道测试音，并确认音频队列排空；不读取麦克风、不启动 Codex 听写：
+
+```sh
+swiftc Mac/WatchAudioOutput.swift Tests/Hardware/VirtualMicrophoneSmoke.swift -o artifacts/virtual-microphone-smoke
+artifacts/virtual-microphone-smoke
+```
+
+实测返回 `PASS: 16000 mono samples routed to BlackHole and playback queue drained`。这只确认 Mac 定向输出及播放完成；真实 Watch 收音、BLE 音频流和 Codex 转写仍需设备验收。

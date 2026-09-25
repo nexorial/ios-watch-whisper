@@ -30,8 +30,11 @@
 - `swift test --scratch-path /tmp/watch-whisper-tests`：**21 项测试，0 失败**。新增语音频段编码误差、64/185/512 字节 ATT 包容量、每个字节篡改、跨连接／跨录音重放、缺帧恢复、结束边界、半秒缺口拒绝。
 - Mac Debug、watchOS arm64 / arm64_32 真机构建均通过。Mac 已签名安装并重启，真实 UI 显示新增的「Watch 麦克风」区域，已有配对保持为 1 块。
 - 真表已安装并启动 **0.2.0 (2)**，独立已安装应用查询确认版本。日志位于 `artifacts/watch-mic-*`。
-- Mac 当前没有 BlackHole。官方 **0.7.1** 安装包已下载；SHA-256 与 Homebrew Cask 一致，`pkgutil --check-signature` 确認 Apple 可信签名及 notarization。安装脚本写入 `/Library/Audio/Plug-Ins/HAL`，安装器声明需要重启。尚未安装驱动、改动音频输入或重启系统。
-- **完整语音链路、实际手表收音、虚拟音频播放、Codex 转写尚未通过真机验收。** 用户已明确同意安装 BlackHole 并切换默认音频输入。命令行安装被 macOS 阻止（`sudo: a password is required`），已打开签名安装包并停在许可确认页，等待用户完成许可及管理员验证；之后继续驱动核验、输入切换及手表麦克风授权。
+- 官方 BlackHole **0.7.1** 安装包的 SHA-256 与 Homebrew Cask 一致，`pkgutil --check-signature` 确认 Apple 可信签名及 notarization。用户已完成安装和重启；重启后 `pkgutil` 与系统音频设备查询确认驱动已加载。
+- 用户已明确授权安装及切换默认输入。原生命令行安装需管理员验证，后由用户在安装器完成安装并重启；本轮没有再次请求安装授权。
+- System Settings 的电脑操作点击未可靠选中设备，因此新增接收端「设为听写输入」按钮，点击后独立系统查询确认默认输入 **BlackHole 2ch**、默认输出仍为 **DELL U2718Q**。Mac UI 显示「Watch 音频 → BlackHole 2ch」。
+- 生产 `WatchAudioOutput` 硬件 smoke test 通过：**16000 个单声道采样定向输出至 BlackHole，播放队列正常排空**。具体命令见 `docs/WATCH-AUDIO.md`。日志在 `artifacts/virtual-microphone-smoke.log`。
+- **完整 Watch 收音 → BLE 音频流 → Codex 转写链路仍未通过验收。** 已重新启动真表 App；Mac 保留 1 块配对，当前等待用户抬腕解锁、保持 App 前台并反馈正文滚动和实际语音结果。
 
 ## 已解决的开发连接阻塞与历史排查
 
