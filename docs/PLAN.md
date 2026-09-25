@@ -24,5 +24,6 @@
 - [x] Watch 原生界面、表冠和按钮
 - [x] 16 项单元测试、双端构建、40mm 模拟器安装与界面验证
 - [x] Mac 签名安装与真实蓝牙广播
-- [ ] 当前新 Apple Watch 的开发连接、安装与真实 Codex 联调（用户已确认旧 Series 4 不是当前表）
+- [x] 当前 Apple Watch Ultra 4 的 PIN 开发配对（watchOS 27.2）
+- [ ] 建立调试网络通道、真机安装与真实 Codex 联调（当前 tunnel timeout）
 - [x] 记录证据与缺口、Git 提交与推送到私有仓库

@@ -15,13 +15,14 @@
 
 ## 当前真实设备状态
 
-- 用户当前 iPhone 已通过 USB 连接，Developer Mode 已开启。
-- Mac 之前记录的 `Sihang’s Apple Watch`（Series 4）仍离线。用户已确认 **这不是现在使用的那块手表**；它的注册／签名情况不能作为当前手表可安装的证据。
-- 用户已明确指定当前手表是 **Apple Watch Ultra 4**。本次重新检查 CoreDevice、Xcode 设备列表及附近开发配对服务，仍只发现已连接的 iPhone 和旧 Series 4 记录，没有 Ultra 4 真机。
-- 用户确认 Ultra 4 上没有 Developer Mode 选项。Apple 官方说明指出，首次开发配对开始前该开关可能不存在。
-- 已通过官方 `devicectl manage pair` 再次完成现有 iPhone 的开发配对，但 Ultra 4 仍未出现在设备列表。
-- 已通过 Activity Monitor 正常退出并重新启动 Device Hub；新进程的电脑操作接口仍返回 `timeoutReached`，因此尚未能自动点击首次配对入口。已请用户在 Mac 完成「＋ → Pair Nearby Device… → Apple Watch」这一处操作，随后继续处理安装。
-- 已在 macOS 系统设置实际读取并确认：Watch Whisper 的 Device Control and Data Access（辅助功能）开关为 on；Xcode 的 Local Network 开关也为 on。没有修改其他应用权限。
+- 用户指定的 **Apple Watch Ultra 4** 已完成 PIN 开发配对，CoreDevice 已识别到这块新表（Product Type: `Watch8,1`，watchOS **27.2**）。旧 Series 4 记录不是目标设备。
+- 配对的关键一步已经补齐：Mac 保持「Waiting to pair」，再在手表 **Developer Mode → Devices → 选择 Mac → Pair**，把 Mac 显示的 PIN 输入手表；依据 Apple WWDC26 官方演示。
+- 已执行 `scripts/install-watch.sh`，但在准备目标设备时失败。Xcode 报 `Timed out waiting for ... destinations ... to become available`；独立的已安装应用查询也返回 `CoreDeviceError 4000 / RemotePairingError 1001`：`Timed out while attempting to establish tunnel using negotiated network parameters`。
+- 检查现有开发签名包的 provisioning profile，尚未包含这块新 Ultra 4。安装脚本已启用设备注册和自动签名，需要目标连接就绪后重新签名，不能用旧设备的签名包代替。
+- 因此当前是 **开发配对已完成，调试网络通道未建立，App 尚未安装**。已请用户确认手表实际连接与 Mac 相同的 Wi-Fi 并保持解锁；不能把配对成功当作安装成功。
+- iPhone 已通过 USB 连接，Developer Mode 开启。Mac 的 Watch Whisper 辅助功能开关和 Xcode 本地网络开关均为 on。
+- Mac Wi-Fi 的 IPv6 设置为 Automatic，存在 link-local IPv6 地址。检测到 Shadowrocket VPN 正在运行，但尚无证据证明它是原因，也没有修改 VPN 或网络设置。
+- Device Hub 的电脑操作接口仍会超时；用户提供的配对弹窗截图可用于确认其当时状态。
 
 ## 尚未验证，不能宣称完成
 

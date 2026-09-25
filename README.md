@@ -48,13 +48,13 @@ scratch path 放在 Documents 外，避免同步文件的扩展属性影响 XCTe
 
 1. Mac 构建 `WatchWhisperMac`，或运行 `scripts/install-mac.sh 'Apple Development: Your Name (...)'`。安装到 `~/Applications/Watch Whisper.app`。
 2. 打开 Mac App，在系统提示中允许蓝牙；点击「打开设置」，由你在系统设置允许 **Watch Whisper** 的辅助功能权限。Codex 自己还需要麦克风权限。
-3. iPhone 与 Apple Watch 解锁并靠近 Mac，手表和 Mac 连接同一 Wi-Fi。先把 iPhone 通过 USB 连接 Mac 并信任此电脑。Device Hub 必须显示你的当前手表可用；如果未出现，点工具栏「＋ → Pair Nearby Device… → Apple Watch」发起首次开发配对，再按两端的信任提示完成。
-4. 在手表「设置 → 隐私与安全性」开启 Developer Mode，按提示重启并确认。**首次配对前这个开关可能不存在，需先做上一步。** iPhone 也需开启 Developer Mode。
+3. iPhone 与 Apple Watch 解锁并靠近 Mac，手表和 Mac 连接同一 Wi-Fi。先把 iPhone 通过 USB 连接 Mac 并信任此电脑。Device Hub 必须显示你的当前手表可用；如果未出现，点工具栏「＋ → Pair Nearby Device…」，选择左侧 iPhone／iPad／Apple Watch 图标组，保持「Waiting to pair」窗口打开。
+4. 在手表「设置 → 隐私与安全性」开启 Developer Mode，按提示重启并确认。**首次配对前这个开关可能不存在，需先做上一步。** 随后在手表的 Developer Mode 页面向下滚动到 **Devices／设备**，选择你的 Mac，点 **Pair／配对**，再把 Mac Device Hub 显示的 PIN 输入到手表。单纯打开开关不会完成这次配对。iPhone 也需开启 Developer Mode。
 5. 在 Xcode 选择 `WatchWhisperWatch` scheme 与真实手表运行。不需要先安装任何 iPhone App。
 6. Mac 点「允许新手表 · 60 秒」，手表打开 App 后选择本机；确认系统蓝牙配对及 Mac 上的「允许这块手表」。首次操作完成后会保存配对。
 7. 把 Codex 的任务窗口放在 Mac 前台，输入框可见，关闭其他输入面板。先试滚动，再试听写；确认文字后点手表 Enter。
 
-当前目标设备是用户指定的 **Apple Watch Ultra 4**；Xcode 中旧的 Series 4 记录和 Ultra 4 模拟器都不能代替这块真机。首次配对的顺序见 [Apple Device Hub 官方说明](https://developer.apple.com/documentation/xcode/managing-your-simulated-and-physical-devices-in-device-hub)。
+当前目标设备是用户指定的 **Apple Watch Ultra 4**；Xcode 中旧的 Series 4 记录和 Ultra 4 模拟器都不能代替这块真机。首次配对的顺序见 [Apple Device Hub 官方说明](https://developer.apple.com/documentation/xcode/managing-your-simulated-and-physical-devices-in-device-hub)，手表端选择 Mac 和输入 PIN 的过程见 [Apple WWDC26 演示](https://developer.apple.com/videos/play/wwdc2026/260/)（约 8 分钟起的配对演示）。
 
 Mac 上关闭面板不会退出接收端，菜单栏可以再次打开。Mac 当前麦克风可以是内置麦克风、AirPods 等系统音频输入；本项目不更改系统音频设备。
 
@@ -70,6 +70,7 @@ xcrun simctl launch <WATCH_SIMULATOR_ID> com.nexorial.watchwhisper.watchkitapp -
 ## 故障排查
 
 - 手表不出现：两端打开蓝牙并允许 App 使用；Mac 接收端保持运行，手表保持前台。模拟器不能证明蓝牙发现。
+- Xcode 已配对但安装报 tunnel timeout：先确认真表实际连接与 Mac 相同的 Wi-Fi 并已解锁，网络需允许设备互访。此时是开发安装通道失败，不要把配对状态当成安装成功；不要为排查而抹掉手表或解除它与 iPhone 的日常配对。
 - 已配对但拒绝指令：两端移除配对后重配，检查 Mac Keychain 是否可用。密钥只存本地 Keychain，不提交到 Git。
 - 找不到听写：确认 Codex 听写已启用，界面为中文或英文，当前任务输入框可见。不同版本的可访问性名称可能变化。
 - Enter 不可用：先停止听写并等待转写，确认输入框非空、Mac 前台是所选 App；不会把 Return 发给其他进程。
