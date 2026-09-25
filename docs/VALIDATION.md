@@ -2,7 +2,19 @@
 
 日期：2026-09-25。Xcode 27.0 / Swift 6.4 编译器（Swift 5 语言模式）；应用最低 watchOS 9 / macOS 13。
 
-## 当前状态：0.2.1 蓝牙连接修复
+## 当前状态：0.3 Wi-Fi 版本待真表安装
+
+- 用户提供的真表截图确认 `CBErrorDomain 15`。本机 Apple SDK 将 15 定义为 `encryptionTimedOut`。Mac 日志在对应连接中记录超时断开，未收到 App 层的配对读取；不能仅据此认定配对密钥损坏。
+- 用户明确批准一次 Mac 蓝牙关闭／开启。工具核验开关确实 off → on；MX 键盘和 MX Master 3S 均已恢复 Connected。用户随后确认仍是错误 15。
+- 新增保持证书固定与显式批准的 HTTPS 路径，保留蓝牙加密配置。没有删除系统蓝牙配对、重置整机或关闭连接加密。
+- **28 项单元测试通过**。`scripts/test-wifi-security.sh` 使用生产 TLS/配对/会话实现、独立测试凭据与 demo controller，通过错误证书拒绝、未批准设备拒绝、票据绑定、认证回执和重放拒绝；没有操作真实 Codex。
+- **Mac / Watch 0.3.0 (4) 构建通过**。Mac 已签名更新并启动，UI 显示 `Wi-Fi 已就绪 · 192.168.31.99`。Watch 构建的地址与完整证书摘要已独立核验匹配本机身份。
+- 真表安装先返回 **CoreDeviceError 4016 / unavailable**；随后设备恢复 available，安装通道仍返回 **RemotePairingError 1007 / CBErrorDomain 15**。当前手表最后确认安装的是 0.2.1 (3)，**0.3.0 尚未安装；真实 Watch HTTPS、收音和 Codex 控制仍未通过验收**。
+- 已完成 Release archive 与内部 TestFlight 导出（0.3.0 (4)，755524 字节），验证导出包 Watch-only 结构、Mac 证书摘要匹配、不含私有身份，以及 `codesign --verify --deep --strict`。导出配置确认 `testFlightInternalTestingOnly=true`、`destination=export`。
+- **尚未上传 Apple，也未创建／分配任何测试者或发起 App Review。** 私有 TestFlight 作为绕过 Mac 调试安装通道的备选路径，等待用户明确批准上传范围。
+- 证据在本机 `artifacts/wifi-*`；TLS 私有身份仅在 App Support 的 0700 目录，未提交 Git。实现边界见 `docs/WIFI-TRANSPORT.md`。
+
+## 0.2.1 蓝牙连接修复记录
 
 - 用户反馈手表显示「暂时无法连接 Mac」，重新配对后仍失败。此文案对应 CBCentralManager 的 `didFailToConnect`，旧版丢弃了底层错误。
 - 修复缓存 Mac 失败后仍无限重取旧记录的问题，失败后改为扫描新广播；重新配对创建新的 central manager，并忽略旧 manager／旧 peripheral 回调。收到认证心跳回执后才显示已连接。

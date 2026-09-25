@@ -2,7 +2,7 @@
 
 ## 目标与验收
 
-独立 watchOS App + macOS 菜单栏接收端，无自建 iPhone 程序（仅 Apple 的分发 stub）。首次由 Mac 明确允许配对，之后手表启动时自动寻找已配对 Mac。Digital Crown 控制 Mac 的任务正文滚动；屏幕按钮控制 Codex 自带听写；按住说话，右滑锁定，再点停止；提供独立 Enter。用户在 2026-09-25 真机测试后明确要求使用 Watch 麦克风，并选择保留 Codex 内置听写。更新为 Watch 录音 → BLE 音频流 → BlackHole 2ch → Codex；不用 OpenAI API、不另做转写。Mac 麦克风方案已被替代。
+独立 watchOS App + macOS 菜单栏接收端，无自建 iPhone 程序（仅 Apple 的分发 stub）。首次由 Mac 明确允许配对，之后手表启动时自动寻找已配对 Mac。Digital Crown 控制 Mac 的任务正文滚动；屏幕按钮控制 Codex 自带听写；按住说话，右滑锁定，再点停止；提供独立 Enter。用户在 2026-09-25 真机测试后明确要求使用 Watch 麦克风，并选择保留 Codex 内置听写。更新为 Watch 录音 → HTTPS（蓝牙备用）→ BlackHole 2ch → Codex；不用 OpenAI API、不另做转写。Mac 麦克风方案已被替代。
 
 默认手动 Enter，避免异步转写未完成时发送。第一版不自动 Enter。普通侧边按钮与表冠按压不重映射，离开前台停止听写，断线有超时保护。
 
@@ -43,3 +43,21 @@
 - [x] Mac 广播状态、广播恢复及配对窗口错误提示
 - [x] 24 项测试、双端构建、Mac 更新及真表 0.2.1 (3) 安装启动
 - [ ] 真机重新配对与认证心跳、退出／重开后的重连验证
+
+## 0.3 HTTPS Wi-Fi 直连
+
+用户截图明确错误为 CBErrorDomain 15。经用户授权的 Mac 蓝牙开关验证仍失败，键鼠已恢复，因此在原需求允许的 Wi-Fi 路径上继续实现。保留 Watch 麦克风及 Codex 内置听写。
+
+- [x] 固定 Mac 证书的 HTTPS 客户端、本机 TLS 服务和双端核对配对码
+- [x] 认证会话、控制回执、重放保护与批量音频传输
+- [x] 28 项单元测试、真实 TLS/认证集成测试和双端构建
+- [x] Mac 0.3.0 (4) 签名更新并启动；Watch 包地址与证书摘要匹配
+- [ ] Ultra 4 恢复可用后安装 0.3.0 (4)
+- [ ] 真表 HTTPS 配对、自动重连、滚动、Watch 收音及 Codex 转写验证
+
+## 0.3 交付状态
+
+- [x] Release 归档、内部 TestFlight IPA 导出及真实包校验
+- [x] Mac 地址编辑与保持证书固定的重连入口
+- [ ] 用户批准向 Apple 上传并创建必要测试记录（仅本人内部测试）
+- [ ] Apple 处理、内部测试可用、真表安装与完整功能验收

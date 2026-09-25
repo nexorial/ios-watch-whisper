@@ -1,24 +1,27 @@
 # Watch Whisper
 
-用 Apple Watch 的表冠和屏幕按钮遥控 Mac 上的 Codex。原生 SwiftUI，独立 Watch App；无需 iPhone 伴侣 App。0.2.1 (3) 已在真实 Ultra 4 安装并启动。0.1 的一次蓝牙配对与重连曾通过；0.2.1 针对后续连接失败的修复仍待真机复测；Watch 麦克风 → BlackHole → Codex 的完整语音链路仍待驱动安装和真机验收。
+用 Apple Watch 的表冠和屏幕按钮遥控 Mac 上的 Codex。原生 SwiftUI，独立 Watch App；无需 iPhone 伴侣 App。
+
+当前 0.3 本机开发版采用 **HTTPS Wi-Fi 直连**，蓝牙保留为备用。Mac 0.3.0 (4) 已运行，手表构建与内部 TestFlight 安装包已准备好，但本地安装通道同样被蓝牙加密错误阻塞；尚未上传 Apple，真表安装与端到端验收待完成。0.2.1 (3) 真表仍报告系统蓝牙加密超时，详情见 [Wi-Fi 方案与证据](docs/WIFI-TRANSPORT.md)。
 
 ## 这版能做什么
 
-- Mac 首次批准手表，通过加密 BLE 配对；保存后在手表 App 前台自动重连。缓存连接失败后改为重新扫描，重新配对会重建蓝牙会话，避免旧回调覆盖新连接。
+- Wi-Fi 首次由 Mac 批准手表，两端核对六位配对码；开发安装时固定这台 Mac 的完整 TLS 证书摘要。保存后在手表 App 前台自动重连。
+- 蓝牙备用保留加密配对、缓存失败后重新扫描与旧回调隔离。
 - 表冠上下滚动；按住说话，右滑锁定；短点开始／再点停止。
-- 使用 **Watch 内置麦克风**，通过认证的 BLE 音频流送到 Mac 的 **BlackHole 2ch** 虚拟麦克风，继续使用 **Codex 自带听写**。不会回退到 Mac 麦克风；驱动和输入路由未就绪时明确报错。
+- 使用 **Watch 内置麦克风**，通过 HTTPS 批量发送认证音频帧到 Mac 的 **BlackHole 2ch** 虚拟麦克风，继续使用 **Codex 自带听写**。不会回退到 Mac 麦克风；驱动和输入路由未就绪时明确报错。
 - 开始听写会激活 Codex 并寻找、聚焦任务输入框；表冠滚动对话正文，不再以输入框识别成功为前提。
 - 独立 Enter；收音中第一次 Enter 先停止，等 Codex 转写完成再点击发送。
 - 断线不重发指令；5 秒心跳超时请求停止，录音最长 2 分钟。
 
-**普通侧边按钮、表冠按压不能任意重映射。** 自动 Enter、Wi-Fi 传输、后台持续遥控和 Mac 唤醒没有实现。Claude 仅有桌面目标的滚动／Enter 适配代码，未验证；Claude 听写明确禁用。
+**普通侧边按钮、表冠按压不能任意重映射。** 自动 Enter、后台持续遥控和 Mac 唤醒没有实现。Claude 仅有桌面目标的滚动／Enter 适配代码，未验证；Claude 听写明确禁用。
 
 ## 项目
 
 | 路径 | 内容 |
 | --- | --- |
-| `Watch/` | watchOS 9+ 原生界面、BLE central、手势和表冠 |
-| `Mac/` | macOS 13+ 菜单栏接收端、BLE peripheral、目标适配器 |
+| `Watch/` | watchOS 9+ 界面、HTTPS 主连接、蓝牙备用、手势和表冠 |
+| `Mac/` | macOS 接收端、HTTPS（15+）、蓝牙备用（13+）、目标适配器 |
 | `Sources/WhisperCore/` | 20 字节认证协议、重放保护、Keychain、手势和录音租约 |
 | `Tests/WhisperCoreTests/` | 协议、篡改、重放、手势、表冠和失联保护测试 |
 | `docs/RESEARCH.md` | 方案对比、苹果平台限制与 Codex 映射依据 |
@@ -52,7 +55,7 @@ scratch path 放在 Documents 外，避免同步文件的扩展属性影响 XCTe
 3. iPhone 与 Apple Watch 解锁并靠近 Mac，手表和 Mac 连接同一 Wi-Fi。先把 iPhone 通过 USB 连接 Mac 并信任此电脑。Device Hub 必须显示你的当前手表可用；如果未出现，点工具栏「＋ → Pair Nearby Device…」，选择左侧 iPhone／iPad／Apple Watch 图标组，保持「Waiting to pair」窗口打开。
 4. 在手表「设置 → 隐私与安全性」开启 Developer Mode，按提示重启并确认。**首次配对前这个开关可能不存在，需先做上一步。** 随后在手表的 Developer Mode 页面向下滚动到 **Devices／设备**，选择你的 Mac，点 **Pair／配对**，再把 Mac Device Hub 显示的 PIN 输入到手表。单纯打开开关不会完成这次配对。iPhone 也需开启 Developer Mode。
 5. 在 Xcode 选择 `WatchWhisperWatch` scheme 与真实手表运行。不需要先安装任何 iPhone App。
-6. Mac 点「允许新手表 · 60 秒」，手表打开 App 后选择本机；确认系统蓝牙配对及 Mac 上的「允许这块手表」。首次操作完成后会保存配对。
+6. 通过 `scripts/install-watch.sh <WATCH_UDID>` 安装时会配置本机 Wi-Fi 地址和 TLS 证书摘要。Mac 点「允许 Wi-Fi 手表」，核对两端六位码，再点「核对一致，允许手表」。蓝牙备用需要在两端明确选择开启。
 7. 安装并配置 [BlackHole 2ch](docs/WATCH-AUDIO.md)。在手表首次主动录音时允许麦克风。
 8. 把 Codex 任务窗口放在 Mac 前台，先试正文滚动。按住说话时会自动定位输入框；等手表显示「Watch 正在收音」后说话。松开后等 Codex 转写，检查文字，再点 Enter。
 
@@ -74,7 +77,7 @@ xcrun simctl launch <WATCH_SIMULATOR_ID> com.nexorial.watchwhisper.watchkitapp -
 - 手表不出现：两端打开蓝牙并允许 App 使用；Mac 接收端保持运行，手表保持前台。接收端会显示是否正在广播，也可点「重新广播」。模拟器不能证明蓝牙发现。
 - 连接失败：0.2.1 会显示系统错误域与错误码，先记录具体错误；无需仅因提示失败反复删除配对。开发版还会保留最近 100 条连接事件，不包含配对密钥、录音或输入内容。
 - Xcode 已配对但安装报 tunnel timeout：先确认真表实际连接与 Mac 相同的 Wi-Fi 并已解锁，网络需允许设备互访。此时是开发安装通道失败，不要把配对状态当成安装成功；不要为排查而抹掉手表或解除它与 iPhone 的日常配对。
-- 已配对但拒绝指令：两端移除配对后重配，检查 Mac Keychain 是否可用。密钥只存本地 Keychain，不提交到 Git。
+- 已配对但拒绝指令：两端移除配对后重配，检查 Mac Keychain 是否可用。遥控配对密钥存本地 Keychain；TLS 身份存储见 Wi-Fi 文档，私有身份均不提交到 Git。
 - 找不到听写：确认 Codex 听写已启用，界面为中文或英文，当前任务输入框可见。不同版本的可访问性名称可能变化。
 - Enter 不可用：先停止听写并等待转写，确认输入框非空、Mac 前台是所选 App；不会把 Return 发给其他进程。
 - Codex 未确认启动／停止：立即在 Codex 检查录音状态。自动保护是尽力停止，不保证在目标 App 挂起或控件消失时能成功。

@@ -20,6 +20,11 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>与你的 Mac 直接连接，用表冠滚动、传输你的语音和发送 Enter。</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -28,5 +33,9 @@
 	<true/>
 	<key>WKWatchOnly</key>
 	<true/>
+	<key>WatchWhisperWiFiHost</key>
+	<string>$(WATCH_WHISPER_HOST)</string>
+	<key>WatchWhisperWiFiPin</key>
+	<string>$(WATCH_WHISPER_PIN)</string>
 </dict>
 </plist>

@@ -4,7 +4,7 @@ import WhisperCore
 
 @main
 struct WatchWhisperApp: App {
-    @StateObject private var connection = WatchConnection()
+    @StateObject private var connection = WatchLink()
     @Environment(\.scenePhase) private var scenePhase
     var body: some Scene {
         WindowGroup {
@@ -15,7 +15,7 @@ struct WatchWhisperApp: App {
 }
 
 private struct ContentView: View {
-    @ObservedObject var connection: WatchConnection
+    @ObservedObject var connection: WatchLink
     @State private var showingConnection = false
     var body: some View {
         Group {
@@ -29,7 +29,7 @@ private struct ContentView: View {
 }
 
 private struct RemoteView: View {
-    @ObservedObject var connection: WatchConnection
+    @ObservedObject var connection: WatchLink
     @Binding var showingConnection: Bool
     @State private var gesture = TalkGesture()
     @State private var fingerDown = false
@@ -126,14 +126,24 @@ private struct RemoteView: View {
 }
 
 private struct ConnectionView: View {
-    @ObservedObject var connection: WatchConnection
+    @ObservedObject var connection: WatchLink
     @Binding var showingConnection: Bool
+    @State private var wifiHost = ""
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Image(systemName: "applewatch.radiowaves.left.and.right").font(.system(size: 30, weight: .light)).foregroundStyle(.mint)
                 Text("连接你的 Mac").font(.headline)
                 Text(connection.status).font(.caption).foregroundStyle(.secondary)
+                if connection.usesWiFi { Text("Wi-Fi 直连").font(.caption2).foregroundStyle(.mint) }
+                if let code = connection.pairingCode {
+                    Text(code).font(.system(size: 30, weight: .semibold, design: .monospaced)).foregroundStyle(.mint)
+                    Text("核对 Mac 上的六位码，再允许配对。").font(.caption2)
+                }
+                if connection.usesWiFi {
+                    TextField("Mac 地址", text: $wifiHost).font(.caption)
+                    Button("保存地址并重连") { connection.updateWiFiHost(wifiHost) }.font(.caption)
+                }
                 if connection.connected {
                     Button("返回遥控") { showingConnection = false }
                     Button("忘记 Mac", role: .destructive) { connection.forget() }
@@ -143,12 +153,14 @@ private struct ConnectionView: View {
                             Label(mac.name, systemImage: "laptopcomputer").font(.caption)
                         }
                     }
-                    Text("Mac 打开 Watch Whisper，允许配对后在这里选择它。无需 iPhone App。")
+                    Text(connection.usesWiFi ? "Mac 打开 Watch Whisper，点「允许 Wi-Fi 手表」，核对上方配对码。" : "Mac 打开蓝牙备用，允许配对后在这里选择它。")
                         .font(.caption2).foregroundStyle(.secondary)
                     Button("重新配对") { connection.forget() }.font(.caption)
                     Button("试用界面") { connection.enableDemo(); showingConnection = false }.font(.caption)
+                    if connection.usesWiFi { Button("使用蓝牙备用") { connection.useBluetooth() }.font(.caption) }
+                    else if connection.canUseWiFi { Button("使用 Wi-Fi 直连") { connection.useWiFi() }.font(.caption) }
                 }
             }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4)
-        }
+        }.onAppear { wifiHost = WatchWiFiConnection.configuration?.0 ?? "" }
     }
 }

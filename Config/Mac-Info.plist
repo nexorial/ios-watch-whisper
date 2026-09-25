@@ -28,5 +28,7 @@
 	<string>向 Apple Watch 广播本机，建立私人遥控连接。</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 Nexorial</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>与你批准的 Apple Watch 建立加密的局域网遥控连接。</string>
 </dict>
 </plist>

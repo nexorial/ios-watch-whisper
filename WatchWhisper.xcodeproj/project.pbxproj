@@ -9,12 +9,17 @@
 /* Begin PBXBuildFile section */
 		003164C1F5AF1DA033C3A635 /* BluetoothHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D373DE9F6EF75A1F0FE86D /* BluetoothHost.swift */; };
 		04E107EC87D1C4591F788634 /* WatchConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66045390888B8D237B61C4A3 /* WatchConnection.swift */; };
+		1769C9288DB5AC2F23119396 /* TLSHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABF055A2419F5E569E7293D /* TLSHTTPServer.swift */; };
 		2A054FB7408B5F907B97A1D3 /* WatchMicrophone.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA1AC96BE6DFDF526FF0A8E2 /* WatchMicrophone.swift */; };
 		3471D6D48F1C90A1A91B0C0D /* Watch Whisper Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 61542ED69989041D5450B536 /* Watch Whisper Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4DB43DE1D9C4D01C7A47F853 /* WatchWiFiConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93F3A5EEC5E4207554E06F3E /* WatchWiFiConnection.swift */; };
+		5EB0BF1062F9AC689DC203D3 /* LocalTLSIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4972DECE918C7411AD226FDF /* LocalTLSIdentity.swift */; };
 		640C98E6BE7518FCD41D50C0 /* AgentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F88732BF367A20E2254DF0CB /* AgentController.swift */; };
 		74C902B726311520622E9FFD /* WatchWhisperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BEC50347DE86A98024179B9 /* WatchWhisperApp.swift */; };
+		835C98AEB6FAD379669E025C /* WiFiHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35648F124847835FB61830E5 /* WiFiHost.swift */; };
 		9ED27EA051C2E78811EC33F0 /* WhisperCore in Frameworks */ = {isa = PBXBuildFile; productRef = A9D66D1ED769965B001DB7CA /* WhisperCore */; };
 		C2DCB8CC3801ECA3DAD35773 /* WatchAudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC616450452ABD5F1DD931B7 /* WatchAudioOutput.swift */; };
+		CB5DDF3CB0010C6E814B476C /* WatchLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = D826B0E8EEFD8B018DE702E0 /* WatchLink.swift */; };
 		E847B1DD6792C271CAA6D5E2 /* WatchWhisperMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9284A1A1858BCBCE6C67442 /* WatchWhisperMacApp.swift */; };
 		EECF08CC98A084339E610303 /* WhisperCore in Frameworks */ = {isa = PBXBuildFile; productRef = F2CB382A3466BB02A82B80F0 /* WhisperCore */; };
 		F9F7B00ADC446B52A03E580C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 65304C6637A076FA81216284 /* Assets.xcassets */; };
@@ -47,14 +52,19 @@
 /* Begin PBXFileReference section */
 		2BEC50347DE86A98024179B9 /* WatchWhisperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWhisperApp.swift; sourceTree = "<group>"; };
 		2C8DFE93DD6860DBE1B46034 /* Watch Whisper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Whisper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		35648F124847835FB61830E5 /* WiFiHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiHost.swift; sourceTree = "<group>"; };
+		4972DECE918C7411AD226FDF /* LocalTLSIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTLSIdentity.swift; sourceTree = "<group>"; };
 		61542ED69989041D5450B536 /* Watch Whisper Watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Whisper Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65304C6637A076FA81216284 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		66045390888B8D237B61C4A3 /* WatchConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnection.swift; sourceTree = "<group>"; };
 		6B0D3796E82F22A60EF1D4D8 /* WatchWhisper.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WatchWhisper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		93F3A5EEC5E4207554E06F3E /* WatchWiFiConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWiFiConnection.swift; sourceTree = "<group>"; };
 		A2D373DE9F6EF75A1F0FE86D /* BluetoothHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothHost.swift; sourceTree = "<group>"; };
 		AC616450452ABD5F1DD931B7 /* WatchAudioOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAudioOutput.swift; sourceTree = "<group>"; };
 		B9284A1A1858BCBCE6C67442 /* WatchWhisperMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWhisperMacApp.swift; sourceTree = "<group>"; };
 		C7B1F17E7096A11D1B5C59EB /* ios-watch-whisper */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "ios-watch-whisper"; path = .; sourceTree = SOURCE_ROOT; };
+		CABF055A2419F5E569E7293D /* TLSHTTPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TLSHTTPServer.swift; sourceTree = "<group>"; };
+		D826B0E8EEFD8B018DE702E0 /* WatchLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLink.swift; sourceTree = "<group>"; };
 		F88732BF367A20E2254DF0CB /* AgentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentController.swift; sourceTree = "<group>"; };
 		FA1AC96BE6DFDF526FF0A8E2 /* WatchMicrophone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMicrophone.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -84,8 +94,11 @@
 			children = (
 				F88732BF367A20E2254DF0CB /* AgentController.swift */,
 				A2D373DE9F6EF75A1F0FE86D /* BluetoothHost.swift */,
+				4972DECE918C7411AD226FDF /* LocalTLSIdentity.swift */,
+				CABF055A2419F5E569E7293D /* TLSHTTPServer.swift */,
 				AC616450452ABD5F1DD931B7 /* WatchAudioOutput.swift */,
 				B9284A1A1858BCBCE6C67442 /* WatchWhisperMacApp.swift */,
+				35648F124847835FB61830E5 /* WiFiHost.swift */,
 			);
 			path = Mac;
 			sourceTree = "<group>";
@@ -115,8 +128,10 @@
 			children = (
 				65304C6637A076FA81216284 /* Assets.xcassets */,
 				66045390888B8D237B61C4A3 /* WatchConnection.swift */,
+				D826B0E8EEFD8B018DE702E0 /* WatchLink.swift */,
 				FA1AC96BE6DFDF526FF0A8E2 /* WatchMicrophone.swift */,
 				2BEC50347DE86A98024179B9 /* WatchWhisperApp.swift */,
+				93F3A5EEC5E4207554E06F3E /* WatchWiFiConnection.swift */,
 			);
 			path = Watch;
 			sourceTree = "<group>";
@@ -254,8 +269,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				04E107EC87D1C4591F788634 /* WatchConnection.swift in Sources */,
+				CB5DDF3CB0010C6E814B476C /* WatchLink.swift in Sources */,
 				2A054FB7408B5F907B97A1D3 /* WatchMicrophone.swift in Sources */,
 				74C902B726311520622E9FFD /* WatchWhisperApp.swift in Sources */,
+				4DB43DE1D9C4D01C7A47F853 /* WatchWiFiConnection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,8 +289,11 @@
 			files = (
 				640C98E6BE7518FCD41D50C0 /* AgentController.swift in Sources */,
 				003164C1F5AF1DA033C3A635 /* BluetoothHost.swift in Sources */,
+				5EB0BF1062F9AC689DC203D3 /* LocalTLSIdentity.swift in Sources */,
+				1769C9288DB5AC2F23119396 /* TLSHTTPServer.swift in Sources */,
 				C2DCB8CC3801ECA3DAD35773 /* WatchAudioOutput.swift in Sources */,
 				E847B1DD6792C271CAA6D5E2 /* WatchWhisperMacApp.swift in Sources */,
+				835C98AEB6FAD379669E025C /* WiFiHost.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -323,7 +343,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -344,7 +364,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.3.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -366,6 +386,8 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
+				WATCH_WHISPER_HOST = "";
+				WATCH_WHISPER_PIN = "";
 			};
 			name = Release;
 		};
@@ -379,6 +401,8 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
+				WATCH_WHISPER_HOST = "";
+				WATCH_WHISPER_PIN = "";
 			};
 			name = Debug;
 		};
@@ -467,7 +491,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -482,7 +506,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.3.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

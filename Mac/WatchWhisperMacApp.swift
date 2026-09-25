@@ -5,29 +5,32 @@ import WhisperCore
 struct WatchWhisperMacApp: App {
     @StateObject private var controller: AgentController
     @StateObject private var host: BluetoothHost
+    @StateObject private var wifi: WiFiHost
     private let demo = ProcessInfo.processInfo.arguments.contains("--demo")
     init() {
         let demo = ProcessInfo.processInfo.arguments.contains("--demo")
         let controller = AgentController(demo: demo)
         _controller = StateObject(wrappedValue: controller)
-        _host = StateObject(wrappedValue: BluetoothHost(controller: controller, demo: demo))
+        _host = StateObject(wrappedValue: BluetoothHost(controller: controller, demo: demo, enabled: false))
+        _wifi = StateObject(wrappedValue: WiFiHost(controller: controller, demo: demo))
     }
     var body: some Scene {
-        WindowGroup("Watch Whisper", id: "control") { HostView(host: host, controller: controller, demo: demo) }
+        WindowGroup("Watch Whisper", id: "control") { HostView(host: host, wifi: wifi, controller: controller, demo: demo) }
             .defaultSize(width: 470, height: 570)
             .windowResizability(.contentSize)
         MenuBarExtra("Watch Whisper", systemImage: controller.isRecording ? "mic.fill" : "applewatch.radiowaves.left.and.right") {
-            HostMenu(host: host, controller: controller)
+            HostMenu(host: host, wifi: wifi, controller: controller)
         }
     }
 }
 
 private struct HostMenu: View {
     @ObservedObject var host: BluetoothHost
+    @ObservedObject var wifi: WiFiHost
     @ObservedObject var controller: AgentController
     @Environment(\.openWindow) private var openWindow
     var body: some View {
-        Text(host.connection)
+        Text(wifi.status)
         Text(controller.phase.caption)
         Divider()
         Button("打开控制面板") {
@@ -42,6 +45,7 @@ private struct HostMenu: View {
 
 private struct HostView: View {
     @ObservedObject var host: BluetoothHost
+    @ObservedObject var wifi: WiFiHost
     @ObservedObject var controller: AgentController
     let demo: Bool
     var body: some View {
@@ -55,8 +59,7 @@ private struct HostView: View {
                 }
             }
             VStack(alignment: .leading, spacing: 10) {
-                Label(host.connection, systemImage: "antenna.radiowaves.left.and.right").font(.headline)
-                Text(host.radioStatus).font(.caption).foregroundStyle(.secondary)
+                Label(wifi.status, systemImage: "wifi").font(.headline)
                 Text(controller.detail).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }.padding(16).frame(maxWidth: .infinity, alignment: .leading).background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 16))
             GroupBox("1 · 允许 Mac 接收操作") {
@@ -66,31 +69,47 @@ private struct HostView: View {
                     Button("打开设置") { controller.requestAccessibility() }.disabled(demo)
                 }.padding(8)
             }
-            GroupBox("2 · 与 Apple Watch 配对") {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("在手表打开 Watch Whisper，选择这台 Mac。首次需要在两端确认，之后自动重连。")
+            GroupBox("2 · Wi-Fi 连接 Apple Watch") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("手表会自动连接这台 Mac。首次核对两端的六位码，再允许配对。")
                         .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     HStack {
-                        Button(host.pairingOpen ? "等待手表…" : "允许新手表 · 60 秒") { host.allowPairing() }.disabled(host.pairingOpen || demo)
-                        Button("重新广播") { host.restartAdvertising() }.disabled(demo || controller.isRecording)
+                        Button(wifi.pairingOpen ? "等待手表…" : "允许 Wi-Fi 手表") { wifi.allowPairing() }
+                            .disabled(wifi.pairingOpen || demo)
                         Spacer()
-                        Text("已配对 \(host.pairedCount) 块").foregroundStyle(.secondary)
+                        Text("已配对 \(wifi.pairedCount) 块").foregroundStyle(.secondary)
                     }
-                    if let pending = host.pendingWatch {
+                    if let code = wifi.pendingCode {
                         HStack {
-                            Text("附近手表请求 · \(pending)")
-                            Button("允许这块手表") { host.approve() }.buttonStyle(.borderedProminent)
+                            Text(code).font(.system(.title2, design: .monospaced).bold())
+                            Button("核对一致，允许手表") { wifi.approve() }.buttonStyle(.borderedProminent)
                         }
                     }
                 }.padding(8)
             }
-            AudioRouteView(audio: host.audio)
+            AudioRouteView(audio: wifi.audio)
+            DisclosureGroup("蓝牙备用") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(host.connection).font(.caption)
+                    Text(host.radioStatus).font(.caption).foregroundStyle(.secondary)
+                    HStack {
+                        Button("开启蓝牙备用") { host.enableBluetooth() }
+                        Button("允许蓝牙手表") { host.allowPairing() }.disabled(host.pairingOpen)
+                    }
+                    if let pending = host.pendingWatch {
+                        HStack {
+                            Text("手表请求 · \(pending)")
+                            Button("允许这块手表") { host.approve() }
+                        }
+                    }
+                }.padding(.top, 8)
+            }.disabled(demo)
             HStack {
                 Picker("控制目标", selection: $controller.target) {
                     ForEach(AgentController.Target.allCases) { Text($0.rawValue).tag($0) }
                 }.disabled(controller.isRecording)
                 Spacer()
-                Button("移除所有配对") { host.revokeAll() }.disabled(host.pairedCount == 0)
+                Button("移除所有配对") { host.revokeAll(); wifi.revokeAll() }.disabled(host.pairedCount == 0 && wifi.pairedCount == 0)
             }
             VStack(alignment: .leading, spacing: 6) {
                 Label("表冠滚动 · 按住说话 · 右滑锁定 · Enter 发送", systemImage: "hand.draw")
@@ -106,7 +125,7 @@ private struct HostView: View {
             }
         }.padding(28).frame(width: 470).tint(.mint)
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-                controller.objectWillChange.send(); host.audio.refresh(); host.refreshRadio()
+                controller.objectWillChange.send(); host.audio.refresh(); host.refreshRadio(); wifi.audio.refresh()
             }
     }
 }

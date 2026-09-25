@@ -27,12 +27,17 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     private let demo: Bool
     private struct Session { var key: Data; var nonce: Data; var gate = ReplayGate(); var audioGate: AudioGate? }
 
-    init(controller: AgentController, demo: Bool = false) {
+    init(controller: AgentController, demo: Bool = false, enabled: Bool = true) {
         self.controller = controller; self.demo = demo
         super.init()
         pairedCount = approvedIDs.count
         if demo { connection = "演示模式 · 无蓝牙连接" }
-        else { manager = CBPeripheralManager(delegate: self, queue: .main) }
+        else if enabled { manager = CBPeripheralManager(delegate: self, queue: .main) }
+        else { connection = "蓝牙备用未开启"; radioStatus = "Wi-Fi 直连优先" }
+    }
+    func enableBluetooth() {
+        guard manager == nil, !demo else { return }
+        manager = CBPeripheralManager(delegate: self, queue: .main)
     }
     func allowPairing() {
         guard manager?.state == .poweredOn, serviceReady else {
@@ -53,6 +58,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     }
     func refreshRadio() {
         guard !demo else { radioStatus = "演示模式"; return }
+        guard manager != nil else { radioStatus = "蓝牙备用未开启"; return }
         switch manager?.state {
         case .poweredOn: radioStatus = manager.isAdvertising ? "Mac 蓝牙广播中" : "Mac 蓝牙已开，广播未启动"
         case .unauthorized: radioStatus = "Watch Whisper 尚未获蓝牙权限"
@@ -204,7 +210,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
                 let (central, command) = work.removeFirst()
                 guard let session = sessions[central.identifier] else { continue }
                 let phase: HostPhase
-                if controller.isRecording, let owner, owner != central.identifier {
+                if controller.isRecording, owner != central.identifier {
                     phase = .unavailable
                 } else {
                     if command.action == .beginDictation {

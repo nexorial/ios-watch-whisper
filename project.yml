@@ -8,8 +8,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: '5.0'
-    MARKETING_VERSION: '0.2.1'
-    CURRENT_PROJECT_VERSION: 3
+    MARKETING_VERSION: '0.3.0'
+    CURRENT_PROJECT_VERSION: 4
     DEVELOPMENT_TEAM: JNN5TPN23D
     CODE_SIGN_STYLE: Automatic
 packages:
@@ -37,6 +37,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSBluetoothAlwaysUsageDescription: 与你批准的 Apple Watch 连接，接收滚动、听写和 Enter 指令。
+        NSLocalNetworkUsageDescription: 与你批准的 Apple Watch 建立加密的局域网遥控连接。
         NSBluetoothPeripheralUsageDescription: 向 Apple Watch 广播本机，建立私人遥控连接。
         LSApplicationCategoryType: public.app-category.productivity
         NSHumanReadableCopyright: Copyright © 2026 Nexorial
@@ -68,6 +69,8 @@ targets:
         PRODUCT_NAME: Watch Whisper Watch
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: '4'
+        WATCH_WHISPER_HOST: ""
+        WATCH_WHISPER_PIN: ""
         SDKROOT: watchos
         SKIP_INSTALL: YES
     info:
@@ -76,6 +79,10 @@ targets:
         CFBundleDisplayName: Watch Whisper
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        WatchWhisperWiFiHost: $(WATCH_WHISPER_HOST)
+        WatchWhisperWiFiPin: $(WATCH_WHISPER_PIN)
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
         WKApplication: true
         WKWatchOnly: true
         NSBluetoothAlwaysUsageDescription: 与你的 Mac 直接连接，用表冠滚动、传输你的语音和发送 Enter。
