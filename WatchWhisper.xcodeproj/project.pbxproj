@@ -339,6 +339,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "Config/Watch-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.watchkitapp;
+				PRODUCT_NAME = "Watch Whisper Watch";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -351,6 +352,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "Config/Watch-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.watchkitapp;
+				PRODUCT_NAME = "Watch Whisper Watch";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -370,6 +372,7 @@
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.mac;
+				PRODUCT_NAME = "Watch Whisper";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -387,6 +390,7 @@
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.mac;
+				PRODUCT_NAME = "Watch Whisper";
 				SDKROOT = macosx;
 			};
 			name = Debug;

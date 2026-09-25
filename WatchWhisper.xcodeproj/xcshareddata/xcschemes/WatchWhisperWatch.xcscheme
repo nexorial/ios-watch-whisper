@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "41784621BC404F29C5B764DF"
-               BuildableName = "WatchWhisperWatch.app"
+               BuildableName = "Watch Whisper Watch.app"
                BlueprintName = "WatchWhisperWatch"
                ReferencedContainer = "container:WatchWhisper.xcodeproj">
             </BuildableReference>
@@ -31,7 +31,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "41784621BC404F29C5B764DF"
-            BuildableName = "WatchWhisperWatch.app"
+            BuildableName = "Watch Whisper Watch.app"
             BlueprintName = "WatchWhisperWatch"
             ReferencedContainer = "container:WatchWhisper.xcodeproj">
          </BuildableReference>
@@ -54,7 +54,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "41784621BC404F29C5B764DF"
-            BuildableName = "WatchWhisperWatch.app"
+            BuildableName = "Watch Whisper Watch.app"
             ReferencedContainer = "container:WatchWhisper.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -70,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "41784621BC404F29C5B764DF"
-            BuildableName = "WatchWhisperWatch.app"
+            BuildableName = "Watch Whisper Watch.app"
             ReferencedContainer = "container:WatchWhisper.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
