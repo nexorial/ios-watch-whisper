@@ -130,6 +130,9 @@ final class WiFiHost: ObservableObject {
                     if gap > 0 { try audio.enqueue([Int16](repeating: 0, count: gap)) }
                     try audio.enqueue(frame.samples)
                 }
+                if session.audioGate?.nextOffset == 0 {
+                    ConnectionTrace.record("audio", "first Watch audio batch received")
+                }
                 session.audioGate = gate; sessions[id] = session
                 return (200, WiFiReply("ok"))
             }
@@ -160,11 +163,15 @@ final class WiFiHost: ObservableObject {
                 audio.stop(); sessions[id]?.audioGate = nil
             } else { phase = await controller.perform(command.action, value: command.value) }
             if !controller.isRecording { owner = nil; audio.stop() }
+            if command.action == .beginDictation || command.action == .finishDictation || command.action == .cancelDictation {
+                ConnectionTrace.record("audio", "\(command.action) phase=\(phase) samples=\(audio.receivedSamples) \(audio.captureSummary)")
+            }
             status = "Wi-Fi 已连接 · \(phase.caption)"
             return (200, WiFiReply("ok", message: controller.detail,
                                   packet: try Wire.status(phase, sequence: command.sequence, key: session.key,
                                                           challenge: session.challenge).base64EncodedString()))
         } catch {
+            ConnectionTrace.record("wifi", "request failed path=\(request.path) samples=\(audio.receivedSamples) error=\(error.localizedDescription)")
             if request.path == "/v1/audio", owner == id {
                 audio.stop(); _ = await controller.perform(.cancelDictation); owner = nil
             }

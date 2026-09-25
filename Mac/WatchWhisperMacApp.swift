@@ -88,6 +88,11 @@ private struct HostView: View {
                 }.padding(8)
             }
             AudioRouteView(audio: wifi.audio)
+            if !controller.lastOperation.isEmpty {
+                DisclosureGroup("最近一次操作") {
+                    Text(controller.lastOperation).font(.caption).textSelection(.enabled)
+                }
+            }
             DisclosureGroup("蓝牙备用") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(host.connection).font(.caption)
@@ -136,6 +141,7 @@ private struct AudioRouteView: View {
         GroupBox("3 · Watch 麦克风") {
             VStack(alignment: .leading, spacing: 6) {
                 Text(audio.status).font(.callout)
+                Text(audio.captureSummary).font(.caption).foregroundStyle(.secondary)
                 Text("安装 BlackHole 2ch 后，在系统声音设置中选择它作为输入，并让 Codex 使用默认输入或 BlackHole 2ch。其他使用默认麦克风的应用也会使用这一输入。")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 HStack {

@@ -19,7 +19,8 @@
 - 本地 IPA：`artifacts/testflight-0.3.0-build5/WatchWhisper.ipa`，755717 字节，SHA-256 `7dfa7b9115dab4337a1a6fcfbe00f50c545aa0484cf237e820eb4123480810d9`。
 - Build 5 于 17:37:57 上传成功，Upload ID `c07b63d8-af09-4166-a0f4-9a1f5363a9fe`；Apple 在 17:39:40 发出处理完成通知，网页独立显示 `Complete` 与 `Build 5 Internal`。
 - 加密问卷按实际 Watch 包填写：URLSession/Security/CryptoKit 提供系统加密、证书验证和 HMAC/SHA-256，没有随 Watch 包交付自实现加密算法或第三方加密库，因此选择 `None of the algorithms mentioned above`（不属于问卷列举的专有或额外实现的标准算法）。参考 [Apple 系统加密豁免说明](https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations)。
-- 合规信息保存后，构建由 `Missing Compliance` 变为 `Ready to Test`；加入 James 组后，刷新网页仍显示 **Testing / James / 1 invite**。仅本人内部测试分配已完成，手表安装与功能验收仍待用户确认。
+- 合规信息保存后，构建由 `Missing Compliance` 变为 `Ready to Test`；加入 James 组后，刷新网页仍显示 **Testing / James / 1 invite**。邀请邮件已送达本人。
+- 用户随后确认已安装，Mac 验证 `Wi-Fi 已连接 · 准备好了` 与 `已配对 1 块`。首轮实测听写能触发但未转写、正文未滚动；后续 Mac 修复和复测证据见 `VALIDATION.md`。
 
 本机脱敏回执分别位于 `artifacts/testflight-0.3.0/upload-receipt.json` 与 `artifacts/testflight-0.3.0-build5/upload-receipt.json`。Xcode 从归档重新导出后上传，因此本地 IPA 的 SHA-256 只标识该本地文件，不冒充上传字节的哈希。
 
