@@ -15,6 +15,7 @@ final class WatchLink: ObservableObject {
     @Published var usesWiFi = false
     @Published var pairingCode: String?
     @Published var microphoneLevel = ""
+    @Published var stopping = false
     var canUseWiFi: Bool { WatchWiFiConnection.configuration != nil }
     private var bluetooth: WatchConnection?
     private var wifi: WatchWiFiConnection?
@@ -76,10 +77,12 @@ final class WatchLink: ObservableObject {
             connected = wifi.connected; status = wifi.status; phase = wifi.phase; macName = wifi.macName
             demo = false; nearby = []; pairingCode = wifi.pairingCode
             microphoneLevel = wifi.microphoneLevel
+            stopping = wifi.stopping
         } else if let bluetooth {
             connected = bluetooth.connected; status = bluetooth.status; phase = bluetooth.phase; macName = bluetooth.macName
             demo = bluetooth.demo; nearby = bluetooth.nearby; pairingCode = nil
             microphoneLevel = "Watch 麦克风 · 最长 2 分钟"
+            stopping = false
         }
     }
 }

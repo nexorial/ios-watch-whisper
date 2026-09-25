@@ -7,6 +7,7 @@ public struct TalkGesture {
     public private(set) var state: State = .idle
     private var beganAt: TimeInterval = 0
     private var stopOnRelease = false
+    private var recordingAcknowledged = false
     public init() {}
 
     public mutating func touchDown(at time: TimeInterval) -> RemoteAction? {
@@ -15,7 +16,7 @@ public struct TalkGesture {
             state = .idle; stopOnRelease = true
             return .finishDictation
         }
-        stopOnRelease = false; beganAt = time; state = .touching
+        stopOnRelease = false; recordingAcknowledged = false; beganAt = time; state = .touching
         return .beginDictation
     }
     public mutating func drag(right: Double) -> Bool {
@@ -35,7 +36,14 @@ public struct TalkGesture {
         state = .idle; stopOnRelease = false
         return cancel ? .cancelDictation : .finishDictation
     }
-    public mutating func reset() { state = .idle; stopOnRelease = false }
+    /// A delayed host reply must never erase a physical press or its release.
+    public mutating func hostChanged(_ phase: HostPhase) {
+        if phase == .listening, state != .idle { recordingAcknowledged = true }
+        guard state != .touching else { return }
+        if [.failed, .unavailable, .permissionRequired, .targetInactive].contains(phase)
+            || (phase == .ready && recordingAcknowledged) { reset() }
+    }
+    public mutating func reset() { state = .idle; stopOnRelease = false; recordingAcknowledged = false }
 }
 
 public struct CrownAccumulator {

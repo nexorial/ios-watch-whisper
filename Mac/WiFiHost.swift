@@ -129,6 +129,7 @@ final class WiFiHost: ObservableObject {
                     let gap = try gate.accept(frame)
                     if gap > 0 { try audio.enqueue([Int16](repeating: 0, count: gap)) }
                     try audio.enqueue(frame.samples)
+                    if frame.ended { ConnectionTrace.record("audio", "Watch end marker received samples=\(frame.offset)") }
                 }
                 if session.audioGate?.nextOffset == 0 {
                     ConnectionTrace.record("audio", "first Watch audio batch received")
@@ -155,7 +156,10 @@ final class WiFiHost: ObservableObject {
             } else if command.action == .finishDictation, owner == id {
                 do {
                     guard sessions[id]?.audioGate?.ended == true else { throw LocalTLSIdentity.Failure("手表音频尚未完整结束") }
-                    try await audio.drain(); phase = await controller.perform(.finishDictation)
+                    let started = ProcessInfo.processInfo.systemUptime
+                    try await audio.drain()
+                    ConnectionTrace.record("audio", String(format: "tail playback drained in %.0f ms", (ProcessInfo.processInfo.systemUptime - started) * 1000))
+                    phase = await controller.perform(.finishDictation)
                 } catch {
                     _ = await controller.perform(.cancelDictation)
                     controller.phase = .failed; controller.detail = error.localizedDescription; phase = .failed

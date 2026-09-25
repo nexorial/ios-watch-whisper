@@ -2,7 +2,7 @@
 
 用 Apple Watch 的表冠和屏幕按钮遥控 Mac 上的 Codex。原生 SwiftUI，独立 Watch App；无需 iPhone 伴侣 App。
 
-当前 0.3 本机开发版采用 **HTTPS Wi-Fi 直连**，蓝牙保留为备用。**真表 Wi-Fi 连接与表冠滚动 Codex 正文已通过实测**。听写能触发，但尚未生成文字；0.3.0 (6) 调整手表录音模式、增加精确音量诊断和停止确认，继续联调。进度见 [验证记录](docs/VALIDATION.md) 与 [TestFlight 记录](docs/TESTFLIGHT.md)，连接实现见 [Wi-Fi 方案与证据](docs/WIFI-TRANSPORT.md)。
+当前 0.3 本机开发版采用 **HTTPS Wi-Fi 直连**，蓝牙保留为备用。**真表 Wi-Fi 连接与表冠滚动 Codex 正文已通过实测**，Build 6 已收到明显音量并有口述文字试用反馈。用户仍报告松开后停止不及时；Build 7 修复触摸状态被异步回执清除的问题，并区分停止收音与处理尾音，继续真机验证。进度见 [验证记录](docs/VALIDATION.md) 与 [TestFlight 记录](docs/TESTFLIGHT.md)。
 
 ## 这版能做什么
 

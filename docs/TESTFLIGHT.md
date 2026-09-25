@@ -32,13 +32,21 @@
 - 23:09:29 上传成功，Upload ID `d29dd43e-f163-4525-9d86-7a2dbd638aba`；23:11:57 Apple 发出处理完成通知，网页显示 `Complete / Build 6 Internal / Ready to Test`。
 - 已保存中文测试说明、加入 James 内部组；构建详情显示 `Group (1) / James / Internal / 1`。返回构建列表后独立核验 **Build 6 Internal / Testing / James / 1 invite**。新版本实际安装和语音转写仍待用户确认。
 
+## Build 7 松开停止修复
+
+- 修复主机状态回执误清除物理触摸状态，防止松开被漏掉；立即停止本地 Watch 收音并显示尾音处理状态，拒绝延迟的 listening 回执把界面切回录音。
+- Mac 保留异步停止确认和有界取消保护，增加尾音排空耗时诊断。39 项测试、双端构建、Mac 安装启动和导出包校验通过。
+- 本地 IPA `artifacts/testflight-0.3.0-build7/WatchWhisper.ipa`，800485 字节；SHA-256 `5327f2985c88fa247e765617d0bb3ef575d5fcc6171319b42de2fb3e346cb7c1`。保持同一 Mac 证书、地址和配对。
+- 23:33:48 上传成功，Upload ID `4e26c0ef-71e5-4ef8-a18d-b821c320555e`。Apple 于 23:35:35 通知处理完成。
+- 已保存两句话验收说明并将 Build 7 加入 James 内部组；23:40:12 本人收到 Apple 的 `Watch Whisper 0.3.0 (7) ... is now available to test` 通知，正文包含已保存说明。新版已可内部测试；真表更新与松开后的结果待用户确认。
+
 ## 可用后安装与验收
 
-1. 在与 Ultra 4 配对的 iPhone 上打开 TestFlight，将 Watch Whisper 更新为 **0.3.0 (6)**。Apple 对 Watch-only App 的说明是直接在 TestFlight App 列表中点 Install；不需要自建 iPhone 配套 App。
+1. 在与 Ultra 4 配对的 iPhone 上打开 TestFlight，将 Watch Whisper 更新为 **0.3.0 (7)**。Apple 对 Watch-only App 的说明是直接在 TestFlight App 列表中点 Install；不需要自建 iPhone 配套 App。
 2. 保持 Mac 的 Watch Whisper 运行，核对 Wi-Fi 就绪地址。当前包默认 `192.168.31.99`，如地址变化，可在手表连接页修改；证书摘要仍固定为这台 Mac 的身份。
 3. Mac 点「允许 Wi-Fi 手表」，手表打开 App；核对两端六位码一致后，在 Mac 批准。
 4. 先验证真实认证连接与退出／重开后的重连，再由用户用表冠测试 Codex 正文滚动。
-5. 允许 Watch 麦克风，按住说话后松开；核对 Codex 自动定位输入框并完成转写，文字保留待确认。随后单独测试手动 Enter、右滑锁定和中断停止。
+5. 按住说第一句话后松开，随后说第二句话；确认手表立即显示收音停止，转写只包含第一句。尾音排空与 Codex 转写可能仍需短暂等待。文字保留待确认；随后单独测试手动 Enter、右滑锁定和中断停止。
 
 工具不能直接控制 Codex；真实 Codex 行为需要用户操作手表确认。现有单元测试、TLS 集成测试和 BlackHole 输出测试不替代上述真机验收。
 

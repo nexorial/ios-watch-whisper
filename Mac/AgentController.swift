@@ -154,10 +154,16 @@ final class AgentController: ObservableObject {
         try press(candidates[0])
         // Preserve the exact window through the asynchronous transcription period.
         pendingTranscription = true; phase = .transcribing; recordingConfirmed = false
+        // Tail playback may have consumed most of the heartbeat lease. Allow
+        // a fresh bounded stop-confirmation interval, without extending 2 min.
+        lease.renew(at: ProcessInfo.processInfo.systemUptime)
         detail = cancel ? "正在取消听写，不会发送消息。" : "正在结束 Codex 收音…"
         for _ in 0..<10 {
             try await Task.sleep(nanoseconds: 100_000_000)
-            if buttons(descendants(window), matching: AgentLabels.stop.union(AgentLabels.starting)).isEmpty {
+            let current = descendants(window)
+            let finishedLabels = AgentLabels.dictate.union(AgentLabels.transcribing).union(["Retry dictation", "重试听写"])
+            if buttons(current, matching: AgentLabels.stop.union(AgentLabels.starting)).isEmpty,
+               !buttons(current, matching: finishedLabels).isEmpty {
                 lease.finish(); stopControl = nil
                 detail = cancel ? "已取消听写，不会发送消息。" : "已停止收音，等待 Codex 转写；检查文字后在手表点 Enter。"
                 refresh(); return
@@ -165,8 +171,13 @@ final class AgentController: ObservableObject {
         }
         // Keep the existing watchdog for an unconfirmed finish; a failed cancel
         // itself must not loop forever. Never retry by pressing a start button.
-        if cancel { lease.finish() }
-        throw Failure(.failed, "已请求停止，但 Codex 仍显示录音。请在 Codex 手动停止。")
+        if cancel {
+            lease.finish()
+            throw Failure(.failed, "已请求取消，但 Codex 仍显示录音。请在 Codex 手动停止。")
+        }
+        // Codex drains its microphone asynchronously. Keep the bounded watchdog,
+        // but don't report a failed stop merely because its UI takes over 1 s.
+        detail = "Watch 收音已停止，等待 Codex 完成尾音处理与转写。"
     }
 
     private func refresh() {
@@ -185,7 +196,11 @@ final class AgentController: ObservableObject {
                 if phase != .failed { phase = pendingTranscription ? .transcribing : .listening }
                 return
             }
-            if !buttons(elements, matching: AgentLabels.transcribing.union(AgentLabels.starting)).isEmpty {
+            if !buttons(elements, matching: AgentLabels.transcribing).isEmpty {
+                if pendingTranscription { lease.finish(); stopControl = nil }
+                phase = .transcribing; return
+            }
+            if !buttons(elements, matching: AgentLabels.starting).isEmpty {
                 phase = .transcribing; return
             }
             if buttons(elements, matching: AgentLabels.dictate).count == 1 {

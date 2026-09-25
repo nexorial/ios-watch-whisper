@@ -16,6 +16,8 @@ Mac 面板保留最近一次录音的接收秒数和峰值，重新激活面板�
 
 Build 6 将 Watch 会话从 `measurement` 改为 `default`。Apple 说明 [measurement 会关闭部分动态处理](https://developer.apple.com/documentation/avfaudio/avaudiosession/mode-swift.struct/measurement)；这提供了调整录音模式的依据，尚未证明它是本次无转写的唯一原因。系统输入静音时只提示用户，不自动解除。手表显示是否有输入音量；Mac 记录精确峰值、RMS 与非零采样数，以区分完全静音和低音量。松开后还会确认 Codex 停止控件消失，并识别转写重试状态。
 
+Build 6 真表后来已收到峰值 10192 / RMS -31.5 dBFS 的 14.4 秒音频；用户反馈剩余问题是松开后停止不及时。Build 7 保留物理触摸到松开的状态，立即关闭 Watch 麦克风，并单独显示正在传完尾音；延迟的主机回执不会恢复收音显示。正常结束不再仅因 Codex 界面超过 1 秒未切换就报错，仍保留停止请求后的有限确认窗口与取消保护。验收应使用「按住说第一句，松开后说第二句」，确认第二句不进入转写，而非仅看 Codex 波纹消失时间。
+
 ## 安装包核验
 
 - 来源：`https://existential.audio/downloads/BlackHole2ch-0.7.1.pkg`

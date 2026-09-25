@@ -58,7 +58,7 @@ private struct RemoteView: View {
             VStack(spacing: 5) {
                 Image(systemName: talking ? (gesture.state == .locked ? "lock.fill" : "waveform") : "mic.fill")
                     .font(.system(size: 26, weight: .medium))
-                Text(talking ? (gesture.state == .locked ? "点击停止" : "松开结束 · 右滑锁定") : "按住说话")
+                Text(connection.stopping ? "收音已停止" : (talking ? (gesture.state == .locked ? "点击停止" : "松开结束 · 右滑锁定") : "按住说话"))
                     .font(.system(size: 12, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.7)
             }
             .frame(maxWidth: .infinity).frame(height: max(48, min(76, geometry.size.height - 106)))
@@ -101,7 +101,7 @@ private struct RemoteView: View {
                     .disabled(connection.phase == .transcribing)
                     .accessibilityHint(talking ? "先停止听写，再次点击发送" : "发送 Mac 输入框中的文字")
             }.buttonStyle(.plain).foregroundStyle(.mint)
-            Text(connection.demo ? "演示 · 不连接 Mac" : (talking ? connection.microphoneLevel : scrollHint))
+            Text(connection.demo ? "演示 · 不连接 Mac" : (connection.stopping ? "正在传完尾音，请稍候" : (talking ? connection.microphoneLevel : scrollHint)))
                 .font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.75)
         }.frame(width: geometry.size.width, height: geometry.size.height)
         }
@@ -112,15 +112,12 @@ private struct RemoteView: View {
             let pixels = accumulator.add(value - crown)
             if pixels != 0 { connection.send(.scroll, value: pixels); scrollHint = pixels > 0 ? "↓ 向下浏览" : "↑ 向上浏览" }
         }
-        .onChange(of: connection.phase) { value in
-            if value != .listening { gesture.reset(); fingerDown = false }
-        }
+        .onChange(of: connection.phase) { gesture.hostChanged($0) }
         .onAppear { crownFocused = true }
-        .onDisappear { stop() }
+        .onDisappear { stop(); fingerDown = false; gesture.reset() }
     }
     private func stop() {
         let action = gesture.stop()
-        fingerDown = false
         if action != nil || connection.phase == .listening { connection.send(.finishDictation) }
     }
 }
