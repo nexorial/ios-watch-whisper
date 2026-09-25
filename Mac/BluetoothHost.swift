@@ -9,6 +9,8 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     @Published var pendingWatch: String?
     @Published var pairingOpen = false
     @Published var pairedCount = 0
+    @Published var radioStatus = "正在启动蓝牙"
+    private var serviceReady = false
     private var manager: CBPeripheralManager!
     private var statusCharacteristic: CBMutableCharacteristic!
     let audio = WatchAudioOutput()
@@ -33,19 +35,46 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         else { manager = CBPeripheralManager(delegate: self, queue: .main) }
     }
     func allowPairing() {
+        guard manager?.state == .poweredOn, serviceReady else {
+            refreshRadio(); connection = "蓝牙服务尚未就绪，请查看蓝牙状态。"; return
+        }
+        if !manager.isAdvertising { advertise() }
+        refreshRadio()
+        ConnectionTrace.record("mac", "pairing window opened; advertising=\(manager.isAdvertising)")
         pairingUntil = Date().addingTimeInterval(60); pairingOpen = true
         connection = "60 秒内在手表选择这台 Mac"
         Task { [weak self] in
             try? await Task.sleep(nanoseconds: 60_000_000_000)
             guard let self, self.pairingUntil <= Date() else { return }
             self.pairingOpen = false; self.pendingWatch = nil; self.pendingCentral = nil
+            if self.sessions.isEmpty { self.connection = "配对窗口已结束，可重新允许手表。" }
+            self.refreshRadio()
         }
+    }
+    func refreshRadio() {
+        guard !demo else { radioStatus = "演示模式"; return }
+        switch manager?.state {
+        case .poweredOn: radioStatus = manager.isAdvertising ? "Mac 蓝牙广播中" : "Mac 蓝牙已开，广播未启动"
+        case .unauthorized: radioStatus = "Watch Whisper 尚未获蓝牙权限"
+        case .poweredOff: radioStatus = "Mac 蓝牙已关闭"
+        default: radioStatus = "蓝牙服务正在准备"
+        }
+    }
+    func restartAdvertising() {
+        guard !demo, manager?.state == .poweredOn, serviceReady else { refreshRadio(); return }
+        manager.stopAdvertising(); advertise()
+        ConnectionTrace.record("mac", "advertising restarted")
+    }
+    private func advertise() {
+        manager.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: Wire.service)],
+                                  CBAdvertisementDataLocalNameKey: "Whisper · \(Host.current().localizedName ?? "Mac")"])
     }
     func approve() {
         guard pairingOpen, Date() < pairingUntil, let id = pendingCentral else { return }
         do {
             try KeychainStore.save(KeychainStore.random(count: 32), account: "watch-\(id)")
             var ids = approvedIDs; if !ids.contains(id.uuidString) { ids.append(id.uuidString) }; approvedIDs = ids
+            ConnectionTrace.record("mac", "watch approved \(id.uuidString.prefix(8))")
             pendingWatch = nil; pendingCentral = nil; pairingOpen = false
             connection = "已允许这块手表，正在建立加密连接…"
         } catch { connection = "无法保存配对密钥：\(error.localizedDescription)" }
@@ -53,6 +82,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     func revokeAll() {
         Task {
             _ = await controller.perform(.cancelDictation)
+            audio.stop()
             do {
                 for id in approvedIDs { try KeychainStore.delete("watch-\(id)") }
                 approvedIDs = []; sessions = [:]; owner = nil; work = []; pendingNotifications = []
@@ -61,6 +91,8 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         }
     }
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
+        serviceReady = false; refreshRadio()
+        ConnectionTrace.record("mac", "peripheral manager state=\(peripheral.state.rawValue)")
         guard peripheral.state == .poweredOn else {
             connection = peripheral.state == .unauthorized ? "请在系统设置允许蓝牙" : "请打开 Mac 蓝牙"
             audio.stop(); sessions = [:]; work = []; owner = nil
@@ -78,16 +110,22 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         peripheral.removeAllServices(); peripheral.add(service)
     }
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
-        guard error == nil else { connection = "蓝牙服务失败：\(error!.localizedDescription)"; return }
-        peripheral.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: Wire.service)],
-                                     CBAdvertisementDataLocalNameKey: "Whisper · \(Host.current().localizedName ?? "Mac")"])
+        guard error == nil else {
+            connection = "蓝牙服务失败：\(error!.localizedDescription)"
+            ConnectionTrace.record("mac", connection); return
+        }
+        serviceReady = true; ConnectionTrace.record("mac", "GATT service registered")
+        advertise()
     }
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
+        refreshRadio()
         connection = error == nil ? "等待已配对手表 · 蓝牙直连" : "广播失败：\(error!.localizedDescription)"
+        ConnectionTrace.record("mac", "advertising=\(peripheral.isAdvertising) error=\(String(describing: error))")
     }
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
         let id = request.central.identifier
         let uuid = request.characteristic.uuid
+        ConnectionTrace.record("mac", "read \(uuid) from \(id.uuidString.prefix(8)) offset=\(request.offset) approved=\(approvedIDs.contains(id.uuidString))")
         do {
             let payload: Data
             if uuid == CBUUID(string: Wire.pairing) {
@@ -209,6 +247,9 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
             draining = false
         }
     }
+    func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
+        ConnectionTrace.record("mac", "watch subscribed \(central.identifier.uuidString.prefix(8))")
+    }
     func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
         while let item = pendingNotifications.first {
             guard peripheral.updateValue(item.0, for: statusCharacteristic, onSubscribedCentrals: [item.1]) else { return }
@@ -216,6 +257,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         }
     }
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
+        ConnectionTrace.record("mac", "watch unsubscribed \(central.identifier.uuidString.prefix(8))")
         sessions[central.identifier] = nil
         work.removeAll { $0.0.identifier == central.identifier }
         pendingNotifications.removeAll { $0.1.identifier == central.identifier }

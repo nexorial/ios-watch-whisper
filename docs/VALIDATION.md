@@ -2,6 +2,17 @@
 
 日期：2026-09-25。Xcode 27.0 / Swift 6.4 编译器（Swift 5 语言模式）；应用最低 watchOS 9 / macOS 13。
 
+## 当前状态：0.2.1 蓝牙连接修复
+
+- 用户反馈手表显示「暂时无法连接 Mac」，重新配对后仍失败。此文案对应 CBCentralManager 的 `didFailToConnect`，旧版丢弃了底层错误。
+- 修复缓存 Mac 失败后仍无限重取旧记录的问题，失败后改为扫描新广播；重新配对创建新的 central manager，并忽略旧 manager／旧 peripheral 回调。收到认证心跳回执后才显示已连接。
+- 增加 Mac 广播状态与「重新广播」按钮。蓝牙服务未准备好时，打开配对窗口不会再覆盖错误提示。Debug 连接日志有 100 条上限，不记录密钥、音频或任务文本。
+- **24 项单元测试通过**，包括新增的缓存失效回退、旧连接失败不能覆盖新连接、重新配对后忽略已取消尝试。Mac 和 watchOS 真机构建通过。
+- Mac 已签名更新并真实启动，UI 与调试日志都确认 `advertising=true`、GATT 服务注册成功。手表已安装、启动并独立查询到 **0.2.1 (3)**。
+- 从真表取回的首份日志只有 `central state=5`（poweredOn）和开始扫描；尚无新版的 Mac 发现／连接请求／认证成功记录。Mac 当前配对数量为 0，等待用户在两端完成此次配对测试；**不能宣称当前连接问题或语音链路已解决**。
+- 本轮开发安装一度出现 `RemotePairingError 1007 / L2CAP open channel failed`；暂停 Mac 接收端后安装成功。开发通道还出现间歇性的 1001 超时；并行运行限定时长的 `dns-sd -includep2p -includeAWDL -B _rp-tunnel._tcp local.` 时曾在 awdl0 发现服务并完成安装／读取日志。这些是成功操作时的条件，不据此认定唯一根因，也未删除系统蓝牙配对。
+- 本机证据：`artifacts/ble-recovery-*`；Mac 日志 `~/Library/Application Support/WatchWhisper/connection-trace.log`；Watch App 沙盒内同名路径。详细日志不提交到 Git。
+
 ## 已通过
 
 - `swift test --scratch-path /tmp/watch-whisper-tests`：**16 项测试，0 失败**。覆盖最小 BLE 包长度、全部指令／状态、字节篡改、不同密钥／连接挑战、方向反射、重复 Enter、手势锁定、表冠反向与超速、失联和最长录音租约。
@@ -13,7 +24,7 @@
 - 独立 Watch 配置经模拟器安装校验：`WKWatchOnly = true`，无 `WKCompanionAppBundleIdentifier`、无 `WKRunsIndependentlyOfCompanionApp`。
 - iOS root target 是 Apple 自动生成的 Watch-only 分发 stub，未编写 iPhone App。尝试经已连接手机传递包装时，iOS 正确拒绝 `WatchOnlyAppContainerNotInstallable`；**未安装 iPhone App**。手表必须直接作为开发目标。
 
-## 当前真实设备状态
+## 首次真机安装与连接（0.1）
 
 - **Ultra 4 的开发连接已恢复。** 2026-09-25 本次查询为 `connected`，`xctrace` 也将 watchOS 27.2 的目标表列为在线。
 - `scripts/install-watch.sh` 已完整执行成功：目标真机构建成功，`devicectl` 明确返回安装成功及启动成功。随后独立查询已安装应用，确认 `com.nexorial.watchwhisper.watchkitapp`，版本 **0.1.0 (1)**；进程查询也确认真表上的 App 进程正在运行。

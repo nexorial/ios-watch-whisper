@@ -56,6 +56,7 @@ private struct HostView: View {
             }
             VStack(alignment: .leading, spacing: 10) {
                 Label(host.connection, systemImage: "antenna.radiowaves.left.and.right").font(.headline)
+                Text(host.radioStatus).font(.caption).foregroundStyle(.secondary)
                 Text(controller.detail).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }.padding(16).frame(maxWidth: .infinity, alignment: .leading).background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 16))
             GroupBox("1 · 允许 Mac 接收操作") {
@@ -71,6 +72,7 @@ private struct HostView: View {
                         .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     HStack {
                         Button(host.pairingOpen ? "等待手表…" : "允许新手表 · 60 秒") { host.allowPairing() }.disabled(host.pairingOpen || demo)
+                        Button("重新广播") { host.restartAdvertising() }.disabled(demo || controller.isRecording)
                         Spacer()
                         Text("已配对 \(host.pairedCount) 块").foregroundStyle(.secondary)
                     }
@@ -104,7 +106,7 @@ private struct HostView: View {
             }
         }.padding(28).frame(width: 470).tint(.mint)
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-                controller.objectWillChange.send(); host.audio.refresh()
+                controller.objectWillChange.send(); host.audio.refresh(); host.refreshRadio()
             }
     }
 }

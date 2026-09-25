@@ -27,6 +27,8 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     private var pairAttempts = 0
     private var active = true
     private var lastError: String?
+    private var recovery = ConnectionRecovery()
+    private var transportReady = false
     private let microphone = WatchMicrophone()
     private var microphoneTask: Task<Void, Never>?
     private var audioStream: UInt32 = 0
@@ -62,7 +64,13 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     }
     func choose(_ mac: NearbyMac) {
         guard !demo else { return }
+        guard ![CBPeripheralState.connecting, .connected, .disconnecting].contains(mac.peripheral.state) else { return }
         retryTask?.cancel(); lastError = nil
+        if let previous = peripheral, previous.identifier != mac.id {
+            previous.delegate = nil; central.cancelPeripheralConnection(previous)
+        }
+        recovery.begin(mac.id)
+        ConnectionTrace.record("watch", "connect \(mac.id.uuidString.prefix(8)) state=\(mac.peripheral.state.rawValue)")
         central.stopScan(); peripheral = mac.peripheral; peripheral?.delegate = self
         macName = mac.name; status = "正在连接 \(mac.name)…"
         central.connect(mac.peripheral)
@@ -71,14 +79,18 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     func forget() {
         retryTask?.cancel(); timeout?.cancel()
         if let id = savedID { try? KeychainStore.delete("mac-\(id)") }
-        savedID = nil; demo = false; connected = false
-        if let peripheral { central?.cancelPeripheralConnection(peripheral) }
+        savedID = nil; demo = false; lastError = nil; recovery.forget()
+        // Discard the old manager too: its delayed cancellation callback must not
+        // tear down a new pairing attempt with the same peripheral identifier.
+        central?.delegate = nil; central?.stopScan()
+        if let peripheral { peripheral.delegate = nil; central?.cancelPeripheralConnection(peripheral) }
         peripheral = nil; nearby = []; reset()
-        if central == nil { central = CBCentralManager(delegate: self, queue: .main) }
-        else { discover() }
+        ConnectionTrace.record("watch", "forget; create fresh central manager")
+        central = CBCentralManager(delegate: self, queue: .main)
     }
     func setActive(_ active: Bool) {
         self.active = active
+        ConnectionTrace.record("watch", "scene active=\(active)")
         if active { if !connected && !demo { discover() } }
         else {
             // Stop intent is sent even if start acknowledgement is still pending.
@@ -167,7 +179,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         audioAccepted = false; recordingRequested = false; finishRequested = false
     }
     private func sendCommand(_ action: RemoteAction, value: Int16 = 0) {
-        guard connected else { return }
+        guard connected || (transportReady && action == .heartbeat) else { return }
         if demo {
             switch action {
             case .beginDictation: phase = .listening
@@ -195,7 +207,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         drain()
     }
     private func drain() {
-        guard connected, inflight == nil, !queue.isEmpty, let peripheral,
+        guard transportReady, inflight == nil, !queue.isEmpty, let peripheral,
               let characteristic = characteristics[CBUUID(string: Wire.command)], let key, let challenge else { return }
         guard sequence < UInt32.max else { fail("连接需要更新，请重连"); return }
         sequence += 1
@@ -215,13 +227,14 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     }
     private func reset() {
         clearAudio()
-        connected = false; key = nil; challenge = nil; sequence = 0
+        connected = false; transportReady = false; key = nil; challenge = nil; sequence = 0
         queue = []; inflight = nil; characteristics = [:]
         timeout?.cancel(); timeout = nil; phase = .ready; pairAttempts = 0
     }
     private func fail(_ message: String) {
         clearAudio()
-        lastError = message; status = message; connected = false
+        ConnectionTrace.record("watch", "failure: \(message)")
+        lastError = message; status = message; connected = false; transportReady = false
         queue = []; inflight = nil; timeout?.cancel()
         WKInterfaceDevice.current().play(.failure)
         if let peripheral { central.cancelPeripheralConnection(peripheral) }
@@ -229,10 +242,11 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     private func discover() {
         guard !demo, active, central?.state == .poweredOn else { return }
         guard peripheral?.state != .connecting, peripheral?.state != .connected else { return }
-        if let id = savedID, let known = central.retrievePeripherals(withIdentifiers: [id]).first {
+        if let id = recovery.takeCachedID(savedID), let known = central.retrievePeripherals(withIdentifiers: [id]).first {
             choose(NearbyMac(id: id, name: known.name ?? "已配对 Mac", peripheral: known))
         } else {
             status = lastError ?? "在 Mac 点「允许新手表」"
+            ConnectionTrace.record("watch", "scan for fresh Mac advertisement")
             central.scanForPeripherals(withServices: [CBUUID(string: Wire.service)], options: nil)
         }
     }
@@ -245,19 +259,26 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         }
     }
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        guard central === self.central else { return }
+        ConnectionTrace.record("watch", "central state=\(central.state.rawValue)")
         if central.state == .poweredOn { discover() }
         else {
-            reset()
+            reset(); peripheral = nil; recovery.forget()
             status = central.state == .unauthorized ? "请在手表设置允许蓝牙" : "请打开手表蓝牙"
         }
     }
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        guard central === self.central else { return }
+        ConnectionTrace.record("watch", "discovered \(peripheral.identifier.uuidString.prefix(8)) RSSI=\(RSSI)")
         let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? peripheral.name ?? "Whisper Mac"
         let mac = NearbyMac(id: peripheral.identifier, name: name, peripheral: peripheral)
-        if !nearby.contains(where: { $0.id == mac.id }) { nearby.append(mac) }
+        if let index = nearby.firstIndex(where: { $0.id == mac.id }) { nearby[index] = mac }
+        else { nearby.append(mac) }
         if savedID == mac.id { choose(mac) }
     }
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        guard central === self.central, recovery.accepts(peripheral.identifier) else { return }
+        ConnectionTrace.record("watch", "BLE connected; discover GATT service")
         timeout?.cancel(); reset(); self.peripheral = peripheral; peripheral.delegate = self
         status = "正在验证配对…"
         peripheral.discoverServices([CBUUID(string: Wire.service)])
@@ -269,12 +290,22 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         }
     }
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        reset(); self.peripheral = nil; status = "暂时无法连接 Mac"; scheduleReconnect()
+        guard central === self.central, recovery.failed(peripheral.identifier) else { return }
+        let reason = bluetoothError(error)
+        reset(); self.peripheral = nil; nearby.removeAll { $0.id == peripheral.identifier }
+        lastError = lastError ?? "连接失败（\(reason)），正在重新搜索 Mac。"; status = lastError!
+        ConnectionTrace.record("watch", "connect failed: \(reason)")
+        scheduleReconnect()
     }
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        guard !demo else { return }
-        reset(); self.peripheral = nil; status = lastError ?? "连接中断，正在重连…"
+        guard !demo, central === self.central, recovery.failed(peripheral.identifier) else { return }
+        ConnectionTrace.record("watch", "disconnected: \(bluetoothError(error))")
+        reset(); self.peripheral = nil; status = lastError ?? "连接中断，正在重新搜索 Mac…"
         scheduleReconnect()
+    }
+    private func bluetoothError(_ error: Error?) -> String {
+        guard let error = error as NSError? else { return "系统未提供错误码" }
+        return "\(error.domain) \(error.code)：\(error.localizedDescription)"
     }
     private func scheduleReconnect() {
         retryTask?.cancel()
@@ -286,19 +317,23 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         }
     }
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        guard peripheral === self.peripheral, recovery.accepts(peripheral.identifier) else { return }
         guard error == nil, let service = peripheral.services?.first(where: { $0.uuid == CBUUID(string: Wire.service) }) else {
-            fail("Mac 的服务不可用，请重启接收端"); return
+            fail("Mac 服务不可用（\(bluetoothError(error))）"); return
         }
+        ConnectionTrace.record("watch", "GATT service found; discovering characteristics")
         peripheral.discoverCharacteristics(nil, for: service)
     }
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard error == nil else { fail("无法读取 Mac 服务"); return }
+        guard peripheral === self.peripheral, recovery.accepts(peripheral.identifier) else { return }
+        guard error == nil else { fail("无法读取 Mac 服务（\(bluetoothError(error))）"); return }
         for characteristic in service.characteristics ?? [] { characteristics[characteristic.uuid] = characteristic }
         guard [Wire.pairing, Wire.challenge, Wire.command, Wire.status].allSatisfy({ characteristics[CBUUID(string: $0)] != nil }) else {
             fail("Mac 服务版本不兼容"); return
         }
         do { key = try KeychainStore.read("mac-\(peripheral.identifier)") }
         catch { fail("无法读取配对密钥，请解锁手表"); return }
+        ConnectionTrace.record("watch", "GATT ready; stored key=\(key != nil)")
         if key != nil { readChallenge() }
         else { readPairing() }
     }
@@ -311,7 +346,9 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         peripheral.readValue(for: characteristic)
     }
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard peripheral === self.peripheral, recovery.accepts(peripheral.identifier) else { return }
         if characteristic.uuid == CBUUID(string: Wire.pairing) {
+            if let error { ConnectionTrace.record("watch", "pair read: \(bluetoothError(error))") }
             guard error == nil, let value = characteristic.value, value.count == 32 else {
                 pairAttempts += 1
                 guard pairAttempts < 40 else { fail("配对未获允许，请在 Mac 重试"); return }
@@ -337,6 +374,10 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
                 let (newPhase, seq) = try Wire.decodeStatus(data, key: key, challenge: challenge)
                 guard let current = inflight, seq == current.sequence else { return }
                 timeout?.cancel(); inflight = nil; phase = newPhase
+                if !connected {
+                    connected = true; lastError = nil; recovery.authenticated()
+                    ConnectionTrace.record("watch", "authenticated Mac heartbeat received")
+                }
                 status = newPhase.caption
                 if current.action == .beginDictation {
                     if newPhase == .listening { audioAccepted = true; drainAudio() }
@@ -351,12 +392,19 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         }
     }
     func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-        guard error == nil, characteristic.isNotifying else { fail("无法接收 Mac 状态"); return }
-        timeout?.cancel(); connected = true; status = "已连接 \(macName)"; lastError = nil
-        send(.heartbeat)
+        guard peripheral === self.peripheral, recovery.accepts(peripheral.identifier) else { return }
+        guard error == nil, characteristic.isNotifying else { fail("无法接收 Mac 状态（\(bluetoothError(error))）"); return }
+        timeout?.cancel(); transportReady = true; status = "正在认证 Mac…"
+        ConnectionTrace.record("watch", "subscribed; send authenticated heartbeat")
+        sendCommand(.heartbeat)
+    }
+    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        guard recovery.accepts(peripheral.identifier), invalidatedServices.contains(where: { $0.uuid == CBUUID(string: Wire.service) }) else { return }
+        fail("Mac 服务已更新，正在重新连接…")
     }
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-        if error != nil { fail("Mac 拒绝了指令，请重新配对或查看 Mac") }
+        guard peripheral === self.peripheral, recovery.accepts(peripheral.identifier) else { return }
+        if error != nil { fail("Mac 拒绝了指令（\(bluetoothError(error))）") }
         // ATT success is not an execution acknowledgement; wait for the signed notification.
     }
 }
