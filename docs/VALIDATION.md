@@ -31,7 +31,7 @@
 - Mac Debug、watchOS arm64 / arm64_32 真机构建均通过。Mac 已签名安装并重启，真实 UI 显示新增的「Watch 麦克风」区域，已有配对保持为 1 块。
 - 真表已安装并启动 **0.2.0 (2)**，独立已安装应用查询确认版本。日志位于 `artifacts/watch-mic-*`。
 - Mac 当前没有 BlackHole。官方 **0.7.1** 安装包已下载；SHA-256 与 Homebrew Cask 一致，`pkgutil --check-signature` 确認 Apple 可信签名及 notarization。安装脚本写入 `/Library/Audio/Plug-Ins/HAL`，安装器声明需要重启。尚未安装驱动、改动音频输入或重启系统。
-- **完整语音链路、实际手表收音、虚拟音频播放、Codex 转写尚未通过真机验收。** 下一步需要用户确认系统驱动安装和音频输入设置，以及手表首次麦克风授权。
+- **完整语音链路、实际手表收音、虚拟音频播放、Codex 转写尚未通过真机验收。** 用户已明确同意安装 BlackHole 并切换默认音频输入。命令行安装被 macOS 阻止（`sudo: a password is required`），已打开签名安装包并停在许可确认页，等待用户完成许可及管理员验证；之后继续驱动核验、输入切换及手表麦克风授权。
 
 ## 已解决的开发连接阻塞与历史排查
 
