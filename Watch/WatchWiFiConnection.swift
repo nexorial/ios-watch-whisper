@@ -9,6 +9,7 @@ final class WatchWiFiConnection: ObservableObject {
     @Published var phase: HostPhase = .ready
     @Published var macName = "Mac"
     @Published var pairingCode: String?
+    @Published var microphoneLevel = ""
     private let client: PinnedHTTPSClient
     private let account: String
     private let id: UUID
@@ -122,11 +123,12 @@ final class WatchWiFiConnection: ObservableObject {
         if action == .beginDictation {
             guard !recordingRequested else { return }
             clearAudio(); recordingRequested = true; status = "正在开启 Watch 麦克风…"
+            microphoneLevel = "正在开启 Watch 麦克风…"
             let token = epoch
             micTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    try await self.microphone.start { [weak self] in self?.capture($0) }
+                    try await self.microphone.start(onFailure: { [weak self] in self?.fail($0) }) { [weak self] in self?.capture($0) }
                     try self.check(token)
                     guard self.recordingRequested else { self.microphone.stop(); return }
                     self.enqueue(.beginDictation)
@@ -191,6 +193,7 @@ final class WatchWiFiConnection: ObservableObject {
     }
     private func capture(_ chunk: [Int16]) {
         guard recordingRequested, !finishing else { return }
+        var level = AudioLevel(); level.append(chunk); microphoneLevel = level.caption
         guard Int(audioOffset) + samples.count + chunk.count <= 1_920_000,
               samples.count + chunk.count <= 32_000, audioPackets.count < 80 else { fail("音频积压或录音达到上限"); return }
         samples.append(contentsOf: chunk); packAudio(); drainAudio()

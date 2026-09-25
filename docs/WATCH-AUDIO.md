@@ -14,6 +14,8 @@
 
 Mac 面板保留最近一次录音的接收秒数和峰值，重新激活面板不会清除这些数字。仅是音频链路诊断，不保存音频或识别文字。首次 Wi-Fi 真机测试中听写已能触发但没有转写；后续修复输入框等待与启动音频队列上限，真实转写仍待复测。
 
+Build 6 将 Watch 会话从 `measurement` 改为 `default`。Apple 说明 [measurement 会关闭部分动态处理](https://developer.apple.com/documentation/avfaudio/avaudiosession/mode-swift.struct/measurement)；这提供了调整录音模式的依据，尚未证明它是本次无转写的唯一原因。系统输入静音时只提示用户，不自动解除。手表显示是否有输入音量；Mac 记录精确峰值、RMS 与非零采样数，以区分完全静音和低音量。松开后还会确认 Codex 停止控件消失，并识别转写重试状态。
+
 ## 安装包核验
 
 - 来源：`https://existential.audio/downloads/BlackHole2ch-0.7.1.pkg`
@@ -37,8 +39,7 @@ Mac 面板保留最近一次录音的接收秒数和峰值，重新激活面板�
 以下测试直接编译生产输出类，向 BlackHole 播放一秒 16 kHz 单声道测试音，并确认音频队列排空；不读取麦克风、不启动 Codex 听写：
 
 ```sh
-swiftc Mac/WatchAudioOutput.swift Tests/Hardware/VirtualMicrophoneSmoke.swift -o artifacts/virtual-microphone-smoke
-artifacts/virtual-microphone-smoke
+bash scripts/test-audio-output.sh
 ```
 
 实测返回 `PASS: 16000 mono samples routed to BlackHole and playback queue drained`。这只确认 Mac 定向输出及播放完成；真实 Watch 收音、BLE 音频流和 Codex 转写仍需设备验收。

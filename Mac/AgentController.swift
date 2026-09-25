@@ -100,9 +100,13 @@ final class AgentController: ObservableObject {
 
     private func begin() async throws {
         guard target == .codex else { throw Failure(.unavailable, "Claude 听写尚未适配。请使用 Codex，Claude 目前仅支持滚动和 Enter。") }
+        guard !pendingTranscription else { throw Failure(.transcribing, "正在确认上一次听写已停止，请稍后再开始。") }
         if recordingWindow != nil { refresh(); return }
         let (app, window) = try await activateTargetWindow()
         let elements = descendants(window)
+        guard buttons(elements, matching: ["Retry dictation", "重试听写"]).isEmpty else {
+            throw Failure(.failed, "Codex 上一次转写失败，请先在 Mac 重试听写或清除错误，再开始新录音。")
+        }
         let editor = try composer(elements, in: window)
         guard AXUIElementSetAttributeValue(editor, kAXFocusedAttribute as CFString, kCFBooleanTrue) == .success else {
             throw Failure(.unavailable, "无法聚焦 Codex 任务输入框。")
@@ -148,12 +152,21 @@ final class AgentController: ObservableObject {
             throw Failure(.failed, "未找到原录音的停止控件，请在 Codex 停止听写。")
         }
         try press(candidates[0])
-        lease.finish(); stopControl = nil
         // Preserve the exact window through the asynchronous transcription period.
-        pendingTranscription = true; phase = .transcribing
-        detail = cancel ? "已请求取消听写，不会发送消息。" : "已停止收音，等待 Codex 转写；检查文字后在手表点 Enter。"
-        try await Task.sleep(nanoseconds: 150_000_000)
-        refresh()
+        pendingTranscription = true; phase = .transcribing; recordingConfirmed = false
+        detail = cancel ? "正在取消听写，不会发送消息。" : "正在结束 Codex 收音…"
+        for _ in 0..<10 {
+            try await Task.sleep(nanoseconds: 100_000_000)
+            if buttons(descendants(window), matching: AgentLabels.stop.union(AgentLabels.starting)).isEmpty {
+                lease.finish(); stopControl = nil
+                detail = cancel ? "已取消听写，不会发送消息。" : "已停止收音，等待 Codex 转写；检查文字后在手表点 Enter。"
+                refresh(); return
+            }
+        }
+        // Keep the existing watchdog for an unconfirmed finish; a failed cancel
+        // itself must not loop forever. Never retry by pressing a start button.
+        if cancel { lease.finish() }
+        throw Failure(.failed, "已请求停止，但 Codex 仍显示录音。请在 Codex 手动停止。")
     }
 
     private func refresh() {
@@ -163,7 +176,15 @@ final class AgentController: ObservableObject {
                 phase = .failed; detail = "原任务已切换，请在 Mac 检查听写状态。"; return
             }
             let elements = descendants(window)
-            if !buttons(elements, matching: AgentLabels.stop).isEmpty { phase = .listening; return }
+            if !buttons(elements, matching: ["Retry dictation", "重试听写"]).isEmpty {
+                clearRecording(); phase = .failed
+                detail = "Codex 显示重试听写，本次未确认生成文字。请在 Mac 重试或清除错误。"
+                return
+            }
+            if !buttons(elements, matching: AgentLabels.stop).isEmpty {
+                if phase != .failed { phase = pendingTranscription ? .transcribing : .listening }
+                return
+            }
             if !buttons(elements, matching: AgentLabels.transcribing.union(AgentLabels.starting)).isEmpty {
                 phase = .transcribing; return
             }

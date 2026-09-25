@@ -1,18 +1,25 @@
 import AVFoundation
+import WhisperCore
 
 @MainActor
 final class WatchMicrophone {
     private var engine: AVAudioEngine?
     private var captureID: UUID?
-    func start(onSamples: @escaping ([Int16]) -> Void) async throws {
+    func start(onFailure: @escaping (String) -> Void = { _ in }, onSamples: @escaping ([Int16]) -> Void) async throws {
         let granted = await withCheckedContinuation { continuation in
             AVAudioSession.sharedInstance().requestRecordPermission { continuation.resume(returning: $0) }
         }
         try Task.checkCancellation()
         guard granted else { throw MicFailure("请在手表设置允许 Watch Whisper 使用麦克风。") }
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.record, mode: .measurement)
+        // Speech capture needs normal input processing, not measurement mode's
+        // reduced dynamics processing. Never override an OS microphone mute.
+        try session.setCategory(.record, mode: .default)
         try session.setActive(true)
+        if #available(watchOS 10.0, *), AVAudioApplication.shared.isInputMuted {
+            try? session.setActive(false)
+            throw MicFailure("手表系统已将麦克风静音，请先在手表解除静音。")
+        }
         // watchOS chooses the recording input; unlike iOS, setPreferredInput is
         // unavailable. Refuse an external route instead of silently using it.
         guard session.currentRoute.inputs.contains(where: { $0.portType == .builtInMic }) else {
@@ -21,26 +28,26 @@ final class WatchMicrophone {
         }
         let engine = AVAudioEngine(), input = engine.inputNode
         let source = input.outputFormat(forBus: 0)
-        guard source.sampleRate > 0,
-              let target = AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 16_000, channels: 1, interleaved: false),
-              let converter = AVAudioConverter(from: source, to: target) else { throw MicFailure("手表音频格式不可用。") }
+        let converter: MicrophoneSamples
+        do { converter = try MicrophoneSamples(source: source) }
+        catch { try? session.setActive(false); throw MicFailure("手表音频格式不可用。") }
         let id = UUID(); captureID = id
         input.installTap(onBus: 0, bufferSize: AVAudioFrameCount(source.sampleRate / 10), format: source) { [weak self] buffer, _ in
-            let capacity = AVAudioFrameCount(ceil(Double(buffer.frameLength) * 16_000 / source.sampleRate) + 32)
-            guard let converted = AVAudioPCMBuffer(pcmFormat: target, frameCapacity: capacity) else { return }
-            var consumed = false, error: NSError?
-            let result = converter.convert(to: converted, error: &error) { _, status in
-                if consumed { status.pointee = .noDataNow; return nil }
-                consumed = true; status.pointee = .haveData; return buffer
-            }
-            guard error == nil, result != .error, let channel = converted.int16ChannelData?[0], converted.frameLength > 0 else { return }
-            let samples = Array(UnsafeBufferPointer(start: channel, count: Int(converted.frameLength)))
-            Task { @MainActor in
-                guard self?.captureID == id else { return }
-                onSamples(samples)
+            do {
+                let samples = try converter.convert(buffer)
+                guard !samples.isEmpty else { return }
+                Task { @MainActor in
+                    guard self?.captureID == id else { return }
+                    onSamples(samples)
+                }
+            } catch {
+                Task { @MainActor in
+                    guard self?.captureID == id else { return }
+                    self?.stop(); onFailure("手表音频格式发生变化，请重新开始录音。")
+                }
             }
         }
-        do { try engine.start(); self.engine = engine }
+        do { engine.prepare(); try engine.start(); self.engine = engine }
         catch { input.removeTap(onBus: 0); stop(); throw error }
     }
     func stop() {

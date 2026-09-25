@@ -9,7 +9,7 @@ settings:
   base:
     SWIFT_VERSION: '5.0'
     MARKETING_VERSION: '0.3.0'
-    CURRENT_PROJECT_VERSION: 5
+    CURRENT_PROJECT_VERSION: 6
     DEVELOPMENT_TEAM: JNN5TPN23D
     CODE_SIGN_STYLE: Automatic
 packages:
@@ -57,6 +57,7 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSMicrophoneUsageDescription: 使用 Apple Watch 内置麦克风采集你主动说的话，通过配对的 Mac 交给 Codex 听写。
+        ITSAppUsesNonExemptEncryption: false
   WatchWhisperWatch:
     type: application
     productName: Watch Whisper Watch
@@ -86,6 +87,7 @@ targets:
           NSAllowsLocalNetworking: true
         WKApplication: true
         WKWatchOnly: true
+        ITSAppUsesNonExemptEncryption: false
         NSBluetoothAlwaysUsageDescription: 与你的 Mac 直接连接，用表冠滚动、传输你的语音和发送 Enter。
         NSMicrophoneUsageDescription: 使用 Apple Watch 内置麦克风采集你主动说的话，通过配对的 Mac 交给 Codex 听写。
 schemes:

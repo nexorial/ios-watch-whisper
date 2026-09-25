@@ -1,5 +1,6 @@
 import AVFoundation
 import CoreAudio
+import WhisperCore
 
 /// Sends only authenticated Watch samples to the loopback device. Never uses
 /// the Mac microphone, the default speaker, or a third party transcription API.
@@ -13,7 +14,7 @@ final class WatchAudioOutput: ObservableObject {
     private var device: AudioDeviceID = 0
     private var queuedSamples = 0
     private var generation = UUID()
-    private var peak = 0
+    private var level = AudioLevel()
     private let format = AVAudioFormat(standardFormatWithSampleRate: 16_000, channels: 1)!
     var installed: Bool { loopbackDevice() != nil }
 
@@ -49,7 +50,7 @@ final class WatchAudioOutput: ObservableObject {
         engine.attach(player)
         engine.connect(player, to: engine.mainMixerNode, format: format)
         try engine.start()
-        self.engine = engine; self.player = player; device = id; receivedSamples = 0; peak = 0
+        self.engine = engine; self.player = player; device = id; receivedSamples = 0; level = AudioLevel()
         status = "等待 Watch 麦克风音频"
         captureSummary = "本次已接收 0.0 秒"
     }
@@ -73,7 +74,7 @@ final class WatchAudioOutput: ObservableObject {
         for (i, sample) in samples.enumerated() { channel[i] = Float(sample) / 32768 }
         let token = generation, count = samples.count
         queuedSamples += count; receivedSamples += count
-        for sample in samples { peak = max(peak, abs(Int(sample))) }
+        level.append(samples)
         player.scheduleBuffer(buffer, completionCallbackType: .dataPlayedBack) { [weak self] _ in
             Task { @MainActor in
                 guard let self, self.generation == token else { return }
@@ -83,7 +84,7 @@ final class WatchAudioOutput: ObservableObject {
         // Start with a short jitter buffer; keep receiving independent BLE blocks.
         if !player.isPlaying && queuedSamples >= 2400 { player.play() }
         status = String(format: "Watch 麦克风 · 已接收 %.1f 秒", Double(receivedSamples) / 16000)
-        captureSummary = String(format: "本次已接收 %.1f 秒 · 峰值 %.0f%%", Double(receivedSamples) / 16000, Double(peak) / 32768 * 100)
+        captureSummary = "本次已接收 " + level.diagnostic
     }
     func drain() async throws {
         if queuedSamples > 0 { player?.play() }

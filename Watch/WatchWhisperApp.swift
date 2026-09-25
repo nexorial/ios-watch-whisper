@@ -101,7 +101,7 @@ private struct RemoteView: View {
                     .disabled(connection.phase == .transcribing)
                     .accessibilityHint(talking ? "先停止听写，再次点击发送" : "发送 Mac 输入框中的文字")
             }.buttonStyle(.plain).foregroundStyle(.mint)
-            Text(connection.demo ? "演示 · 不连接 Mac" : (talking ? "Watch 麦克风 · 最长 2 分钟" : scrollHint))
+            Text(connection.demo ? "演示 · 不连接 Mac" : (talking ? connection.microphoneLevel : scrollHint))
                 .font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.75)
         }.frame(width: geometry.size.width, height: geometry.size.height)
         }
