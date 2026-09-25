@@ -23,7 +23,10 @@
 - iPhone 已通过 USB 连接，Developer Mode 开启。Mac 的 Watch Whisper 辅助功能开关和 Xcode 本地网络开关均为 on。
 - Mac Wi-Fi 的 IPv6 设置为 Automatic，存在 link-local IPv6 地址。用户明确同意后做了 **21 秒**的 Shadowrocket 对照测试：测试期间与恢复前均确认为 Disconnected，查询手表仍返回同一 tunnel timeout；随后恢复并确认 Connected。该测试没有改善连接，不据此认定 VPN 是根因。
 - 已正常终止并重新启动当前用户的 CoreDeviceService，再查询手表应用，仍返回 CoreDeviceError 4000 / RemotePairingError 1001。
-- 下一项有针对性的人工检查：临时关闭 iPhone 的蓝牙，让手表尝试独立连接 Mac 所在 Wi-Fi，再重试。已请用户操作，结果尚未确认。依据 Apple 对手表蓝牙／Wi-Fi 自动选择行为的说明：https://support.apple.com/en-gb/109319 。
+- 用户确认临时关闭 iPhone 蓝牙、让手表连接同一 Wi-Fi 后，已再次查询手表应用，仍返回同一调试通道超时；已请用户恢复 iPhone 蓝牙。Apple 网络选择说明：https://support.apple.com/en-gb/109319 。
+- Mac 可以连接已发现的 iPhone 局域网开发服务 TCP 端口（79 ms），因此并非所有局域网设备通信都失败；这不证明手表路径可达。
+- 当前 watchOS Developer Disk Image 的主机检查结果为 `contentIsCompatible: true`、`isUsable: true`；尚未成功挂载到这块手表，不能把该结果当成真机准备完成或绝对排除版本问题。
+- 已请用户正常重启 Ultra 4、解锁并连接同一 Wi-Fi，保留已有配对，再进行一次连接测试；等待该设备状态变化。
 - Device Hub 的电脑操作接口仍会超时；用户提供的配对弹窗截图可用于确认其当时状态。
 
 ## 尚未验证，不能宣称完成
