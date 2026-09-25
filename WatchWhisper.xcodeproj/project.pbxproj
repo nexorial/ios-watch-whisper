@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		003164C1F5AF1DA033C3A635 /* BluetoothHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2D373DE9F6EF75A1F0FE86D /* BluetoothHost.swift */; };
 		04E107EC87D1C4591F788634 /* WatchConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66045390888B8D237B61C4A3 /* WatchConnection.swift */; };
+		3471D6D48F1C90A1A91B0C0D /* Watch Whisper Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 61542ED69989041D5450B536 /* Watch Whisper Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		640C98E6BE7518FCD41D50C0 /* AgentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F88732BF367A20E2254DF0CB /* AgentController.swift */; };
 		74C902B726311520622E9FFD /* WatchWhisperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BEC50347DE86A98024179B9 /* WatchWhisperApp.swift */; };
 		9ED27EA051C2E78811EC33F0 /* WhisperCore in Frameworks */ = {isa = PBXBuildFile; productRef = A9D66D1ED769965B001DB7CA /* WhisperCore */; };
-		BEA51764BDB26D9454712C97 /* WatchWhisperWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = AF6F12C8086D0C5C8B1EB192 /* WatchWhisperWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E847B1DD6792C271CAA6D5E2 /* WatchWhisperMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9284A1A1858BCBCE6C67442 /* WatchWhisperMacApp.swift */; };
 		EECF08CC98A084339E610303 /* WhisperCore in Frameworks */ = {isa = PBXBuildFile; productRef = F2CB382A3466BB02A82B80F0 /* WhisperCore */; };
 /* End PBXBuildFile section */
@@ -34,7 +34,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				BEA51764BDB26D9454712C97 /* WatchWhisperWatch.app in Embed Watch Content */,
+				3471D6D48F1C90A1A91B0C0D /* Watch Whisper Watch.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -43,11 +43,11 @@
 
 /* Begin PBXFileReference section */
 		2BEC50347DE86A98024179B9 /* WatchWhisperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWhisperApp.swift; sourceTree = "<group>"; };
-		56A700296FD588F6A35C6330 /* WatchWhisperMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchWhisperMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2C8DFE93DD6860DBE1B46034 /* Watch Whisper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Whisper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		61542ED69989041D5450B536 /* Watch Whisper Watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Watch Whisper Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		66045390888B8D237B61C4A3 /* WatchConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnection.swift; sourceTree = "<group>"; };
 		6B0D3796E82F22A60EF1D4D8 /* WatchWhisper.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WatchWhisper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2D373DE9F6EF75A1F0FE86D /* BluetoothHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothHost.swift; sourceTree = "<group>"; };
-		AF6F12C8086D0C5C8B1EB192 /* WatchWhisperWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WatchWhisperWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9284A1A1858BCBCE6C67442 /* WatchWhisperMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWhisperMacApp.swift; sourceTree = "<group>"; };
 		C7B1F17E7096A11D1B5C59EB /* ios-watch-whisper */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "ios-watch-whisper"; path = .; sourceTree = SOURCE_ROOT; };
 		F88732BF367A20E2254DF0CB /* AgentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentController.swift; sourceTree = "<group>"; };
@@ -86,9 +86,9 @@
 		322470B86D81212294F2787D /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				61542ED69989041D5450B536 /* Watch Whisper Watch.app */,
+				2C8DFE93DD6860DBE1B46034 /* Watch Whisper.app */,
 				6B0D3796E82F22A60EF1D4D8 /* WatchWhisper.app */,
-				56A700296FD588F6A35C6330 /* WatchWhisperMac.app */,
-				AF6F12C8086D0C5C8B1EB192 /* WatchWhisperWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -139,7 +139,7 @@
 				F2CB382A3466BB02A82B80F0 /* WhisperCore */,
 			);
 			productName = WatchWhisperWatch;
-			productReference = AF6F12C8086D0C5C8B1EB192 /* WatchWhisperWatch.app */;
+			productReference = 61542ED69989041D5450B536 /* Watch Whisper Watch.app */;
 			productType = "com.apple.product-type.application";
 		};
 		AD8D2D8A40047161F934AA1B /* WatchWhisperMac */ = {
@@ -158,7 +158,7 @@
 				A9D66D1ED769965B001DB7CA /* WhisperCore */,
 			);
 			productName = WatchWhisperMac;
-			productReference = 56A700296FD588F6A35C6330 /* WatchWhisperMac.app */;
+			productReference = 2C8DFE93DD6860DBE1B46034 /* Watch Whisper.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D4D46B3A591B5345765E2DD1 /* WatchWhisper */ = {
@@ -339,7 +339,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "Config/Watch-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.watchkitapp;
-				PRODUCT_NAME = "Watch Whisper Watch";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -352,7 +351,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "Config/Watch-Info.plist";
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.watchkitapp;
-				PRODUCT_NAME = "Watch Whisper Watch";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -372,7 +370,6 @@
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.mac;
-				PRODUCT_NAME = "Watch Whisper";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -390,7 +387,6 @@
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.mac;
-				PRODUCT_NAME = "Watch Whisper";
 				SDKROOT = macosx;
 			};
 			name = Debug;

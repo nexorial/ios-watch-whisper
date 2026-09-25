@@ -18,6 +18,7 @@ packages:
 targets:
   WatchWhisperMac:
     type: application
+    productName: Watch Whisper
     platform: macOS
     sources: [Mac]
     dependencies:
@@ -25,7 +26,6 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nexorial.watchwhisper.mac
-        PRODUCT_NAME: Watch Whisper
         ENABLE_APP_SANDBOX: NO
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
@@ -52,6 +52,7 @@ targets:
         CFBundleDisplayName: Watch Whisper
   WatchWhisperWatch:
     type: application
+    productName: Watch Whisper Watch
     platform: watchOS
     sources: [Watch]
     dependencies:
@@ -59,7 +60,6 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nexorial.watchwhisper.watchkitapp
-        PRODUCT_NAME: Watch Whisper Watch
         TARGETED_DEVICE_FAMILY: '4'
         SDKROOT: watchos
         SKIP_INSTALL: YES
