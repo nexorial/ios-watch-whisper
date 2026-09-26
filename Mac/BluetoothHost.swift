@@ -216,6 +216,9 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
                     if command.action == .beginDictation {
                         do {
                             try audio.start()
+                            controller.drainBeforePreserving = { [weak audio] in
+                                try? await audio?.drain(); audio?.stop()
+                            }
                             phase = await controller.perform(command.action, value: command.value)
                             if phase == .listening {
                                 owner = central.identifier
@@ -225,15 +228,15 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
                             audio.stop(); controller.phase = .failed; controller.detail = error.localizedDescription
                             phase = .failed
                         }
-                    } else if command.action == .finishDictation, owner == central.identifier {
+                    } else if [.finishDictation, .finishReceivedAudio].contains(command.action), owner == central.identifier {
                         do {
-                            guard sessions[central.identifier]?.audioGate?.ended == true else {
-                                throw WatchAudioOutput.AudioFailure("手表音频未完整结束，已取消听写，请重试。")
+                            guard command.action == .finishReceivedAudio || sessions[central.identifier]?.audioGate?.ended == true else {
+                                throw WatchAudioOutput.AudioFailure("手表音频未完整结束，已保留收到的部分。")
                             }
                             try await audio.drain()
                             phase = await controller.perform(.finishDictation)
                         } catch {
-                            _ = await controller.perform(.cancelDictation)
+                            _ = await controller.perform(.finishReceivedAudio)
                             controller.phase = .failed; controller.detail = error.localizedDescription; phase = .failed
                         }
                         audio.stop(); sessions[central.identifier]?.audioGate = nil

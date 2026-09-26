@@ -25,6 +25,17 @@ final class AgentController: ObservableObject {
     private var leaseTask: Task<Void, Never>?
     private let demo: Bool
     private var accessibilityPreparedPID: pid_t?
+    var drainBeforePreserving: (() async -> Void)?
+    private var stopDeadline: TimeInterval?
+    private struct ScrollAnchor {
+        let pid: pid_t; let window: AXUIElement; let frame: CGRect; let title: String
+        let editor: AXUIElement?; let editorFrame: CGRect?; let point: CGPoint; let created: TimeInterval
+    }
+    private var scrollAnchor: ScrollAnchor?
+    private var scrollMotion = ScrollMotion()
+    private var scrollTask: Task<Void, Never>?
+    private var scrollEpoch = UUID()
+    private var scrollReportedAt: TimeInterval = 0
 
     init(demo: Bool = false) {
         self.demo = demo
@@ -33,10 +44,14 @@ final class AgentController: ObservableObject {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 500_000_000)
                 guard let self else { return }
+                if let deadline = self.stopDeadline, ProcessInfo.processInfo.systemUptime >= deadline {
+                    self.stopDeadline = nil; self.lease.finish()
+                    self.phase = .failed; self.detail = "已停止 Watch 收音；Codex 尚未确认结束，请在 Mac 完成转写。"
+                }
                 if self.lease.expired(at: ProcessInfo.processInfo.systemUptime) {
-                    // Never turn a recording on while recovering from disconnect.
-                    _ = await self.perform(.cancelDictation)
-                    self.detail = "手表连接中断或录音已达 2 分钟，已请求取消听写。"
+                    self.lease.finish()
+                    _ = await self.perform(.finishReceivedAudio)
+                    self.detail = "手表连接中断或录音已达 2 分钟，已请求保留收到的内容进行转写。"
                 }
             }
         }
@@ -44,6 +59,7 @@ final class AgentController: ObservableObject {
 
     var accessibilityGranted: Bool { demo || AXIsProcessTrusted() }
     var isRecording: Bool { recordingWindow != nil || (demo && phase == .listening) }
+    var isFinishing: Bool { pendingTranscription }
 
     func requestAccessibility() {
         // Only a user click calls this. The OS permission remains a user decision.
@@ -54,7 +70,7 @@ final class AgentController: ObservableObject {
 
     func perform(_ action: RemoteAction, value: Int16 = 0) async -> HostPhase {
         if busy {
-            if action == .finishDictation || action == .cancelDictation { pendingStop = action }
+            if [.finishDictation, .cancelDictation, .finishReceivedAudio].contains(action) { pendingStop = action }
             return phase
         }
         if action == .heartbeat {
@@ -65,13 +81,14 @@ final class AgentController: ObservableObject {
         if demo {
             switch action {
             case .beginDictation: phase = .listening; lease.begin(at: ProcessInfo.processInfo.systemUptime)
-            case .finishDictation, .cancelDictation: phase = .ready; lease.finish()
+            case .finishDictation, .cancelDictation, .finishReceivedAudio: phase = .ready; lease.finish()
             default: break
             }
             return phase
         }
         busy = true
         defer { busy = false }
+        if action != .scroll { stopScrolling() }
         if recordingConfirmed { lease.renew(at: ProcessInfo.processInfo.systemUptime) }
         do {
             guard accessibilityGranted else { throw Failure(.permissionRequired, "在系统设置 → 隐私与安全性 → 辅助功能中允许 Watch Whisper。") }
@@ -79,6 +96,7 @@ final class AgentController: ObservableObject {
             case .heartbeat: break
             case .beginDictation: try await begin()
             case .finishDictation: try await finish(cancel: false)
+            case .finishReceivedAudio: await drainBeforePreserving?(); try await finish(cancel: false)
             case .cancelDictation: try await finish(cancel: true)
             case .enter: try enter()
             case .scroll: try scroll(value)
@@ -90,11 +108,14 @@ final class AgentController: ObservableObject {
         }
         if let stop = pendingStop {
             pendingStop = nil
+            if stop == .finishReceivedAudio { await drainBeforePreserving?() }
             do { try await finish(cancel: stop == .cancelDictation) }
             catch { phase = .failed; detail = "连接中断后无法确认停止，请在 Codex 检查录音。" }
         }
-        lastOperation = "\(action) · \(phase.caption) · \(detail)"
-        ConnectionTrace.record("control", "\(action) phase=\(phase) detail=\(detail)")
+        if action != .scroll {
+            lastOperation = "\(action) · \(phase.caption) · \(detail)"
+            ConnectionTrace.record("control", "\(action) phase=\(phase) detail=\(detail)")
+        }
         return phase
     }
 
@@ -135,6 +156,7 @@ final class AgentController: ObservableObject {
 
     private func finish(cancel: Bool) async throws {
         guard let window = recordingWindow else { return }
+        if pendingTranscription && !cancel { refresh(); return }
         guard string(window, kAXTitleAttribute) == recordingTitle else {
             lease.finish()
             throw Failure(.failed, "任务窗口已切换，无法确认原录音。请在 Codex 手动停止。")
@@ -154,9 +176,7 @@ final class AgentController: ObservableObject {
         try press(candidates[0])
         // Preserve the exact window through the asynchronous transcription period.
         pendingTranscription = true; phase = .transcribing; recordingConfirmed = false
-        // Tail playback may have consumed most of the heartbeat lease. Allow
-        // a fresh bounded stop-confirmation interval, without extending 2 min.
-        lease.renew(at: ProcessInfo.processInfo.systemUptime)
+        lease.finish(); stopDeadline = ProcessInfo.processInfo.systemUptime + 5
         detail = cancel ? "正在取消听写，不会发送消息。" : "正在结束 Codex 收音…"
         for _ in 0..<10 {
             try await Task.sleep(nanoseconds: 100_000_000)
@@ -164,7 +184,7 @@ final class AgentController: ObservableObject {
             let finishedLabels = AgentLabels.dictate.union(AgentLabels.transcribing).union(["Retry dictation", "重试听写"])
             if buttons(current, matching: AgentLabels.stop.union(AgentLabels.starting)).isEmpty,
                !buttons(current, matching: finishedLabels).isEmpty {
-                lease.finish(); stopControl = nil
+                lease.finish(); stopControl = nil; stopDeadline = nil
                 detail = cancel ? "已取消听写，不会发送消息。" : "已停止收音，等待 Codex 转写；检查文字后在手表点 Enter。"
                 refresh(); return
             }
@@ -172,7 +192,7 @@ final class AgentController: ObservableObject {
         // Keep the existing watchdog for an unconfirmed finish; a failed cancel
         // itself must not loop forever. Never retry by pressing a start button.
         if cancel {
-            lease.finish()
+            lease.finish(); stopDeadline = nil
             throw Failure(.failed, "已请求取消，但 Codex 仍显示录音。请在 Codex 手动停止。")
         }
         // Codex drains its microphone asynchronously. Keep the bounded watchdog,
@@ -197,7 +217,7 @@ final class AgentController: ObservableObject {
                 return
             }
             if !buttons(elements, matching: AgentLabels.transcribing).isEmpty {
-                if pendingTranscription { lease.finish(); stopControl = nil }
+                if pendingTranscription { lease.finish(); stopControl = nil; stopDeadline = nil }
                 phase = .transcribing; return
             }
             if !buttons(elements, matching: AgentLabels.starting).isEmpty {
@@ -240,48 +260,79 @@ final class AgentController: ObservableObject {
     }
 
     private func scroll(_ pixels: Int16) throws {
+        let started = ProcessInfo.processInfo.systemUptime
         let (app, window) = try frontWindow()
-        guard let windowRect = rect(window) else { throw Failure(.unavailable, "无法定位任务窗口。") }
-        let elements = descendants(window)
-        // Scrolling belongs to the conversation, and never requires an editor.
-        let editorRect = (try? composer(elements, in: window)).flatMap { rect($0) }
-        let candidates = elements.filter { string($0, kAXRoleAttribute) == kAXScrollAreaRole }
-            .compactMap { element -> CGRect? in
-                guard let r = rect(element), r.width > 240, r.height > 120,
-                      r.intersects(windowRect) else { return nil }
-                let visible = r.intersection(windowRect)
-                if let editorRect {
-                    guard visible.contains(CGPoint(x: editorRect.midX, y: visible.midY)),
-                          visible.minY < editorRect.minY - 60 else { return nil }
+        guard let frame = rect(window) else { throw Failure(.unavailable, "无法定位任务窗口。") }
+        let title = string(window, kAXTitleAttribute)
+        let cached = scrollAnchor.map { anchor in
+            anchor.pid == app.processIdentifier && CFEqual(anchor.window, window)
+                && anchor.frame == frame && anchor.title == title
+                && started - anchor.created < (anchor.editor == nil ? 0.25 : 3)
+                && (anchor.editor == nil || anchor.editor.flatMap { rect($0) } == anchor.editorFrame)
+        } ?? false
+        if !cached {
+            let elements = descendants(window)
+            let editor = try? composer(elements, in: window)
+            let editorFrame = editor.flatMap { rect($0) }
+            let areas = elements.filter { string($0, kAXRoleAttribute) == kAXScrollAreaRole }.compactMap { element -> CGRect? in
+                guard let r = rect(element), r.width > 240, r.height > 120, r.intersects(frame) else { return nil }
+                let visible = r.intersection(frame)
+                if let editorFrame {
+                    guard visible.contains(CGPoint(x: editorFrame.midX, y: visible.midY)), visible.minY < editorFrame.minY - 60 else { return nil }
                 }
                 return visible
             }
-        let area = candidates.max { $0.width * $0.height < $1.width * $1.height }
-        let point = CGPoint(x: editorRect?.midX ?? area?.midX ?? windowRect.midX,
-                            y: area.map { min($0.midY, editorRect.map { $0.minY - 40 } ?? $0.midY) }
-                                ?? windowRect.minY + windowRect.height * 0.4)
-        guard let event = CGEvent(scrollWheelEvent2Source: CGEventSource(stateID: .hidSystemState), units: .pixel, wheelCount: 1,
-                                  wheel1: -Int32(pixels), wheel2: 0, wheel3: 0) else {
-            throw Failure(.failed, "无法创建滚动事件。")
+            let area = areas.max { $0.width * $0.height < $1.width * $1.height }
+            let point = CGPoint(x: editorFrame?.midX ?? area?.midX ?? frame.midX,
+                                y: area.map { min($0.midY, editorFrame.map { $0.minY - 40 } ?? $0.midY) } ?? frame.minY + frame.height * 0.4)
+            scrollAnchor = ScrollAnchor(pid: app.processIdentifier, window: window, frame: frame, title: title,
+                                        editor: editor, editorFrame: editorFrame, point: point, created: started)
+            ConnectionTrace.record("scroll", String(format: "target resolved in %.1f ms", (ProcessInfo.processInfo.systemUptime - started) * 1000))
         }
-        guard NSWorkspace.shared.frontmostApplication?.processIdentifier == app.processIdentifier else {
-            throw Failure(.targetInactive, "Codex 已离开前台，未执行滚动。")
+        scrollMotion.add(Int(pixels))
+        if scrollTask == nil {
+            let token = UUID(); scrollEpoch = token
+            scrollTask = Task { [weak self] in
+                guard let self else { return }
+                defer { if self.scrollEpoch == token { self.scrollTask = nil } }
+                var frames = 0, totalMS = 0.0
+                while !Task.isCancelled, self.scrollEpoch == token, self.scrollMotion.pending != 0 {
+                    let tick = ProcessInfo.processInfo.systemUptime
+                    do { try self.emitScrollFrame(self.scrollMotion.next()); frames += 1 }
+                    catch {
+                        self.scrollMotion.reset(); self.scrollAnchor = nil
+                        self.phase = .targetInactive; self.detail = "滚动目标已变化，已停止滚动。"; break
+                    }
+                    totalMS += (ProcessInfo.processInfo.systemUptime - tick) * 1000
+                    try? await Task.sleep(nanoseconds: 16_666_667)
+                }
+                if frames > 0, ProcessInfo.processInfo.systemUptime - self.scrollReportedAt >= 1 {
+                    self.scrollReportedAt = ProcessInfo.processInfo.systemUptime
+                    ConnectionTrace.record("scroll", String(format: "burst frames=%d mean-frame-work=%.2f ms", frames, totalMS / Double(frames)))
+                }
+            }
         }
-        // Send through the normal window-server route. Posting a wheel event to
-        // the process alone does not establish which web view is under the wheel.
-        // Check the actual hit belongs to our foreground target before dispatch.
-        var hit: AXUIElement?
-        guard AXUIElementCopyElementAtPosition(AXUIElementCreateSystemWide(), Float(point.x), Float(point.y), &hit) == .success,
-              let hit else { throw Failure(.unavailable, "无法确认正文滚动位置。") }
-        var hitPID: pid_t = 0
-        guard AXUIElementGetPid(hit, &hitPID) == .success, hitPID == app.processIdentifier,
-              NSWorkspace.shared.frontmostApplication?.processIdentifier == app.processIdentifier else {
-            throw Failure(.targetInactive, "正文位置被其他窗口遮挡，未发送滚动。")
-        }
-        event.location = point
-        event.post(tap: .cghidEventTap)
         if !isRecording { phase = .ready }
-        detail = pixels >= 0 ? "向下浏览 Codex 对话正文" : "向上浏览 Codex 对话正文"
+        let message = pixels >= 0 ? "向下浏览 Codex 对话正文" : "向上浏览 Codex 对话正文"
+        if detail != message { detail = message }
+    }
+    func stopScrolling() {
+        scrollEpoch = UUID()
+        scrollTask?.cancel(); scrollTask = nil; scrollMotion.reset(); scrollAnchor = nil
+    }
+    private func emitScrollFrame(_ pixels: Int16) throws {
+        guard let anchor = scrollAnchor, NSWorkspace.shared.frontmostApplication?.processIdentifier == anchor.pid,
+              rect(anchor.window) == anchor.frame,
+              anchor.editor == nil || anchor.editor.flatMap({ rect($0) }) == anchor.editorFrame else { throw Failure(.targetInactive, "目标窗口已变化。") }
+        var focused: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(AXUIElementCreateApplication(anchor.pid), kAXFocusedWindowAttribute as CFString, &focused) == .success,
+              let focused, CFEqual(focused, anchor.window) else { throw Failure(.targetInactive, "任务窗口已切换。") }
+        var hit: AXUIElement?, hitPID: pid_t = 0
+        guard AXUIElementCopyElementAtPosition(AXUIElementCreateSystemWide(), Float(anchor.point.x), Float(anchor.point.y), &hit) == .success,
+              let hit, AXUIElementGetPid(hit, &hitPID) == .success, hitPID == anchor.pid else { throw Failure(.targetInactive, "正文位置已被遮挡。") }
+        guard let event = CGEvent(scrollWheelEvent2Source: CGEventSource(stateID: .hidSystemState), units: .pixel,
+                                  wheelCount: 1, wheel1: -Int32(pixels), wheel2: 0, wheel3: 0) else { throw Failure(.failed, "无法创建滚动事件。") }
+        event.location = anchor.point; event.post(tap: .cghidEventTap)
     }
 
     private func activateTargetWindow() async throws -> (NSRunningApplication, AXUIElement) {
@@ -331,6 +382,7 @@ final class AgentController: ObservableObject {
         throw Failure(.unavailable, "尚未定位任务输入框。请保持 Codex 任务页面可见；搜索框或多个编辑面板可能造成歧义。")
     }
     private func clearRecording() {
+        stopDeadline = nil; drainBeforePreserving = nil
         lease.finish(); recordingWindow = nil; recordingPID = nil; recordingTitle = nil
         stopControl = nil; pendingTranscription = false
         recordingConfirmed = false

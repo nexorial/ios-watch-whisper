@@ -40,7 +40,14 @@
 - 23:33:48 上传成功，Upload ID `4e26c0ef-71e5-4ef8-a18d-b821c320555e`。Apple 于 23:35:35 通知处理完成。
 - 已保存两句话验收说明并将 Build 7 加入 James 内部组；23:40:12 本人收到 Apple 的 `Watch Whisper 0.3.0 (7) ... is now available to test` 通知，正文包含已保存说明。新版已可内部测试；真表更新与松开后的结果待用户确认。
 
-## 可用后安装与验收
+## Build 8 后台录音与滚动（未上传成功）
+
+- 43 项单元测试、真实 TLS 安全集成测试、Mac 构建与 Watch Release archive/export 通过。
+- IPA：`artifacts/testflight-0.3.0-build8/WatchWhisper.ipa`，831867 字节，SHA-256 `38109bf326b056d54647e77589577f43c7e68a280b5642f69d53c6bedcc3f935`。实际包签名、后台音频声明、同一 Mac 地址与证书摘要通过校验。
+- 归档保留在 `/tmp/watch-whisper-testflight.8RXitN/WatchWhisper.xcarchive`。上传选项仍为 TestFlight Internal Only，目标仅 James 本人内部组。
+- 2026-09-26 上传失败：`Failed to Use Accounts`，Xcode 无法取得有效 Apple 账号凭据；同时 Mac 锁屏导致电脑操作受阻。等待用户解锁后核验账号并重试。旧版 7 仍是最后确认可安装版本，不能把本地导出当作新版发布。
+
+## Build 7 安装与验收
 
 1. 在与 Ultra 4 配对的 iPhone 上打开 TestFlight，将 Watch Whisper 更新为 **0.3.0 (7)**。Apple 对 Watch-only App 的说明是直接在 TestFlight App 列表中点 Install；不需要自建 iPhone 配套 App。
 2. 保持 Mac 的 Watch Whisper 运行，核对 Wi-Fi 就绪地址。当前包默认 `192.168.31.99`，如地址变化，可在手表连接页修改；证书摘要仍固定为这台 Mac 的身份。

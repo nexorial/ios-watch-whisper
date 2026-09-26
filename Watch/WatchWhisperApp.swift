@@ -73,18 +73,25 @@ private struct RemoteView: View {
                         fingerDown = true
                         if let action = gesture.touchDown(at: ProcessInfo.processInfo.systemUptime) { connection.send(action) }
                     }
-                    if gesture.drag(right: value.translation.width) { WKInterfaceDevice.current().play(.click) }
+                    if gesture.drag(right: value.translation.width) {
+                        connection.setRecordingLocked(true); WKInterfaceDevice.current().play(.click)
+                    }
                 }
                 .onEnded { _ in
                     guard fingerDown else { return }; fingerDown = false
                     if let action = gesture.release(at: ProcessInfo.processInfo.systemUptime) { connection.send(action) }
+                    connection.setRecordingLocked(gesture.state == .locked)
                 })
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(talking ? "停止听写" : "开始听写，使用 Watch 麦克风")
+            .accessibilityHint(connection.recordingLocked ? "锁定录音会在熄屏后继续，最长两分钟" : "短按或向右滑锁定录音")
             .accessibilityAddTraits(.isButton)
             .accessibilityAction {
                 if talking { stop() }
-                else { _ = gesture.touchDown(at: 0); _ = gesture.drag(right: 44); connection.send(.beginDictation) }
+                else {
+                    _ = gesture.touchDown(at: 0); _ = gesture.drag(right: 44); connection.send(.beginDictation)
+                    connection.setRecordingLocked(true)
+                }
             }
             HStack(spacing: 8) {
                 Button { stop() } label: {
@@ -107,14 +114,20 @@ private struct RemoteView: View {
         }
         .padding(.horizontal, 5)
         .focusable().focused($crownFocused)
-        .digitalCrownRotation($crown, from: -10000, through: 10000, by: 0.5, sensitivity: .medium, isContinuous: true, isHapticFeedbackEnabled: true)
+        .digitalCrownRotation($crown, from: -10000, through: 10000, by: 0.1, sensitivity: .medium, isContinuous: true, isHapticFeedbackEnabled: true)
         .onChange(of: crown) { [crown] value in
             let pixels = accumulator.add(value - crown)
             if pixels != 0 { connection.send(.scroll, value: pixels); scrollHint = pixels > 0 ? "↓ 向下浏览" : "↑ 向上浏览" }
         }
         .onChange(of: connection.phase) { gesture.hostChanged($0) }
-        .onAppear { crownFocused = true }
-        .onDisappear { stop(); fingerDown = false; gesture.reset() }
+        .onAppear {
+            crownFocused = true
+            if connection.recordingLocked { gesture.restoreLockedRecording() }
+        }
+        .onDisappear {
+            if !connection.recordingLocked { stop() }
+            fingerDown = false; gesture.reset()
+        }
     }
     private func stop() {
         let action = gesture.stop()
@@ -126,6 +139,7 @@ private struct ConnectionView: View {
     @ObservedObject var connection: WatchLink
     @Binding var showingConnection: Bool
     @State private var wifiHost = ""
+    @State private var showingScreenHelp = false
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
@@ -156,6 +170,11 @@ private struct ConnectionView: View {
                     Button("试用界面") { connection.enableDemo(); showingConnection = false }.font(.caption)
                     if connection.usesWiFi { Button("使用蓝牙备用") { connection.useBluetooth() }.font(.caption) }
                     else if connection.canUseWiFi { Button("使用 Wi-Fi 直连") { connection.useWiFi() }.font(.caption) }
+                }
+                Button("屏幕与锁定录音") { showingScreenHelp.toggle() }.font(.caption)
+                if showingScreenHelp {
+                    Text("Wi-Fi 锁定录音可在熄屏后继续，最长 2 分钟。屏幕亮度由系统控制；可在手表设置的「显示与亮度」中开启「始终显示」或延长唤醒时长。")
+                        .font(.caption2).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4)
         }.onAppear { wifiHost = WatchWiFiConnection.configuration?.0 ?? "" }

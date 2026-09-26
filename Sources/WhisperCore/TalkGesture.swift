@@ -44,6 +44,7 @@ public struct TalkGesture {
             || (phase == .ready && recordingAcknowledged) { reset() }
     }
     public mutating func reset() { state = .idle; stopOnRelease = false; recordingAcknowledged = false }
+    public mutating func restoreLockedRecording() { state = .locked; recordingAcknowledged = true; stopOnRelease = false }
 }
 
 public struct CrownAccumulator {

@@ -6,7 +6,7 @@ final class WhisperCoreTests: XCTestCase {
     private let nonce = Data(repeating: 0x71, count: 16)
 
     func testEveryCommandFitsMinimumBluetoothMTUAndRoundTrips() throws {
-        for action in [RemoteAction.heartbeat, .beginDictation, .finishDictation, .scroll, .enter, .cancelDictation] {
+        for action in [RemoteAction.heartbeat, .beginDictation, .finishDictation, .scroll, .enter, .cancelDictation, .finishReceivedAudio] {
             let command = Command(action, sequence: 1, value: action == .scroll ? -231 : 0)
             let bytes = try Wire.encode(command, key: key, challenge: nonce)
             XCTAssertEqual(bytes.count, 20)

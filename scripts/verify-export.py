@@ -19,6 +19,7 @@ with zipfile.ZipFile(ipa) as archive:
         assert '$(' not in root[key], f'Unexpanded build setting: {key}'
     assert root.get('ITSWatchOnlyContainer') is True, 'Container is not a Watch-only stub'
     assert watch.get('WKWatchOnly') is True, 'Watch is not standalone'
+    assert 'audio' in watch.get('UIBackgroundModes', []), 'Missing Watch background audio capability'
     assert 'WKCompanionAppBundleIdentifier' not in watch, 'Unexpected iPhone companion'
     assert 'WKRunsIndependentlyOfCompanionApp' not in watch, 'Ambiguous Watch-only configuration'
     assert watch.get('CFBundleSupportedPlatforms') == ['WatchOS']
@@ -39,6 +40,7 @@ with zipfile.ZipFile(ipa) as archive:
         'bundle': root['CFBundleIdentifier'],
         'watch_bundle': watch['CFBundleIdentifier'],
         'watch_only': True,
+        'background_audio': True,
         'sha256': hashlib.sha256(ipa.read_bytes()).hexdigest(),
         'bytes': ipa.stat().st_size,
     }, indent=2))

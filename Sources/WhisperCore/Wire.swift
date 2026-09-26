@@ -2,7 +2,7 @@ import Foundation
 import CryptoKit
 
 public enum RemoteAction: UInt8, Sendable {
-    case heartbeat = 0, beginDictation, finishDictation, scroll, enter, cancelDictation
+    case heartbeat = 0, beginDictation, finishDictation, scroll, enter, cancelDictation, finishReceivedAudio
 }
 
 public enum HostPhase: UInt8, Sendable {

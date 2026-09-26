@@ -5,6 +5,7 @@ import WhisperCore
 final class WatchMicrophone {
     private var engine: AVAudioEngine?
     private var captureID: UUID?
+    private var observers: [NSObjectProtocol] = []
     func start(onFailure: @escaping (String) -> Void = { _ in }, onSamples: @escaping ([Int16]) -> Void) async throws {
         let granted = await withCheckedContinuation { continuation in
             AVAudioSession.sharedInstance().requestRecordPermission { continuation.resume(returning: $0) }
@@ -32,6 +33,20 @@ final class WatchMicrophone {
         do { converter = try MicrophoneSamples(source: source) }
         catch { try? session.setActive(false); throw MicFailure("手表音频格式不可用。") }
         let id = UUID(); captureID = id
+        observers.append(NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: session, queue: .main) { [weak self] notification in
+            guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  raw == AVAudioSession.InterruptionType.began.rawValue else { return }
+            Task { @MainActor in
+                guard self?.captureID == id else { return }
+                self?.stop(); onFailure("录音被系统中断，已请求保留收到的内容")
+            }
+        })
+        observers.append(NotificationCenter.default.addObserver(forName: AVAudioSession.routeChangeNotification, object: session, queue: .main) { [weak self] _ in
+            Task { @MainActor in
+                guard self?.captureID == id, !session.currentRoute.inputs.contains(where: { $0.portType == .builtInMic }) else { return }
+                self?.stop(); onFailure("Watch 内置麦克风已断开，已请求保留收到的内容")
+            }
+        })
         input.installTap(onBus: 0, bufferSize: AVAudioFrameCount(source.sampleRate / 10), format: source) { [weak self] buffer, _ in
             do {
                 let samples = try converter.convert(buffer)
@@ -52,6 +67,7 @@ final class WatchMicrophone {
     }
     func stop() {
         captureID = nil
+        observers.forEach { NotificationCenter.default.removeObserver($0) }; observers = []
         engine?.inputNode.removeTap(onBus: 0); engine?.stop(); engine = nil
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }

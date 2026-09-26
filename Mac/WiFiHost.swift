@@ -51,7 +51,7 @@ final class WiFiHost: ObservableObject {
             }
         } catch { server = nil; status = error.localizedDescription }
     }
-    func shutdown() { server?.stop(); server = nil; audio.stop() }
+    func shutdown() { controller.stopScrolling(); server?.stop(); server = nil; audio.stop() }
     func allowPairing() {
         guard server != nil else { start(); return }
         pairingUntil = Date().addingTimeInterval(60); pairingOpen = true; pending = nil; pendingCode = nil
@@ -80,6 +80,7 @@ final class WiFiHost: ObservableObject {
         } catch { status = "保存 Wi-Fi 配对失败：\(error.localizedDescription)" }
     }
     func revokeAll() {
+        controller.stopScrolling()
         let ids = approved, wasRecording = owner != nil
         approved = []; owner = nil; sessions = [:]; grants = [:]
         pending = nil; pendingCode = nil; pairingOpen = false; pairingUntil = .distantPast
@@ -112,7 +113,7 @@ final class WiFiHost: ObservableObject {
                 if let session = sessions[id], session.clientNonce == nonce {
                     return (200, WiFiReply("ok", challenge: session.challenge.base64EncodedString()))
                 }
-                guard !controller.isRecording else { return (409, WiFiReply("error", message: "请先结束当前听写")) }
+                guard !controller.isRecording || controller.isFinishing else { return (409, WiFiReply("error", message: "请先结束当前听写")) }
                 let challenge = try KeychainStore.random(count: 16)
                 sessions[id] = Session(key: key, challenge: challenge, clientNonce: nonce); grants[id] = nil
                 return (200, WiFiReply("ok", challenge: challenge.base64EncodedString()))
@@ -147,37 +148,41 @@ final class WiFiHost: ObservableObject {
             else if command.action == .beginDictation {
                 do {
                     try audio.start()
+                    controller.drainBeforePreserving = { [weak audio] in
+                        try? await audio?.drain(); audio?.stop()
+                    }
                     phase = await controller.perform(.beginDictation)
                     if phase == .listening { owner = id; sessions[id]?.audioGate = AudioGate(stream: command.sequence) }
                     else { audio.stop() }
                 } catch {
                     audio.stop(); controller.phase = .failed; controller.detail = error.localizedDescription; phase = .failed
                 }
-            } else if command.action == .finishDictation, owner == id {
+            } else if [.finishDictation, .finishReceivedAudio].contains(command.action), owner == id {
                 do {
-                    guard sessions[id]?.audioGate?.ended == true else { throw LocalTLSIdentity.Failure("手表音频尚未完整结束") }
+                    guard command.action == .finishReceivedAudio || sessions[id]?.audioGate?.ended == true else { throw LocalTLSIdentity.Failure("手表音频尚未完整结束") }
                     let started = ProcessInfo.processInfo.systemUptime
                     try await audio.drain()
                     ConnectionTrace.record("audio", String(format: "tail playback drained in %.0f ms", (ProcessInfo.processInfo.systemUptime - started) * 1000))
                     phase = await controller.perform(.finishDictation)
                 } catch {
-                    _ = await controller.perform(.cancelDictation)
+                    _ = await controller.perform(.finishReceivedAudio)
                     controller.phase = .failed; controller.detail = error.localizedDescription; phase = .failed
                 }
                 audio.stop(); sessions[id]?.audioGate = nil
             } else { phase = await controller.perform(command.action, value: command.value) }
             if !controller.isRecording { owner = nil; audio.stop() }
-            if command.action == .beginDictation || command.action == .finishDictation || command.action == .cancelDictation {
+            if [.beginDictation, .finishDictation, .cancelDictation, .finishReceivedAudio].contains(command.action) {
                 ConnectionTrace.record("audio", "\(command.action) phase=\(phase) samples=\(audio.receivedSamples) \(audio.captureSummary)")
             }
-            status = "Wi-Fi 已连接 · \(phase.caption)"
+            let newStatus = "Wi-Fi 已连接 · \(phase.caption)"
+            if status != newStatus { status = newStatus }
             return (200, WiFiReply("ok", message: controller.detail,
                                   packet: try Wire.status(phase, sequence: command.sequence, key: session.key,
                                                           challenge: session.challenge).base64EncodedString()))
         } catch {
             ConnectionTrace.record("wifi", "request failed path=\(request.path) samples=\(audio.receivedSamples) error=\(error.localizedDescription)")
             if request.path == "/v1/audio", owner == id {
-                audio.stop(); _ = await controller.perform(.cancelDictation); owner = nil
+                _ = await controller.perform(.finishReceivedAudio); audio.stop(); owner = nil
             }
             return (403, WiFiReply("error", message: "请求验证失败或音频传输中断"))
         }

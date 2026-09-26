@@ -15,7 +15,9 @@ final class TLSHTTPServer: @unchecked Sendable {
         guard let identity = sec_identity_create(identity) else { throw LocalTLSIdentity.Failure("无法创建 TLS 身份。") }
         sec_protocol_options_set_local_identity(tls.securityProtocolOptions, identity)
         sec_protocol_options_set_min_tls_protocol_version(tls.securityProtocolOptions, .TLSv13)
-        let parameters = NWParameters(tls: tls, tcp: NWProtocolTCP.Options())
+        let tcp = NWProtocolTCP.Options()
+        tcp.noDelay = true
+        let parameters = NWParameters(tls: tls, tcp: tcp)
         let port = NWEndpoint.Port(rawValue: portNumber)!
         parameters.requiredLocalEndpoint = .hostPort(host: NWEndpoint.Host(address), port: port)
         let listener = try NWListener(using: parameters)

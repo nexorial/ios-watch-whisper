@@ -94,7 +94,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         if active { if !connected && !demo { discover() } }
         else {
             // Stop intent is sent even if start acknowledgement is still pending.
-            if connected { send(.cancelDictation) }
+            if connected { clearAudio(); sendCommand(.finishReceivedAudio) }
             central?.stopScan()
             retryTask?.cancel()
         }
@@ -183,7 +183,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         if demo {
             switch action {
             case .beginDictation: phase = .listening
-            case .finishDictation:
+            case .finishDictation, .finishReceivedAudio:
                 if phase == .listening {
                     phase = .transcribing
                     Task { try? await Task.sleep(nanoseconds: 600_000_000); phase = .ready }

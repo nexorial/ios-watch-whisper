@@ -16,6 +16,7 @@ final class WatchLink: ObservableObject {
     @Published var pairingCode: String?
     @Published var microphoneLevel = ""
     @Published var stopping = false
+    @Published var recordingLocked = false
     var canUseWiFi: Bool { WatchWiFiConnection.configuration != nil }
     private var bluetooth: WatchConnection?
     private var wifi: WatchWiFiConnection?
@@ -39,7 +40,7 @@ final class WatchLink: ObservableObject {
         } catch { status = error.localizedDescription }
     }
     func useBluetooth() {
-        wifi?.setActive(false); observer?.cancel(); usesWiFi = false
+        wifi?.disconnect(); observer?.cancel(); usesWiFi = false
         if bluetooth == nil { bluetooth = WatchConnection() }
         bluetooth?.setActive(active)
         observer = bluetooth?.objectWillChange.sink { [weak self] in
@@ -52,7 +53,7 @@ final class WatchLink: ObservableObject {
         do {
             let normalized = host.trimmingCharacters(in: .whitespacesAndNewlines)
             let replacement = try WatchWiFiConnection(host: normalized, pin: pin)
-            wifi?.setActive(false); bluetooth?.setActive(false); observer?.cancel()
+            wifi?.disconnect(); bluetooth?.setActive(false); observer?.cancel()
             wifi = replacement; usesWiFi = true
             UserDefaults.standard.set(normalized, forKey: "wifiHostOverride")
             wifi?.setActive(active)
@@ -69,6 +70,10 @@ final class WatchLink: ObservableObject {
         if usesWiFi { wifi?.send(action, value: value) } else { bluetooth?.send(action, value: value) }
         sync()
     }
+    func setRecordingLocked(_ value: Bool) {
+        if usesWiFi { wifi?.setRecordingLocked(value) }
+        sync()
+    }
     func forget() { if usesWiFi { wifi?.forget() } else { bluetooth?.forget() }; sync() }
     func choose(_ mac: WatchConnection.NearbyMac) { bluetooth?.choose(mac); sync() }
     func enableDemo() { useBluetooth(); bluetooth?.enableDemo(); sync() }
@@ -78,11 +83,13 @@ final class WatchLink: ObservableObject {
             demo = false; nearby = []; pairingCode = wifi.pairingCode
             microphoneLevel = wifi.microphoneLevel
             stopping = wifi.stopping
+            recordingLocked = wifi.recordingLocked
         } else if let bluetooth {
             connected = bluetooth.connected; status = bluetooth.status; phase = bluetooth.phase; macName = bluetooth.macName
             demo = bluetooth.demo; nearby = bluetooth.nearby; pairingCode = nil
             microphoneLevel = "Watch 麦克风 · 最长 2 分钟"
             stopping = false
+            recordingLocked = false
         }
     }
 }
