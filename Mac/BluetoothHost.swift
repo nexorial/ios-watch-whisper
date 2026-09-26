@@ -196,9 +196,9 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
             try audio.enqueue(frame.samples)
         } catch WireError.replay { return }
         catch {
-            audio.stop(); sessions[id]?.audioGate = nil
+            sessions[id]?.audioGate = nil
             Task {
-                _ = await controller.perform(.cancelDictation)
+                _ = await controller.perform(.finishReceivedAudio)
                 controller.phase = .failed; controller.detail = "Watch 音频传输失败：\(error.localizedDescription)"
             }
         }
@@ -271,8 +271,11 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         work.removeAll { $0.0.identifier == central.identifier }
         pendingNotifications.removeAll { $0.1.identifier == central.identifier }
         if owner == central.identifier {
-            audio.stop()
-            Task { _ = await controller.perform(.cancelDictation); owner = nil }
+            Task {
+                guard owner == central.identifier else { return }
+                _ = await controller.perform(.finishReceivedAudio)
+                if owner == central.identifier { owner = nil }
+            }
         }
         connection = "手表已断开 · 等待自动重连"
     }

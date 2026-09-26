@@ -177,7 +177,7 @@ private struct ConnectionView: View {
                 }
                 Button("屏幕与锁定录音") { showingScreenHelp.toggle() }.font(.caption)
                 if showingScreenHelp {
-                    Text("说话后安静 2 秒会自动停止，只转写不发送。Wi-Fi 锁定录音可在熄屏后继续，最长 2 分钟。屏幕亮度由手表系统设置控制。")
+                    Text("锁定录音在放下手腕或熄屏后继续。说话后安静 2 秒会自动停止，只转写不发送，最长 2 分钟。要保持画面可见，请在手表「设置 → 显示与亮度 → 始终显示」中允许本 App；系统仍会调暗屏幕。")
                         .font(.caption2).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4)

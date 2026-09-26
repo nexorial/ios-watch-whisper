@@ -37,6 +37,8 @@
 	</array>
 	<key>WKApplication</key>
 	<true/>
+	<key>WKSupportsAlwaysOnDisplay</key>
+	<true/>
 	<key>WKWatchOnly</key>
 	<true/>
 	<key>WatchWhisperWiFiHost</key>

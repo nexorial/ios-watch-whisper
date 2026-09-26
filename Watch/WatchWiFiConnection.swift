@@ -160,6 +160,7 @@ final class WatchWiFiConnection: ObservableObject {
             guard !stopping else { return }
             guard recordingRequested else { enqueue(action); return }
             guard !finishing else { return }
+            suspendAfterFinish = !visible
             microphone.stop(); finishing = true
             recordingLocked = false
             stopping = true; phase = .transcribing

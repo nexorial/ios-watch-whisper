@@ -26,6 +26,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     private var heartbeatTask: Task<Void, Never>?
     private var pairAttempts = 0
     private var active = true
+    private var visible = true
     private var lastError: String?
     private var recovery = ConnectionRecovery()
     private var transportReady = false
@@ -38,6 +39,8 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     private var audioPackets: [Data] = []
     private var audioAccepted = false
     @Published private(set) var recordingRequested = false
+    @Published private(set) var recordingLocked = false
+    @Published private(set) var stopping = false
     private var finishRequested = false
     private var audioTimeout: Task<Void, Never>?
     private var savedID: UUID? {
@@ -88,21 +91,37 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         ConnectionTrace.record("watch", "forget; create fresh central manager")
         central = CBCentralManager(delegate: self, queue: .main)
     }
-    func setActive(_ active: Bool) {
-        self.active = active
-        ConnectionTrace.record("watch", "scene active=\(active)")
-        if active { if !connected && !demo { discover() } }
-        else {
-            // Stop intent is sent even if start acknowledgement is still pending.
-            if connected { clearAudio(); sendCommand(.finishReceivedAudio) }
-            central?.stopScan()
-            retryTask?.cancel()
+    func setActive(_ value: Bool) {
+        visible = value
+        ConnectionTrace.record("watch", "scene active=\(value)")
+        if value {
+            active = true
+            if !connected && !demo { discover() }
+            return
         }
+        central?.stopScan(); retryTask?.cancel()
+        queue.removeAll { $0.0 == .scroll || $0.0 == .heartbeat }
+        switch RecordingVisibility.onHide(locked: recordingLocked, recording: recordingRequested, stopping: stopping) {
+        case .stayActive:
+            active = true
+        case .finishAndSuspend:
+            active = true
+            send(.finishDictation)
+        case .disconnect:
+            active = false
+        }
+    }
+    func setRecordingLocked(_ value: Bool) { recordingLocked = value && recordingRequested && !stopping }
+    /// Switching transports must stop capture even when wrist-down recording is locked.
+    func disconnect() {
+        visible = false
+        if recordingRequested || audioAccepted || stopping { preserveReceivedAudio("已停止 Watch 收音") }
+        active = false; central?.stopScan(); retryTask?.cancel()
     }
     func send(_ action: RemoteAction, value: Int16 = 0) {
         guard connected, !demo else { sendCommand(action, value: value); return }
         if action == .beginDictation {
-            guard !recordingRequested else { return }
+            guard visible, !recordingRequested, !stopping else { return }
             guard characteristics[CBUUID(string: AudioWire.characteristic)] != nil,
                   let peripheral, peripheral.maximumWriteValueLength(for: .withoutResponse) >= 64 else {
                 status = "请更新 Mac 接收端；当前连接不支持手表音频。"; phase = .failed; return
@@ -111,7 +130,8 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
             microphoneTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    try await self.microphone.start(onSilence: { [weak self] _ in self?.send(.finishDictation) }) { [weak self] in self?.capture($0) }
+                    try await self.microphone.start(onSilence: { [weak self] _ in self?.send(.finishDictation) },
+                                                    onFailure: { [weak self] in self?.preserveReceivedAudio($0) }) { [weak self] in self?.capture($0) }
                     guard !Task.isCancelled, self.recordingRequested else { self.microphone.stop(); return }
                     self.sendCommand(.beginDictation)
                 } catch {
@@ -120,16 +140,21 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
                 }
             }
         } else if action == .finishDictation || (action == .enter && recordingRequested) {
+            guard !stopping else { return }
             guard recordingRequested else { sendCommand(action, value: value); return }
             guard !finishRequested else { return }
-            microphone.stop(); finishRequested = true
-            if audioStream == 0 { microphoneTask?.cancel(); clearAudio(); return }
+            microphone.stop(); finishRequested = true; stopping = true; recordingLocked = false
+            phase = .transcribing
+            if audioStream == 0 {
+                queue.removeAll { $0.0 == .beginDictation }
+                clearAudio(); phase = .ready; active = visible; return
+            }
             flushAudio(ending: true); drainAudio()
             audioTimeout?.cancel()
             audioTimeout = Task { [weak self] in
                 try? await Task.sleep(nanoseconds: 3_000_000_000)
                 guard !Task.isCancelled, let self, self.finishRequested else { return }
-                self.send(.cancelDictation); self.status = "音频发送超时，请重试。"; self.phase = .failed
+                self.preserveReceivedAudio("音频发送超时，已请求保留 Mac 收到的内容")
             }
         } else if action == .cancelDictation {
             clearAudio(); sendCommand(action)
@@ -139,7 +164,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         guard recordingRequested, !finishRequested else { return }
         guard Int(audioOffset) + audioSamples.count + samples.count <= AudioWire.sampleRate * 120,
               audioSamples.count + samples.count <= 32000, audioPackets.count < 100 else {
-            send(.cancelDictation); status = "录音达到上限或蓝牙积压，已停止。"; phase = .failed; return
+            preserveReceivedAudio("录音达到上限或蓝牙积压，已请求保留 Mac 收到的内容"); return
         }
         audioSamples.append(contentsOf: samples); flushAudio(); drainAudio()
     }
@@ -160,7 +185,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
                 audioPackets.append(try AudioWire.encode(samples: [], stream: audioStream, sequence: audioSequence,
                                                        offset: audioOffset, ended: true, key: key, challenge: challenge))
             }
-        } catch { send(.cancelDictation); status = "音频编码失败"; phase = .failed }
+        } catch { preserveReceivedAudio("音频编码失败，已请求保留 Mac 收到的内容") }
     }
     private func drainAudio() {
         guard audioAccepted, let peripheral, let characteristic = characteristics[CBUUID(string: AudioWire.characteristic)] else { return }
@@ -177,18 +202,32 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
         microphoneTask?.cancel(); microphoneTask = nil; microphone.stop(); audioTimeout?.cancel()
         audioStream = 0; audioSequence = 0; audioOffset = 0; audioSamples = []; audioPackets = []
         audioAccepted = false; recordingRequested = false; finishRequested = false
+        recordingLocked = false; stopping = false
+    }
+    private func preserveReceivedAudio(_ message: String) {
+        let started = audioStream != 0
+        queue.removeAll { $0.0 == .beginDictation }
+        clearAudio()
+        if started {
+            stopping = true; phase = .transcribing
+            sendCommand(.finishReceivedAudio)
+        } else { active = visible; phase = .ready }
+        status = message
     }
     private func sendCommand(_ action: RemoteAction, value: Int16 = 0) {
         guard connected || (transportReady && action == .heartbeat) else { return }
         if demo {
             switch action {
-            case .beginDictation: phase = .listening
+            case .beginDictation:
+                guard visible else { return }
+                recordingRequested = true; phase = .listening
             case .finishDictation, .finishReceivedAudio:
                 if phase == .listening {
+                    clearAudio()
                     phase = .transcribing
                     Task { try? await Task.sleep(nanoseconds: 600_000_000); phase = .ready }
                 }
-            case .cancelDictation: phase = .ready
+            case .cancelDictation: clearAudio(); phase = .ready
             case .enter: status = "演示：已点击 Enter"; WKInterfaceDevice.current().play(.success)
             case .scroll: status = value >= 0 ? "演示：向下滚动" : "演示：向上滚动"
             case .heartbeat: break
@@ -373,16 +412,21 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
             do {
                 let (newPhase, seq) = try Wire.decodeStatus(data, key: key, challenge: challenge)
                 guard let current = inflight, seq == current.sequence else { return }
-                timeout?.cancel(); inflight = nil; phase = newPhase
+                timeout?.cancel(); inflight = nil
+                phase = stopping && newPhase == .listening ? .transcribing : newPhase
                 if !connected {
                     connected = true; lastError = nil; recovery.authenticated()
                     ConnectionTrace.record("watch", "authenticated Mac heartbeat received")
                 }
-                status = newPhase.caption
+                status = phase.caption
                 if current.action == .beginDictation {
                     if newPhase == .listening { audioAccepted = true; drainAudio() }
                     else { clearAudio() }
-                } else if [.failed, .unavailable, .permissionRequired].contains(newPhase) { clearAudio() }
+                } else if [.finishDictation, .finishReceivedAudio, .cancelDictation].contains(current.action)
+                            || [.failed, .unavailable, .permissionRequired].contains(newPhase)
+                            || (audioAccepted && newPhase != .listening) {
+                    clearAudio(); active = visible
+                }
                 if [.permissionRequired, .targetInactive, .unavailable, .failed].contains(newPhase), current.action != .heartbeat {
                     WKInterfaceDevice.current().play(.failure)
                 } else if current.action == .beginDictation && newPhase == .listening { WKInterfaceDevice.current().play(.start) }

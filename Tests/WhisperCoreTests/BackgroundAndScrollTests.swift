@@ -8,6 +8,17 @@ final class BackgroundAndScrollTests: XCTestCase {
         XCTAssertEqual(RecordingVisibility.onHide(locked: true, recording: false, stopping: false), .disconnect)
         XCTAssertEqual(RecordingVisibility.onHide(locked: false, recording: false, stopping: true), .finishAndSuspend)
     }
+    func testRepeatedHideDuringFinishNeverResumesLockedCapture() {
+        for recording in [true, false] {
+            for locked in [true, false] {
+                // watchOS delivers inactive and background separately, including
+                // while the final audio and stop acknowledgement are in flight.
+                for _ in 0..<2 {
+                    XCTAssertEqual(RecordingVisibility.onHide(locked: locked, recording: recording, stopping: true), .finishAndSuspend)
+                }
+            }
+        }
+    }
     func testScrollBurstPreservesDistanceAndSettlesWithinTenFrames() {
         var motion = ScrollMotion(); motion.add(160); motion.add(240)
         var sum = 0, frames = 0

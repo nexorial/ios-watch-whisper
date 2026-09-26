@@ -28,4 +28,12 @@ final class TalkReleaseTests: XCTestCase {
         XCTAssertNil(gesture.release(at: 4)); XCTAssertEqual(gesture.state, .locked)
         gesture.hostChanged(.failed); XCTAssertEqual(gesture.state, .idle)
     }
+    func testRecreatedViewStopsExistingLockedRecordingOnFirstTap() {
+        var gesture = TalkGesture()
+        gesture.restoreLockedRecording()
+        gesture.hostChanged(.listening)
+        XCTAssertEqual(gesture.touchDown(at: 50), .finishDictation)
+        XCTAssertNil(gesture.release(at: 50.1))
+        XCTAssertEqual(gesture.state, .idle)
+    }
 }

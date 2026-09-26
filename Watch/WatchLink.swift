@@ -31,7 +31,7 @@ final class WatchLink: ObservableObject {
     }
     func useWiFi() {
         guard let (host, pin) = WatchWiFiConnection.configuration else { return }
-        bluetooth?.setActive(false); observer?.cancel()
+        bluetooth?.disconnect(); observer?.cancel()
         do {
             if wifi == nil { wifi = try WatchWiFiConnection(host: host, pin: pin) }
             usesWiFi = true; wifi?.setActive(active)
@@ -55,7 +55,7 @@ final class WatchLink: ObservableObject {
         do {
             let normalized = host.trimmingCharacters(in: .whitespacesAndNewlines)
             let replacement = try WatchWiFiConnection(host: normalized, pin: pin)
-            wifi?.disconnect(); bluetooth?.setActive(false); observer?.cancel()
+            wifi?.disconnect(); bluetooth?.disconnect(); observer?.cancel()
             wifi = replacement; usesWiFi = true
             UserDefaults.standard.set(normalized, forKey: "wifiHostOverride")
             wifi?.setActive(active)
@@ -73,7 +73,7 @@ final class WatchLink: ObservableObject {
         sync()
     }
     func setRecordingLocked(_ value: Bool) {
-        if usesWiFi { wifi?.setRecordingLocked(value) }
+        if usesWiFi { wifi?.setRecordingLocked(value) } else { bluetooth?.setRecordingLocked(value) }
         sync()
     }
     func forget() { if usesWiFi { wifi?.forget() } else { bluetooth?.forget() }; sync() }
@@ -91,8 +91,8 @@ final class WatchLink: ObservableObject {
             connected = bluetooth.connected; status = bluetooth.status; phase = bluetooth.phase; macName = bluetooth.macName
             demo = bluetooth.demo; nearby = bluetooth.nearby; pairingCode = nil
             microphoneLevel = "Watch 麦克风 · 最长 2 分钟"
-            stopping = false
-            recordingLocked = false
+            stopping = bluetooth.stopping
+            recordingLocked = bluetooth.recordingLocked
             recordingRequested = bluetooth.recordingRequested || (bluetooth.demo && bluetooth.phase == .listening)
             macAddress = ""
         }
