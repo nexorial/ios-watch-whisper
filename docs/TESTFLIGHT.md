@@ -46,6 +46,7 @@
 - IPA：`artifacts/testflight-0.3.0-build8/WatchWhisper.ipa`，831867 字节，SHA-256 `38109bf326b056d54647e77589577f43c7e68a280b5642f69d53c6bedcc3f935`。实际包签名、后台音频声明、同一 Mac 地址与证书摘要通过校验。
 - 归档保留在 `/tmp/watch-whisper-testflight.8RXitN/WatchWhisper.xcarchive`。上传选项仍为 TestFlight Internal Only，目标仅 James 本人内部组。
 - 2026-09-26 上传失败：`Failed to Use Accounts`，Xcode 无法取得有效 Apple 账号凭据；同时 Mac 锁屏导致电脑操作受阻。等待用户解锁后核验账号并重试。旧版 7 仍是最后确认可安装版本，不能把本地导出当作新版发布。
+- 后续用户已解锁，Mac Build 8 完成签名安装及启动，保留配对。20:29 上传重试仍因账号访问失败而终止；Xcode 已打开本人 Apple 账号登录窗口，等待登录验证完成。运行中的 Mac 地址为 `192.168.31.186`，包内默认地址仍为 `.99`，手表需使用现有地址编辑功能保存 `.186`；证书摘要不变。
 
 ## Build 7 安装与验收
 

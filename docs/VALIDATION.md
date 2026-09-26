@@ -4,14 +4,15 @@
 
 ## 当前状态：有真实收音与文字试用，松开停止仍在联调
 
-### Build 8：锁定录音与滚动优化（本地就绪，尚未发布）
+### Build 8：锁定录音与滚动优化（Mac 已更新，Watch 尚未发布）
 
 - 用户报告锁定后熄屏会丢失整段、表冠明显延迟。根因之一是所有非 active 场景都主动发送取消；滚动路径每个事件都扫描最多 6000 个 AX 元素，并同步重写诊断文件。
 - 新增真实录音所需的 `UIBackgroundModes=audio`。Wi-Fi 锁定状态由连接层保留，熄屏／视图重建继续已有录音；普通按住进入后台时结束并转写，不自动开始新的后台录音。系统中断、路线离开内置麦克风或网络失败时，停止采集并请求保留 Mac 已收到的音频。保留 2 分钟上限和手动 Enter。
 - 新增经原有 HMAC／重放门控的 `finishReceivedAudio`，允许在中断时转写已收到的部分；不把缺失音频伪造为完整录音。Mac 超时改为保留音频，停止确认超时明确要求用户检查，不再自动丢弃整段。
 - 滚动缓存受 PID、窗口、窗口位置、编辑器位置、标题和短期限约束；每帧仍检查前台、窗口和落点所属 PID。短程插值有队列上限，反转丢弃旧方向，录音／发送／撤销配对时清空；Crown 步进细化，停止逐事件文件写入，TLS TCP 开启 no-delay。
 - **43 项单元测试通过**，包含锁定熄屏策略、插值距离、反向、停止和积压上限；真实 TLS 配对／认证／重放／错误证书／撤销集成测试通过（demo controller，不操作 Codex）。Mac 构建及 Watch Release archive/export 通过；实际 IPA 已检查签名、后台音频模式、地址和证书摘要。
-- 当前 Mac 锁屏，电脑操作工具无法继续更新运行中的接收端或浏览器分组。上传尝试返回 Xcode `Failed to Use Accounts`／有效 Apple 凭据不可用。**Build 8 尚未上传成功、尚未安装到 Mac 或真表；性能和熄屏行为尚无新版实机验收。** 等解锁后先核验账号，再完成已授权的本人内部测试分发。
+- 用户解锁后，Mac Build 8 已签名安装、独立核验版本并启动，原有 1 块配对保留。当前物理网络地址变为 `192.168.31.186`，监听端口 8766 已核验；已请用户修改手表的 Mac 地址，证书仍与交付包匹配，不需要重新配对。
+- 20:29 再次上传仍返回 Xcode `Failed to Use Accounts`。已打开 Xcode Apple Accounts 的现有账号登录窗口，等待用户完成密码／验证。**Build 8 尚未上传成功、尚未分配或安装到真表；性能和熄屏行为尚无新版实机验收。** 本地归档与 IPA 保留，完成登录后继续原授权的本人内部测试分发。
 
 watchOS 的常亮／唤醒时长由系统设置控制；没有使用已废弃的延长前台时间接口，也没有将遥控录音伪装为健身或冥想会话。参考 [Apple 显示设置](https://support.apple.com/en-ie/guide/watch/apd127ec93ac/watchos)、[后台录音支持](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/iPhoneOSKeys.html)、[前台时间设置](https://developer.apple.com/documentation/watchkit/wkextension/isfrontmosttimeoutextended)。
 
