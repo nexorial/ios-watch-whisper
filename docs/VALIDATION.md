@@ -10,10 +10,10 @@
 - 蓝牙现在保留锁定录音与心跳，普通录音退后台正常结束；等待尾音/停止确认时拒绝重复结束，迟到的开始回执不能恢复收音显示。切换传输方式仍明确停止原录音。中断、积压、音频编码/解码失败和断开改为请求保留 Mac 已收到的音频，未送达的部分不宣称可恢复。
 - Wi-Fi 后台结束收音时明确结束当前连接。显式启用常亮显示支持并补充手表设置说明，未尝试强制全亮或覆盖系统设置；真实后台录音继续使用 `UIBackgroundModes=audio`。
 - **51 项单元测试通过**，包含重复 inactive/background 通知下的结束状态和视图重建后首次点击停止原录音。真实 TLS/HMAC 音频流程回归通过，覆盖静音结束、迟到 cancel/release/audio、新录音和重连。
-- Mac Debug 与 Watch arm64/arm64_32 构建通过。Watch 实际签名包已核验 **0.3.0 (10)**、后台音频、常亮支持、目标地址和既有证书摘要配置。`scripts/install-watch.sh` 明确返回真表安装成功与启动成功。
+- Mac Debug 与 Watch arm64/arm64_32 构建通过。Watch 实际签名包已核验 **0.3.0 (10)**、后台音频、常亮支持、目标地址和既有证书摘要配置。`scripts/install-watch.sh` 明确返回真表安装成功与启动成功；后续独立 `devicectl device info apps` 查询也确认真表安装版本为 **0.3.0 (10)**。
 - Mac **Build 10** 已签名安装并启动，保留 1 块配对和 BlackHole 路由。首次启动遇到临时端口占用，点击「刷新网络」后原生 UI 显示 Wi-Fi 已就绪。没有上传或分发新的 TestFlight 构建。
 - 已请用户实测右滑锁定、放下手腕继续说话、抬腕停止；**安装和策略测试不能代替真表熄屏期间持续收音的验收**。
-- 本机证据：`artifacts/locked-recording-build10-{tests,mac,security,install-watch,installed-app}.log`。
+- 本机证据：`artifacts/locked-recording-build10-{tests,mac,security,install-watch,installed-app-retry}.log`。首次独立查询曾遇开发隧道超时；同目录 `installed-app.log` 保留失败记录，`installed-app-retry.log` 为保持开发服务发现时取得的安装版本证明。
 
 ### Build 9：静音停止与 IP 显示（2026-09-26，待安装／发布）
 
