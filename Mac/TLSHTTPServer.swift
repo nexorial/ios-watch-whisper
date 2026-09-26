@@ -40,12 +40,20 @@ final class TLSHTTPServer: @unchecked Sendable {
         }
         listener.start(queue: queue)
     }
-    func stop() {
-        queue.async { [weak self] in
-            guard let self else { return }
-            self.listener?.cancel(); self.listener = nil
+    func stop(completion: @escaping @Sendable () -> Void = {}) {
+        // Retain the server until cancellation completes; a weak capture can
+        // disappear before releasing its port when a host replaces the server.
+        queue.async {
+            guard let listener = self.listener else { completion(); return }
+            listener.stateUpdateHandler = { state in
+                guard case .cancelled = state else { return }
+                listener.stateUpdateHandler = nil
+                self.listener = nil
+                completion()
+            }
             let clients = Array(self.connections.values); self.connections = [:]
             clients.forEach { $0.stop() }
+            listener.cancel()
         }
     }
 }

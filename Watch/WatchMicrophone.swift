@@ -6,7 +6,8 @@ final class WatchMicrophone {
     private var engine: AVAudioEngine?
     private var captureID: UUID?
     private var observers: [NSObjectProtocol] = []
-    func start(onFailure: @escaping (String) -> Void = { _ in }, onSamples: @escaping ([Int16]) -> Void) async throws {
+    private var silenceEndpoint = SilenceEndpoint()
+    func start(onSilence: @escaping (SilenceEndpoint.Reason) -> Void = { _ in }, onFailure: @escaping (String) -> Void = { _ in }, onSamples: @escaping ([Int16]) -> Void) async throws {
         let granted = await withCheckedContinuation { continuation in
             AVAudioSession.sharedInstance().requestRecordPermission { continuation.resume(returning: $0) }
         }
@@ -32,7 +33,7 @@ final class WatchMicrophone {
         let converter: MicrophoneSamples
         do { converter = try MicrophoneSamples(source: source) }
         catch { try? session.setActive(false); throw MicFailure("手表音频格式不可用。") }
-        let id = UUID(); captureID = id
+        let id = UUID(); captureID = id; silenceEndpoint = SilenceEndpoint()
         observers.append(NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: session, queue: .main) { [weak self] notification in
             guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
                   raw == AVAudioSession.InterruptionType.began.rawValue else { return }
@@ -54,6 +55,10 @@ final class WatchMicrophone {
                 Task { @MainActor in
                     guard self?.captureID == id else { return }
                     onSamples(samples)
+                    guard let self, self.captureID == id else { return }
+                    if let reason = self.silenceEndpoint.consume(samples) {
+                        self.stop(); onSilence(reason)
+                    }
                 }
             } catch {
                 Task { @MainActor in

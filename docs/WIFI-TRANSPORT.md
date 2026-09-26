@@ -39,6 +39,8 @@
 
 本机安装脚本会自动准备证书与本机地址、把公开配置写到临时 xcconfig，然后签名构建。当前是绑定这台 Mac 的开发安装流程，还不是面向任意 Mac 的 App Store 配网流程。Mac 地址变化时可在手表连接页修改地址；完整证书固定仍然保持，不能自动信任新证书。更换 Mac 或证书时需要重新配置签名构建。
 
+Build 9 在 Mac 面板和菜单常驻显示「Mac IP」，提供复制与空闲时刷新；手表明确显示「目标 Mac IP」，要填电脑地址而不是手表自身的地址。刷新保留已批准的设备密钥，使旧会话失效，并等待旧监听器取消后重建。认证音频还增加约两秒静音结束保护，已结束的录音不再追加播放迟到音频、取消已开始的转写。对应的真实 TLS 音频／刷新／重连测试使用 demo controller 和内存采样计数器，不操作目标 App。
+
 Apple 的 [TN3135](https://developer.apple.com/documentation/technotes/tn3135-low-level-networking-on-watchos) 将 URLSession HTTP/HTTPS 列为所有 watchOS App 都可用的高层网络 API；本实现不使用 Watch 的 NWBrowser 或 WebSocket。
 
 ## TestFlight 备选安装路径

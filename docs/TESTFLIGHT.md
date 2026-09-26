@@ -48,6 +48,14 @@
 - 2026-09-26 上传失败：`Failed to Use Accounts`，Xcode 无法取得有效 Apple 账号凭据；同时 Mac 锁屏导致电脑操作受阻。等待用户解锁后核验账号并重试。旧版 7 仍是最后确认可安装版本，不能把本地导出当作新版发布。
 - 后续用户已解锁，Mac Build 8 完成签名安装及启动，保留配对。20:29 上传重试仍因账号访问失败而终止；Xcode 已打开本人 Apple 账号登录窗口，等待登录验证完成。运行中的 Mac 地址为 `192.168.31.186`，包内默认地址仍为 `.99`，手表需使用现有地址编辑功能保存 `.186`；证书摘要不变。
 
+## Build 9 静音结束与 IP 显示（未导出／上传）
+
+- 包含 Build 8 的后台录音与滚动改进，以及 Watch／Mac 两端的静音结束、迟到取消保护和清晰的 Mac IP 显示。
+- 49 项单元测试、真实 HTTPS 音频／安全流程、Mac 构建、Watch Release 归档通过。归档：`/tmp/watch-whisper-testflight.u3XgNx/WatchWhisper.xcarchive`。
+- 2026-09-26 21:07 导出失败：Xcode `No Accounts`，账号 keychain 凭据缺少 `Xcode-Username`；不能使用云端分发签名。归档签名可验证，但不等于分发签名或 TestFlight 可用。
+- 归档中 Watch 的默认目标为当前 Mac `192.168.31.186`，证书摘要保持不变；已有 Watch 的手动地址覆盖会保留。
+- 等待 Mac 解锁和 Xcode 原生 Apple 登录后，从该归档继续导出／上传 Build 9，仅分配已有 James 内部组。Build 8 不再单独发布；最后确认可安装的版本仍为 Build 7。
+
 ## Build 7 安装与验收
 
 1. 在与 Ultra 4 配对的 iPhone 上打开 TestFlight，将 Watch Whisper 更新为 **0.3.0 (7)**。Apple 对 Watch-only App 的说明是直接在 TestFlight App 列表中点 Install；不需要自建 iPhone 配套 App。

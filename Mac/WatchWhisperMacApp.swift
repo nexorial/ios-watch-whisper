@@ -31,6 +31,7 @@ private struct HostMenu: View {
     @Environment(\.openWindow) private var openWindow
     var body: some View {
         Text(wifi.status)
+        Text("Mac IP：\(wifi.address.isEmpty ? "未连接局域网" : wifi.address)")
         Text(controller.phase.caption)
         Divider()
         Button("打开控制面板") {
@@ -71,7 +72,21 @@ private struct HostView: View {
             }
             GroupBox("2 · Wi-Fi 连接 Apple Watch") {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("手表会自动连接这台 Mac。首次核对两端的六位码，再允许配对。")
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("Mac IP").font(.callout.bold())
+                        Text(wifi.address.isEmpty ? "未连接局域网" : wifi.address)
+                            .font(.system(.title3, design: .monospaced).bold()).textSelection(.enabled)
+                            .accessibilityLabel("Mac IP：\(wifi.address)")
+                        Spacer()
+                    }
+                    HStack {
+                        Button("复制 IP") {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(wifi.address, forType: .string)
+                        }.disabled(wifi.address.isEmpty)
+                        Button("刷新网络") { wifi.refreshNetwork() }.disabled(demo || !wifi.canRefreshNetwork)
+                    }
+                    Text("在手表的「目标 Mac IP」填入上方地址。两台设备连接同一局域网，设备各自的 IP 不需要相同。首次连接再核对六位配对码。")
                         .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     HStack {
                         Button(wifi.pairingOpen ? "等待手表…" : "允许 Wi-Fi 手表") { wifi.allowPairing() }
@@ -118,7 +133,7 @@ private struct HostView: View {
             }
             VStack(alignment: .leading, spacing: 6) {
                 Label("表冠滚动 · 按住说话 · 右滑锁定 · Enter 发送", systemImage: "hand.draw")
-                Text("语音由 Watch 麦克风采集，经 BlackHole 送入 Codex 自带听写。录音最长 2 分钟；连接中断会请求停止。")
+                Text("Watch 麦克风 → Codex 自带听写。说话后安静约 2 秒自动停止，只转写不发送；松开或点停止也可结束。录音最长 2 分钟。")
                     .foregroundStyle(.secondary)
             }.font(.caption)
             if demo {
@@ -131,6 +146,7 @@ private struct HostView: View {
         }.padding(28).frame(width: 470).tint(.mint)
             .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
                 controller.objectWillChange.send(); host.audio.refresh(); host.refreshRadio(); wifi.audio.refresh()
+                wifi.refreshAddressIfNeeded()
             }
     }
 }

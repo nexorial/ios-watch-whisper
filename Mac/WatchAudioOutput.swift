@@ -2,10 +2,20 @@ import AVFoundation
 import CoreAudio
 import WhisperCore
 
+@MainActor
+protocol WatchAudioPlayback: AnyObject {
+    var receivedSamples: Int { get }
+    var captureSummary: String { get }
+    func start() throws
+    func enqueue(_ samples: [Int16]) throws
+    func drain() async throws
+    func stop()
+}
+
 /// Sends only authenticated Watch samples to the loopback device. Never uses
 /// the Mac microphone, the default speaker, or a third party transcription API.
 @MainActor
-final class WatchAudioOutput: ObservableObject {
+final class WatchAudioOutput: ObservableObject, WatchAudioPlayback {
     @Published var status = "检查虚拟麦克风…"
     @Published var receivedSamples = 0
     @Published var captureSummary = "尚无 Watch 录音"

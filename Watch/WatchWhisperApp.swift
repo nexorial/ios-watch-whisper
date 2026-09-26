@@ -37,7 +37,7 @@ private struct RemoteView: View {
     @State private var accumulator = CrownAccumulator()
     @State private var scrollHint = "转动表冠浏览"
     @FocusState private var crownFocused: Bool
-    private var talking: Bool { gesture.state != .idle || connection.phase == .listening }
+    private var talking: Bool { connection.recordingRequested && !connection.stopping }
 
     var body: some View {
         GeometryReader { geometry in
@@ -152,8 +152,12 @@ private struct ConnectionView: View {
                     Text("核对 Mac 上的六位码，再允许配对。").font(.caption2)
                 }
                 if connection.usesWiFi {
-                    TextField("Mac 地址", text: $wifiHost).font(.caption)
+                    Text("目标 Mac IP").font(.caption.bold())
+                    TextField("填写 Mac 显示的 IP", text: $wifiHost).font(.caption).accessibilityLabel("目标 Mac IP")
+                    Text("这是电脑的地址，不是手表自身 IP。请与 Mac 接收端显示的地址核对。")
+                        .font(.caption2).foregroundStyle(.secondary)
                     Button("保存地址并重连") { connection.updateWiFiHost(wifiHost) }.font(.caption)
+                    Text("已保存目标：\(connection.macAddress)").font(.caption2).foregroundStyle(.secondary)
                 }
                 if connection.connected {
                     Button("返回遥控") { showingConnection = false }
@@ -173,7 +177,7 @@ private struct ConnectionView: View {
                 }
                 Button("屏幕与锁定录音") { showingScreenHelp.toggle() }.font(.caption)
                 if showingScreenHelp {
-                    Text("Wi-Fi 锁定录音可在熄屏后继续，最长 2 分钟。屏幕亮度由系统控制；可在手表设置的「显示与亮度」中开启「始终显示」或延长唤醒时长。")
+                    Text("说话后安静 2 秒会自动停止，只转写不发送。Wi-Fi 锁定录音可在熄屏后继续，最长 2 分钟。屏幕亮度由手表系统设置控制。")
                         .font(.caption2).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4)

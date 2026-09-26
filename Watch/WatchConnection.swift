@@ -37,7 +37,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     private var audioSamples: [Int16] = []
     private var audioPackets: [Data] = []
     private var audioAccepted = false
-    private var recordingRequested = false
+    @Published private(set) var recordingRequested = false
     private var finishRequested = false
     private var audioTimeout: Task<Void, Never>?
     private var savedID: UUID? {
@@ -111,7 +111,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
             microphoneTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    try await self.microphone.start { [weak self] in self?.capture($0) }
+                    try await self.microphone.start(onSilence: { [weak self] _ in self?.send(.finishDictation) }) { [weak self] in self?.capture($0) }
                     guard !Task.isCancelled, self.recordingRequested else { self.microphone.stop(); return }
                     self.sendCommand(.beginDictation)
                 } catch {

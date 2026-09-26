@@ -36,9 +36,10 @@ final class WatchWiFiConnection: ObservableObject {
     private var stream: UInt32 = 0
     private var audioSequence: UInt32 = 0
     private var audioOffset: UInt32 = 0
-    private var recordingRequested = false
+    @Published private(set) var recordingRequested = false
     private var audioAccepted = false
     private var finishing = false
+    var macAddress: String { client.baseURL.host ?? "" }
     static var configuration: (String, String)? {
         let host = UserDefaults.standard.string(forKey: "wifiHostOverride")
             ?? (Bundle.main.object(forInfoDictionaryKey: "WatchWhisperWiFiHost") as? String ?? "")
@@ -143,7 +144,10 @@ final class WatchWiFiConnection: ObservableObject {
             micTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    try await self.microphone.start(onFailure: { [weak self] in self?.fail($0) }) { [weak self] in self?.capture($0) }
+                    try await self.microphone.start(onSilence: { [weak self] reason in
+                        self?.send(.finishDictation)
+                        self?.microphoneLevel = reason == .quietAfterSound ? "安静 2 秒，已停止收音" : "未检测到声音，已停止收音"
+                    }, onFailure: { [weak self] in self?.fail($0) }) { [weak self] in self?.capture($0) }
                     try self.check(token)
                     guard self.recordingRequested else { self.microphone.stop(); return }
                     self.enqueue(.beginDictation)

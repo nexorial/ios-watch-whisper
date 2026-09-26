@@ -60,6 +60,7 @@ final class AgentController: ObservableObject {
     var accessibilityGranted: Bool { demo || AXIsProcessTrusted() }
     var isRecording: Bool { recordingWindow != nil || (demo && phase == .listening) }
     var isFinishing: Bool { pendingTranscription }
+    var isBusy: Bool { busy }
 
     func requestAccessibility() {
         // Only a user click calls this. The OS permission remains a user decision.
