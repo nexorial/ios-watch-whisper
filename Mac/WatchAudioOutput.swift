@@ -1,6 +1,6 @@
 import AVFoundation
 import CoreAudio
-import WhisperCore
+import MicodexCore
 
 @MainActor
 protocol WatchAudioPlayback: AnyObject {

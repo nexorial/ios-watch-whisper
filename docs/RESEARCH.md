@@ -11,7 +11,7 @@
 | Network.framework / WebSocket / Bonjour | 可做双向连接、发现 | 普通 watchOS App 受低层网络限制；模拟器表现不代表真机 | 不作为普通遥控 App 的基础 |
 | WatchConnectivity | Apple 官方手表与配对 iPhone 通信通道 | 不是 Watch 与 Mac 的直连通道，使用它会额外需要 iPhone 中转 | 不采用 |
 
-Apple 文档允许独立 Watch-only App。项目中的 `WatchWhisper` iOS container 是分发包装，不含 iPhone 应用代码，也不向 iPhone 安装界面。手表实际程序是 `WatchWhisperWatch`。其 Info.plist 只声明 `WKWatchOnly`，不同时声明 companion identifier 或 independent-companion 键；模拟器安装器会拒绝这些互相矛盾的组合。
+Apple 文档允许独立 Watch-only App。项目中的 `Micodex` iOS container 是分发包装，不含 iPhone 应用代码，也不向 iPhone 安装界面。手表实际程序是 `MicodexWatch`。其 Info.plist 只声明 `WKWatchOnly`，不同时声明 companion identifier 或 independent-companion 键；模拟器安装器会拒绝这些互相矛盾的组合。
 
 蓝牙的连接参数、后台调度由系统管理。这里只承诺前台发现和重连；没有通过假音频、假运动会话维持后台运行。Mac 休眠时不能保证连接，也没有实现远程唤醒。
 

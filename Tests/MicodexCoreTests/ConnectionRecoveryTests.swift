@@ -1,5 +1,5 @@
 import XCTest
-@testable import WhisperCore
+@testable import MicodexCore
 
 final class ConnectionRecoveryTests: XCTestCase {
     func testUnreachableCachedMacFallsBackToFreshDiscovery() {

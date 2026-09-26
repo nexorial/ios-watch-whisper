@@ -1,6 +1,6 @@
 import Foundation
 import Combine
-import WhisperCore
+import MicodexCore
 
 /// One UI and gesture contract over either transport. Only the selected
 /// transport is active; existing BLE pairing remains available as a fallback.

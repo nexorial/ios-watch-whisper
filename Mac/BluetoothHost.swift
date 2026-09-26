@@ -1,6 +1,6 @@
 import Foundation
 import CoreBluetooth
-import WhisperCore
+import MicodexCore
 
 @MainActor
 // CoreBluetooth delivers every delegate callback on the explicitly selected main queue.
@@ -61,7 +61,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         guard manager != nil else { radioStatus = "蓝牙备用未开启"; return }
         switch manager?.state {
         case .poweredOn: radioStatus = manager.isAdvertising ? "Mac 蓝牙广播中" : "Mac 蓝牙已开，广播未启动"
-        case .unauthorized: radioStatus = "Watch Whisper 尚未获蓝牙权限"
+        case .unauthorized: radioStatus = "Micodex 尚未获蓝牙权限"
         case .poweredOff: radioStatus = "Mac 蓝牙已关闭"
         default: radioStatus = "蓝牙服务正在准备"
         }
@@ -73,7 +73,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     }
     private func advertise() {
         manager.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [CBUUID(string: Wire.service)],
-                                  CBAdvertisementDataLocalNameKey: "Whisper · \(Host.current().localizedName ?? "Mac")"])
+                                  CBAdvertisementDataLocalNameKey: "Micodex · \(Host.current().localizedName ?? "Mac")"])
     }
     func approve() {
         guard pairingOpen, Date() < pairingUntil, let id = pendingCentral else { return }

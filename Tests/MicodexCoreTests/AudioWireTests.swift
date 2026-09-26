@@ -1,5 +1,5 @@
 import XCTest
-@testable import WhisperCore
+@testable import MicodexCore
 
 final class AudioWireTests: XCTestCase {
     let key = Data(repeating: 0x71, count: 32), nonce = Data(repeating: 0x39, count: 16)

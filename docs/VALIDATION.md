@@ -1,5 +1,18 @@
 # 验证记录
 
+> 当前产品已更名为 **Micodex**（Build 11）。以下历史上传／验证证据保留当时的应用名和原始文件路径。
+
+## 2026-09-26 · Micodex 亮紫色与界面精简（Build 11）
+
+- 品牌、Mac / Watch 显示名、菜单、权限提示、蓝牙广播名、Xcode 工程 / schemes、Swift package 和构建脚本统一为 Micodex。历史安装身份、Keychain 服务、TLS 身份目录、HMAC 协议域保持不变，支持与旧版设备配对兼容。
+- Mac 使用 420 × 550 pt 紧凑面板：当前操作、目标、Mac IP、音频与辅助功能状态常驻，详细配对、音频配置和蓝牙备用按需展开；展开内容在面板内滚动。录音时底部常驻停止入口。
+- Watch 使用紫色语音主操作、独立停止与 Enter，移除重复状态与默认展开的长说明；保留原有按住、短点、右滑锁定、表冠滚动、转写禁用 Enter 和 VoiceOver 操作。
+- 双端新增亮紫色 accent 与统一麦克风 / 代码括号图标。Mac 颜色随系统深浅模式切换；已实际观察深色面板和展开 / 收起、演示开始 / 停止状态。浅色未取得实际截图验证。
+- 51 项 Swift 单元测试通过；真实本机 HTTPS 集成测试通过（配对、认证、重放、静音结束、迟到命令、网络刷新、错误证书、撤销）。本轮没有将 UI 演示当作真实听写证明。
+- Mac Debug、Watch Simulator、Watch 真机签名 Debug 和 iOS Watch-only 分发容器 Release 构建通过。实际包名均为 Micodex，版本 0.3.0 (11)；Watch 签名校验通过，内置证书摘要与现有 Mac TLS 身份一致。
+- 已检查 Ultra 4 / 40mm SE 3 模拟器布局，截图在 `artifacts/micodex-ui/watch-{ultra,small}.png`；本机日志在 `/tmp/micodex-{build,security,mac-final,sim-final,device-build,container-build}.log`。
+- 旧 Mac 接收端当前仍显示未确认结束的听写，尚未重启或替换。新 Mac 签名包准备于 `artifacts/micodex-ui/prepared/Micodex.app`，Watch 真机包准备于 `/tmp/micodex-device/Build/Products/Debug-watchos/Micodex Watch.app`。待用户确认录音空闲后安装；本轮未上传 TestFlight 或修改 App Store Connect 的名称。
+
 日期：2026-09-25。Xcode 27.0 / Swift 6.4 编译器（Swift 5 语言模式）；应用最低 watchOS 9 / macOS 13。
 
 ## 当前状态：有真实收音与文字试用，松开停止仍在联调

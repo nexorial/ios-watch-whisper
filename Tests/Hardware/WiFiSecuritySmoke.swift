@@ -1,5 +1,5 @@
 import Foundation
-import WhisperCore
+import MicodexCore
 
 @main
 struct WiFiSecuritySmoke {
@@ -10,7 +10,7 @@ struct WiFiSecuritySmoke {
     @MainActor static func run() async throws {
         let identity = try LocalTLSIdentity.prepare()
         guard let address = LocalTLSIdentity.localAddress() else { throw Failure("No local interface") }
-        let id = UUID().uuidString, suite = "WatchWhisper.Test.\(UUID())", prefix = "wifi-test-\(UUID())-"
+        let id = UUID().uuidString, suite = "Micodex.Test.\(UUID())", prefix = "wifi-test-\(UUID())-"
         let preferences = UserDefaults(suiteName: suite)!
         // Production TLS/pairing/session implementation, isolated credentials and
         // a demo controller: this test cannot operate Codex or send user messages.

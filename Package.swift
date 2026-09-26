@@ -1,11 +1,11 @@
 // swift-tools-version: 5.9
 import PackageDescription
 let package = Package(
-    name: "WatchWhisper",
+    name: "Micodex",
     platforms: [.macOS(.v13), .watchOS(.v9)],
-    products: [.library(name: "WhisperCore", targets: ["WhisperCore"])],
+    products: [.library(name: "MicodexCore", targets: ["MicodexCore"])],
     targets: [
-        .target(name: "WhisperCore"),
-        .testTarget(name: "WhisperCoreTests", dependencies: ["WhisperCore"])
+        .target(name: "MicodexCore"),
+        .testTarget(name: "MicodexCoreTests", dependencies: ["MicodexCore"])
     ]
 )

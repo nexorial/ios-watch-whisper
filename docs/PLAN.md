@@ -1,4 +1,4 @@
-# Watch Whisper 第一版
+# Micodex 第一版
 
 ## 目标与验收
 
@@ -60,7 +60,7 @@
 - [x] Release 归档、内部 TestFlight IPA 导出及真实包校验
 - [x] Mac 地址编辑与保持证书固定的重连入口
 - [x] 用户批准向 Apple 上传并创建必要测试记录（仅本人内部测试）
-- [x] 创建 Watch Whisper 记录，Xcode 确认 0.3.0 (4) 上传成功；内部组 James 仅加入账号持有人
+- [x] 创建 Micodex 记录，Xcode 确认 0.3.0 (4) 上传成功；内部组 James 仅加入账号持有人
 - [x] 修复 Apple ITMS-90683 外层麦克风说明，Build 5 归档／导出／签名校验通过，旧包被新增校验正确拒绝
 - [x] Build 5 上传、Apple 处理完成、合规信息保存，刷新确认 Testing / James / 1 invite
 - [x] 用户确认真表安装，Mac 验证认证连接及表冠指令到达

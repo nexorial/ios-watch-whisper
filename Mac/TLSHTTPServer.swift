@@ -1,11 +1,11 @@
 import Foundation
 import Network
 import Security
-import WhisperCore
+import MicodexCore
 
 final class TLSHTTPServer: @unchecked Sendable {
     typealias Handler = @Sendable (HTTPEnvelope) async -> (Int, WiFiReply)
-    private let queue = DispatchQueue(label: "WatchWhisper.https")
+    private let queue = DispatchQueue(label: "Micodex.https")
     private var listener: NWListener?
     private var connections: [UUID: HTTPConnection] = [:]
     private let handler: Handler

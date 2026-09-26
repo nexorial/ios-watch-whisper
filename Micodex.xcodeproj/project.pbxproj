@@ -1,0 +1,624 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		15EDD641C4D7CDD2E351F561 /* Micodex Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D948F6D3C1F72D84E65A0931 /* Micodex Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		19CA057FA093318A79B60FE9 /* WatchWiFiConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B586EF779EA2301362C85FBD /* WatchWiFiConnection.swift */; };
+		1DCDCCBF08CFFA4C2BB4071E /* MicodexCore in Frameworks */ = {isa = PBXBuildFile; productRef = D60509EED89C117B33B5991F /* MicodexCore */; };
+		275E6F5BC2ABA49AA07A7C64 /* MicodexStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */; };
+		34CE10E4DE841A8C199F6E0F /* LocalTLSIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F985FAA4BDB022D28261E6 /* LocalTLSIdentity.swift */; };
+		52C1B5FA21806897EA31B233 /* WatchAudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */; };
+		62BDB0FAA6A44AF360C76069 /* BluetoothHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = C180B30971414F71F8DBADAC /* BluetoothHost.swift */; };
+		769DC7B498970D5A43685B34 /* WatchMicrophone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */; };
+		8C7919D2EA8141E8592D10C7 /* MicodexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89AB17F6A012B2C920CC380 /* MicodexApp.swift */; };
+		9C0AA554068EACDEE3DB28BE /* TLSHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0383EF77860F4707E6839B /* TLSHTTPServer.swift */; };
+		A34832A57F1576D8FB4607F0 /* MicodexStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */; };
+		A594F72EABA0D3B8B7E0FCA8 /* WiFiHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C4BA921586A3603CB13845 /* WiFiHost.swift */; };
+		B5A5F176E4DBE8B1F5C4CBDB /* WatchLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3F1656BE48EA5F1C1A77E6 /* WatchLink.swift */; };
+		B6793AE5769CACB5339194C5 /* WatchConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8971E3471ED09EB2EECE676 /* WatchConnection.swift */; };
+		B6DC78C6369CEDAE2807658A /* MicodexCore in Frameworks */ = {isa = PBXBuildFile; productRef = 65CA20A636FB87CA7A833F1E /* MicodexCore */; };
+		B97745DA1700628F5E395757 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 502475A91D42AE5CAE9E12F2 /* Assets.xcassets */; };
+		C302609A8D7D74FB19AC95D8 /* AgentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75955C7535FC50E2A09E7077 /* AgentController.swift */; };
+		F30E06CA1B6671DEC6E00B07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B50ED7B712D97AE6EDB12C0 /* Assets.xcassets */; };
+		FC0100A6B7D0DCFE2D84C8D2 /* MicodexMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		25111DD06588F483D21E3E44 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0C580EDAB9F4D39A3A360B3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D23DE6C31DEAA6C3DC35E58D;
+			remoteInfo = MicodexWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		563E5395D00B16BB9373A4B4 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				15EDD641C4D7CDD2E351F561 /* Micodex Watch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0C0383EF77860F4707E6839B /* TLSHTTPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TLSHTTPServer.swift; sourceTree = "<group>"; };
+		2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexMacApp.swift; sourceTree = "<group>"; };
+		4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMicrophone.swift; sourceTree = "<group>"; };
+		4C3F1656BE48EA5F1C1A77E6 /* WatchLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLink.swift; sourceTree = "<group>"; };
+		502475A91D42AE5CAE9E12F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		56F985FAA4BDB022D28261E6 /* LocalTLSIdentity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalTLSIdentity.swift; sourceTree = "<group>"; };
+		6B50ED7B712D97AE6EDB12C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		75955C7535FC50E2A09E7077 /* AgentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentController.swift; sourceTree = "<group>"; };
+		8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexStyle.swift; sourceTree = "<group>"; };
+		99C4BA921586A3603CB13845 /* WiFiHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiHost.swift; sourceTree = "<group>"; };
+		A00F4AD8680D677C24EC8172 /* ios-watch-whisper */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "ios-watch-whisper"; path = .; sourceTree = SOURCE_ROOT; };
+		A20BC01991389FA8F5374D3C /* Micodex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Micodex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAudioOutput.swift; sourceTree = "<group>"; };
+		B586EF779EA2301362C85FBD /* WatchWiFiConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWiFiConnection.swift; sourceTree = "<group>"; };
+		C180B30971414F71F8DBADAC /* BluetoothHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothHost.swift; sourceTree = "<group>"; };
+		C8971E3471ED09EB2EECE676 /* WatchConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnection.swift; sourceTree = "<group>"; };
+		D948F6D3C1F72D84E65A0931 /* Micodex Watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Micodex Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F89AB17F6A012B2C920CC380 /* MicodexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexApp.swift; sourceTree = "<group>"; };
+		FB77D33E9B06F1AF13AB7CB2 /* Micodex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Micodex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EA5864C31E7AABBF41C96EA5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1DCDCCBF08CFFA4C2BB4071E /* MicodexCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F13C7ABFEA443FB5EF428DBA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B6DC78C6369CEDAE2807658A /* MicodexCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		956039339418210070DD2B62 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D948F6D3C1F72D84E65A0931 /* Micodex Watch.app */,
+				A20BC01991389FA8F5374D3C /* Micodex.app */,
+				FB77D33E9B06F1AF13AB7CB2 /* Micodex.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B30C827DE0595EF7B5EF6C94 /* Mac */ = {
+			isa = PBXGroup;
+			children = (
+				75955C7535FC50E2A09E7077 /* AgentController.swift */,
+				6B50ED7B712D97AE6EDB12C0 /* Assets.xcassets */,
+				C180B30971414F71F8DBADAC /* BluetoothHost.swift */,
+				56F985FAA4BDB022D28261E6 /* LocalTLSIdentity.swift */,
+				2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */,
+				0C0383EF77860F4707E6839B /* TLSHTTPServer.swift */,
+				AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */,
+				99C4BA921586A3603CB13845 /* WiFiHost.swift */,
+			);
+			path = Mac;
+			sourceTree = "<group>";
+		};
+		CB7CEC9011573C60CD80D736 = {
+			isa = PBXGroup;
+			children = (
+				B30C827DE0595EF7B5EF6C94 /* Mac */,
+				F021E9C83DEDEBEC4BAA9B3D /* Packages */,
+				F6937CE24220CF240E1E78BB /* Shared */,
+				EF614F25121B236A27A052DE /* Watch */,
+				956039339418210070DD2B62 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EF614F25121B236A27A052DE /* Watch */ = {
+			isa = PBXGroup;
+			children = (
+				502475A91D42AE5CAE9E12F2 /* Assets.xcassets */,
+				F89AB17F6A012B2C920CC380 /* MicodexApp.swift */,
+				C8971E3471ED09EB2EECE676 /* WatchConnection.swift */,
+				4C3F1656BE48EA5F1C1A77E6 /* WatchLink.swift */,
+				4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */,
+				B586EF779EA2301362C85FBD /* WatchWiFiConnection.swift */,
+			);
+			path = Watch;
+			sourceTree = "<group>";
+		};
+		F021E9C83DEDEBEC4BAA9B3D /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				A00F4AD8680D677C24EC8172 /* ios-watch-whisper */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		F6937CE24220CF240E1E78BB /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3DCBF2650B5B0DA4F90E78A5 /* Micodex */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C48179EFA9728D3BA05D4C0E /* Build configuration list for PBXNativeTarget "Micodex" */;
+			buildPhases = (
+				C72CF1DA0A2572FA521767F6 /* Sources */,
+				563E5395D00B16BB9373A4B4 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				115C3C15B848AF707B4F791E /* PBXTargetDependency */,
+			);
+			name = Micodex;
+			packageProductDependencies = (
+			);
+			productName = Micodex;
+			productReference = A20BC01991389FA8F5374D3C /* Micodex.app */;
+			productType = "com.apple.product-type.application.watchapp2-container";
+		};
+		55967A5A3F5CFE4990178203 /* MicodexMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A391A5723F178D0506B3F735 /* Build configuration list for PBXNativeTarget "MicodexMac" */;
+			buildPhases = (
+				D8CFDD120F121B6CBB45DFC6 /* Sources */,
+				CDD6BFEFBB1C8AC0999BE0FE /* Resources */,
+				EA5864C31E7AABBF41C96EA5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MicodexMac;
+			packageProductDependencies = (
+				D60509EED89C117B33B5991F /* MicodexCore */,
+			);
+			productName = MicodexMac;
+			productReference = FB77D33E9B06F1AF13AB7CB2 /* Micodex.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D23DE6C31DEAA6C3DC35E58D /* MicodexWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0167D948AD1F44CF503A43A4 /* Build configuration list for PBXNativeTarget "MicodexWatch" */;
+			buildPhases = (
+				08D2A96682718C5CA905AC79 /* Sources */,
+				013D03F6EB51A9AD432AAD65 /* Resources */,
+				F13C7ABFEA443FB5EF428DBA /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MicodexWatch;
+			packageProductDependencies = (
+				65CA20A636FB87CA7A833F1E /* MicodexCore */,
+			);
+			productName = MicodexWatch;
+			productReference = D948F6D3C1F72D84E65A0931 /* Micodex Watch.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0C580EDAB9F4D39A3A360B3E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					3DCBF2650B5B0DA4F90E78A5 = {
+						DevelopmentTeam = JNN5TPN23D;
+						ProvisioningStyle = Automatic;
+					};
+					55967A5A3F5CFE4990178203 = {
+						DevelopmentTeam = JNN5TPN23D;
+						ProvisioningStyle = Automatic;
+					};
+					D23DE6C31DEAA6C3DC35E58D = {
+						DevelopmentTeam = JNN5TPN23D;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 2D786CF482B9494EDAFC0298 /* Build configuration list for PBXProject "Micodex" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = CB7CEC9011573C60CD80D736;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9A77616BA4E9BF9D161DCB36 /* XCLocalSwiftPackageReference "." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 956039339418210070DD2B62 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				55967A5A3F5CFE4990178203 /* MicodexMac */,
+				3DCBF2650B5B0DA4F90E78A5 /* Micodex */,
+				D23DE6C31DEAA6C3DC35E58D /* MicodexWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		013D03F6EB51A9AD432AAD65 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B97745DA1700628F5E395757 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDD6BFEFBB1C8AC0999BE0FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F30E06CA1B6671DEC6E00B07 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		08D2A96682718C5CA905AC79 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8C7919D2EA8141E8592D10C7 /* MicodexApp.swift in Sources */,
+				A34832A57F1576D8FB4607F0 /* MicodexStyle.swift in Sources */,
+				B6793AE5769CACB5339194C5 /* WatchConnection.swift in Sources */,
+				B5A5F176E4DBE8B1F5C4CBDB /* WatchLink.swift in Sources */,
+				769DC7B498970D5A43685B34 /* WatchMicrophone.swift in Sources */,
+				19CA057FA093318A79B60FE9 /* WatchWiFiConnection.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C72CF1DA0A2572FA521767F6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D8CFDD120F121B6CBB45DFC6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C302609A8D7D74FB19AC95D8 /* AgentController.swift in Sources */,
+				62BDB0FAA6A44AF360C76069 /* BluetoothHost.swift in Sources */,
+				34CE10E4DE841A8C199F6E0F /* LocalTLSIdentity.swift in Sources */,
+				FC0100A6B7D0DCFE2D84C8D2 /* MicodexMacApp.swift in Sources */,
+				275E6F5BC2ABA49AA07A7C64 /* MicodexStyle.swift in Sources */,
+				9C0AA554068EACDEE3DB28BE /* TLSHTTPServer.swift in Sources */,
+				52C1B5FA21806897EA31B233 /* WatchAudioOutput.swift in Sources */,
+				A594F72EABA0D3B8B7E0FCA8 /* WiFiHost.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		115C3C15B848AF707B4F791E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D23DE6C31DEAA6C3DC35E58D /* MicodexWatch */;
+			targetProxy = 25111DD06588F483D21E3E44 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		09885B1C79AED41CF86F879D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = "Config/Mac-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.mac;
+				PRODUCT_NAME = Micodex;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		5E1B95366041D094E08812F9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				INFOPLIST_FILE = "Config/Watch-Info.plist";
+				MICODEX_HOST = "";
+				MICODEX_PIN = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.watchkitapp;
+				PRODUCT_NAME = "Micodex Watch";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
+		637C282C73DB0879A338D54A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "Config/Container-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		680E537F994CE0A07E824490 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "Config/Container-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6BD4785563D1C82E1F4EB911 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 11;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = JNN5TPN23D;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.3.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Debug;
+		};
+		94D23369A89D63527B003669 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 11;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = JNN5TPN23D;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.3.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Release;
+		};
+		D7CC74E589722228D28A73B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				INFOPLIST_FILE = "Config/Watch-Info.plist";
+				MICODEX_HOST = "";
+				MICODEX_PIN = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.watchkitapp;
+				PRODUCT_NAME = "Micodex Watch";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		F67134AF495ABFDC631AD638 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = "Config/Mac-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.mac;
+				PRODUCT_NAME = Micodex;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0167D948AD1F44CF503A43A4 /* Build configuration list for PBXNativeTarget "MicodexWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D7CC74E589722228D28A73B9 /* Debug */,
+				5E1B95366041D094E08812F9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		2D786CF482B9494EDAFC0298 /* Build configuration list for PBXProject "Micodex" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6BD4785563D1C82E1F4EB911 /* Debug */,
+				94D23369A89D63527B003669 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A391A5723F178D0506B3F735 /* Build configuration list for PBXNativeTarget "MicodexMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F67134AF495ABFDC631AD638 /* Debug */,
+				09885B1C79AED41CF86F879D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C48179EFA9728D3BA05D4C0E /* Build configuration list for PBXNativeTarget "Micodex" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				680E537F994CE0A07E824490 /* Debug */,
+				637C282C73DB0879A338D54A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		9A77616BA4E9BF9D161DCB36 /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		65CA20A636FB87CA7A833F1E /* MicodexCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MicodexCore;
+		};
+		D60509EED89C117B33B5991F /* MicodexCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MicodexCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 0C580EDAB9F4D39A3A360B3E /* Project object */;
+}

@@ -10,7 +10,7 @@ import Foundation
         events.append(line)
         if events.count > 100 { events.removeFirst(events.count - 100) }
         guard let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else { return }
-        let folder = base.appendingPathComponent("WatchWhisper", isDirectory: true)
+        let folder = base.appendingPathComponent("Micodex", isDirectory: true)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try? events.joined(separator: "\n").write(to: folder.appendingPathComponent("connection-trace.log"), atomically: true, encoding: .utf8)
         #endif

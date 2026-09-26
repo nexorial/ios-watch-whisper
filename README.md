@@ -1,4 +1,8 @@
-# Watch Whisper
+# Micodex
+
+Build 11 统一为亮紫色 Micodex：Watch 以语音面板、停止和 Enter 为主；Mac 使用紧凑面板，连接、音频与蓝牙细节按需展开。工程为 `Micodex.xcodeproj`，运行 scheme 为 `MicodexMac` / `MicodexWatch`。
+
+为兼容已有安装与配对，Bundle ID、Keychain 服务名、TLS 身份目录和协议认证域保留原值；不会因品牌改名创建新的设备身份。历史上传记录与证据路径仍保留当时的名称。
 
 用 Apple Watch 的表冠和屏幕按钮遥控 Mac 上的 Codex。原生 SwiftUI，独立 Watch App；无需 iPhone 伴侣 App。
 
@@ -18,7 +22,7 @@ Build 9 增加说话后约 2 秒静音自动停止、Mac 接收端的静音保�
 - 独立 Enter；收音中第一次 Enter 先停止，等 Codex 转写完成再点击发送。
 - 断线不重发指令；5 秒心跳超时请求停止，录音最长 2 分钟。
 - Build 9：说话后连续约 2 秒安静自动停止；从未检测到声音时给 8 秒开始说话，只转写不自动发送。
-- Build 9：Mac 的「Wi-Fi 连接 Apple Watch」区域常驻显示 Mac IP，可复制／刷新；手表的「目标 Mac IP」应填此值，而不是手表自身的 IP。局域网地址变化不要求移除配对。
+- Build 9：Mac 的「Apple Watch」区域常驻显示 Mac IP，可复制／刷新；手表的「目标 Mac IP」应填此值，而不是手表自身的 IP。局域网地址变化不要求移除配对。
 
 **普通侧边按钮、表冠按压不能任意重映射。** 自动 Enter、后台持续遥控和 Mac 唤醒没有实现。Claude 仅有桌面目标的滚动／Enter 适配代码，未验证；Claude 听写明确禁用。
 
@@ -28,12 +32,12 @@ Build 9 增加说话后约 2 秒静音自动停止、Mac 接收端的静音保�
 | --- | --- |
 | `Watch/` | watchOS 9+ 界面、HTTPS 主连接、蓝牙备用、手势和表冠 |
 | `Mac/` | macOS 接收端、HTTPS（15+）、蓝牙备用（13+）、目标适配器 |
-| `Sources/WhisperCore/` | 20 字节认证协议、重放保护、Keychain、手势和录音租约 |
-| `Tests/WhisperCoreTests/` | 协议、篡改、重放、手势、表冠和失联保护测试 |
+| `Sources/MicodexCore/` | 20 字节认证协议、重放保护、Keychain、手势和录音租约 |
+| `Tests/MicodexCoreTests/` | 协议、篡改、重放、手势、表冠和失联保护测试 |
 | `docs/RESEARCH.md` | 方案对比、苹果平台限制与 Codex 映射依据 |
 | `docs/VALIDATION.md` | 实际验证结果及剩余真机检查 |
 
-`WatchWhisper` target 是苹果要求的 iOS 分发容器，不含 iPhone 界面或应用代码。`WatchWhisperWatch` 是独立手表程序；开发时直接运行这个 scheme。
+`Micodex` target 是苹果要求的 iOS 分发容器，不含 iPhone 界面或应用代码。`MicodexWatch` 是独立手表程序；开发时直接运行这个 scheme。
 
 ## 构建
 
@@ -44,23 +48,23 @@ brew install xcodegen
 ./scripts/build.sh
 ```
 
-或者打开 `WatchWhisper.xcodeproj`。默认签名团队为本机项目团队；其他开发者需在 Signing & Capabilities 中选择自己的团队，或构建时覆盖 `DEVELOPMENT_TEAM`。`project.yml` 是工程的源配置，修改后运行 `xcodegen generate`。
+或者打开 `Micodex.xcodeproj`。默认签名团队为本机项目团队；其他开发者需在 Signing & Capabilities 中选择自己的团队，或构建时覆盖 `DEVELOPMENT_TEAM`。`project.yml` 是工程的源配置，修改后运行 `xcodegen generate`。
 
 单独运行逻辑测试：
 
 ```sh
-swift test --scratch-path /tmp/watch-whisper-tests
+swift test --scratch-path /tmp/micodex-tests
 ```
 
 scratch path 放在 Documents 外，避免同步文件的扩展属性影响 XCTest 签名。
 
 ## 安装与试用
 
-1. Mac 构建 `WatchWhisperMac`，或运行 `scripts/install-mac.sh 'Apple Development: Your Name (...)'`。安装到 `~/Applications/Watch Whisper.app`。
-2. 打开 Mac App，在系统提示中允许蓝牙；点击「打开设置」，由你在系统设置允许 **Watch Whisper** 的辅助功能权限。Codex 自己还需要麦克风权限。
+1. Mac 构建 `MicodexMac`，或运行 `scripts/install-mac.sh 'Apple Development: Your Name (...)'`。安装到 `~/Applications/Micodex.app`。更新前需结束听写并退出旧接收端；脚本会备份并替换旧名称的 App，保留配对数据。
+2. 打开 Mac App，在系统提示中允许蓝牙；点击「打开设置」，由你在系统设置允许 **Micodex** 的辅助功能权限。Codex 自己还需要麦克风权限。
 3. iPhone 与 Apple Watch 解锁并靠近 Mac，手表和 Mac 连接同一 Wi-Fi。先把 iPhone 通过 USB 连接 Mac 并信任此电脑。Device Hub 必须显示你的当前手表可用；如果未出现，点工具栏「＋ → Pair Nearby Device…」，选择左侧 iPhone／iPad／Apple Watch 图标组，保持「Waiting to pair」窗口打开。
 4. 在手表「设置 → 隐私与安全性」开启 Developer Mode，按提示重启并确认。**首次配对前这个开关可能不存在，需先做上一步。** 随后在手表的 Developer Mode 页面向下滚动到 **Devices／设备**，选择你的 Mac，点 **Pair／配对**，再把 Mac Device Hub 显示的 PIN 输入到手表。单纯打开开关不会完成这次配对。iPhone 也需开启 Developer Mode。
-5. 在 Xcode 选择 `WatchWhisperWatch` scheme 与真实手表运行。不需要先安装任何 iPhone App。
+5. 在 Xcode 选择 `MicodexWatch` scheme 与真实手表运行。不需要先安装任何 iPhone App。
 6. 通过 `scripts/install-watch.sh <WATCH_UDID>` 安装时会配置本机 Wi-Fi 地址和 TLS 证书摘要。Mac 点「允许 Wi-Fi 手表」，核对两端六位码，再点「核对一致，允许手表」。蓝牙备用需要在两端明确选择开启。
 7. 安装并配置 [BlackHole 2ch](docs/WATCH-AUDIO.md)。在手表首次主动录音时允许麦克风。
 8. 把 Codex 任务窗口放在 Mac 前台，先试正文滚动。按住说话时会自动定位输入框；等手表显示「Watch 正在收音」后说话。松开后等 Codex 转写，检查文字，再点 Enter。
@@ -74,7 +78,7 @@ Mac 上关闭面板不会退出接收端，菜单栏可以再次打开。接收�
 蓝牙验证必须使用真机。手表启动参数 `--demo` 或连接页的「试用界面」可检查本地 UI；界面明确标记演示，不会控制 Mac。Mac 也支持 `--demo`，完全不启动蓝牙、不操作其他应用。
 
 ```sh
-xcrun simctl install <WATCH_SIMULATOR_ID> '<BUILD_PRODUCTS>/Watch Whisper Watch.app'
+xcrun simctl install <WATCH_SIMULATOR_ID> '<BUILD_PRODUCTS>/Micodex Watch.app'
 xcrun simctl launch <WATCH_SIMULATOR_ID> com.nexorial.watchwhisper.watchkitapp --demo
 ```
 

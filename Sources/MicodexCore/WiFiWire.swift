@@ -33,6 +33,7 @@ public enum WiFiWire {
         return String(format: "%06u", number % 1_000_000)
     }
     public static func sessionProof(id: String, nonce: Data, key: Data) -> Data {
+        // Stable protocol domain, shared with previously installed Watch builds.
         Data(HMAC<SHA256>.authenticationCode(for: Data("WatchWhisper/WiFi/session/v1/\(id)".utf8) + nonce,
                                              using: SymmetricKey(data: key)))
     }

@@ -28,10 +28,10 @@ with zipfile.ZipFile(ipa) as archive:
     # Apple checks the outer watch-only container too (ITMS-90683).
     assert root.get('NSMicrophoneUsageDescription'), 'Missing container microphone purpose string'
     assert watch.get('NSMicrophoneUsageDescription'), 'Missing Watch microphone purpose string'
-    if 'WatchWhisperWiFiPin' in watch:
-        pin = watch['WatchWhisperWiFiPin']
+    if 'MicodexWiFiPin' in watch:
+        pin = watch['MicodexWiFiPin']
         assert len(pin) == 64 and all(c in '0123456789abcdefABCDEF' for c in pin), 'Invalid Wi-Fi certificate pin'
-        assert watch.get('WatchWhisperWiFiHost') and '$(' not in watch['WatchWhisperWiFiHost'], 'Missing local Mac address'
+        assert watch.get('MicodexWiFiHost') and '$(' not in watch['MicodexWiFiHost'], 'Missing local Mac address'
     assert not any(n.endswith(('.p12', '.password')) for n in archive.namelist()), 'Private TLS identity must never be bundled'
 
     print(json.dumps({

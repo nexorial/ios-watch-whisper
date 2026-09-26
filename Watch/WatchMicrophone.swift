@@ -1,5 +1,5 @@
 import AVFoundation
-import WhisperCore
+import MicodexCore
 
 @MainActor
 final class WatchMicrophone {
@@ -12,7 +12,7 @@ final class WatchMicrophone {
             AVAudioSession.sharedInstance().requestRecordPermission { continuation.resume(returning: $0) }
         }
         try Task.checkCancellation()
-        guard granted else { throw MicFailure("请在手表设置允许 Watch Whisper 使用麦克风。") }
+        guard granted else { throw MicFailure("请在手表设置允许 Micodex 使用麦克风。") }
         let session = AVAudioSession.sharedInstance()
         // Speech capture needs normal input processing, not measurement mode's
         // reduced dynamics processing. Never override an OS microphone mute.

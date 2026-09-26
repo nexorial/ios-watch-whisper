@@ -1,6 +1,6 @@
 import Foundation
 import WatchKit
-import WhisperCore
+import MicodexCore
 
 @MainActor
 final class WatchWiFiConnection: ObservableObject {
@@ -42,8 +42,8 @@ final class WatchWiFiConnection: ObservableObject {
     var macAddress: String { client.baseURL.host ?? "" }
     static var configuration: (String, String)? {
         let host = UserDefaults.standard.string(forKey: "wifiHostOverride")
-            ?? (Bundle.main.object(forInfoDictionaryKey: "WatchWhisperWiFiHost") as? String ?? "")
-        let pin = Bundle.main.object(forInfoDictionaryKey: "WatchWhisperWiFiPin") as? String ?? ""
+            ?? (Bundle.main.object(forInfoDictionaryKey: "MicodexWiFiHost") as? String ?? "")
+        let pin = Bundle.main.object(forInfoDictionaryKey: "MicodexWiFiPin") as? String ?? ""
         guard !host.isEmpty, pin.count == 64, pin.allSatisfy({ $0.isHexDigit }) else { return nil }
         return (host, pin)
     }

@@ -1,5 +1,5 @@
 import XCTest
-@testable import WhisperCore
+@testable import MicodexCore
 
 final class ComposerSelectionTests: XCTestCase {
     private let window = CGRect(x: 0, y: 0, width: 1200, height: 900)

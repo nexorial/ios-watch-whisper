@@ -1,6 +1,6 @@
 import AVFoundation
 import XCTest
-@testable import WhisperCore
+@testable import MicodexCore
 
 final class MicrophoneSamplesTests: XCTestCase {
     func testRealConverterPreservesSpeechLevelAtSupportedInputRates() throws {

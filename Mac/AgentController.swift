@@ -1,6 +1,6 @@
 import AppKit
 import ApplicationServices
-import WhisperCore
+import MicodexCore
 
 @MainActor
 final class AgentController: ObservableObject {
@@ -92,7 +92,7 @@ final class AgentController: ObservableObject {
         if action != .scroll { stopScrolling() }
         if recordingConfirmed { lease.renew(at: ProcessInfo.processInfo.systemUptime) }
         do {
-            guard accessibilityGranted else { throw Failure(.permissionRequired, "在系统设置 → 隐私与安全性 → 辅助功能中允许 Watch Whisper。") }
+            guard accessibilityGranted else { throw Failure(.permissionRequired, "在系统设置 → 隐私与安全性 → 辅助功能中允许 Micodex。") }
             switch action {
             case .heartbeat: break
             case .beginDictation: try await begin()

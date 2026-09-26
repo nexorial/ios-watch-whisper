@@ -1,4 +1,4 @@
-name: WatchWhisper
+name: Micodex
 options:
   bundleIdPrefix: com.nexorial
   deploymentTarget:
@@ -9,31 +9,33 @@ settings:
   base:
     SWIFT_VERSION: '5.0'
     MARKETING_VERSION: '0.3.0'
-    CURRENT_PROJECT_VERSION: 10
+    CURRENT_PROJECT_VERSION: 11
     DEVELOPMENT_TEAM: JNN5TPN23D
     CODE_SIGN_STYLE: Automatic
 packages:
-  WhisperCore:
+  MicodexCore:
     path: .
 targets:
-  WatchWhisperMac:
+  MicodexMac:
     type: application
-    productName: Watch Whisper
+    productName: Micodex
     platform: macOS
-    sources: [Mac]
+    sources: [Mac, Shared]
     dependencies:
-      - package: WhisperCore
+      - package: MicodexCore
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nexorial.watchwhisper.mac
-        PRODUCT_NAME: Watch Whisper
+        PRODUCT_NAME: Micodex
         ENABLE_APP_SANDBOX: NO
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
     info:
       path: Config/Mac-Info.plist
       properties:
-        CFBundleDisplayName: Watch Whisper
+        CFBundleDisplayName: Micodex
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSBluetoothAlwaysUsageDescription: 与你批准的 Apple Watch 连接，接收滚动、听写和 Enter 指令。
@@ -41,7 +43,7 @@ targets:
         NSBluetoothPeripheralUsageDescription: 向 Apple Watch 广播本机，建立私人遥控连接。
         LSApplicationCategoryType: public.app-category.productivity
         NSHumanReadableCopyright: Copyright © 2026 Nexorial
-  WatchWhisper:
+  Micodex:
     type: application.watchapp2-container
     platform: iOS
     settings:
@@ -49,40 +51,41 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.nexorial.watchwhisper
         TARGETED_DEVICE_FAMILY: '1,2'
     dependencies:
-      - target: WatchWhisperWatch
+      - target: MicodexWatch
     info:
       path: Config/Container-Info.plist
       properties:
-        CFBundleDisplayName: Watch Whisper
+        CFBundleDisplayName: Micodex
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSMicrophoneUsageDescription: 使用 Apple Watch 内置麦克风采集你主动说的话，通过配对的 Mac 交给 Codex 听写。
         ITSAppUsesNonExemptEncryption: false
-  WatchWhisperWatch:
+  MicodexWatch:
     type: application
-    productName: Watch Whisper Watch
+    productName: Micodex Watch
     platform: watchOS
-    sources: [Watch]
+    sources: [Watch, Shared]
     dependencies:
-      - package: WhisperCore
+      - package: MicodexCore
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nexorial.watchwhisper.watchkitapp
-        PRODUCT_NAME: Watch Whisper Watch
+        PRODUCT_NAME: Micodex Watch
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         TARGETED_DEVICE_FAMILY: '4'
-        WATCH_WHISPER_HOST: ""
-        WATCH_WHISPER_PIN: ""
+        MICODEX_HOST: ""
+        MICODEX_PIN: ""
         SDKROOT: watchos
         SKIP_INSTALL: YES
     info:
       path: Config/Watch-Info.plist
       properties:
-        CFBundleDisplayName: Watch Whisper
+        CFBundleDisplayName: Micodex
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
-        WatchWhisperWiFiHost: $(WATCH_WHISPER_HOST)
-        WatchWhisperWiFiPin: $(WATCH_WHISPER_PIN)
+        MicodexWiFiHost: $(MICODEX_HOST)
+        MicodexWiFiPin: $(MICODEX_PIN)
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         WKApplication: true
@@ -93,15 +96,15 @@ targets:
         NSBluetoothAlwaysUsageDescription: 与你的 Mac 直接连接，用表冠滚动、传输你的语音和发送 Enter。
         NSMicrophoneUsageDescription: 使用 Apple Watch 内置麦克风采集你主动说的话，通过配对的 Mac 交给 Codex 听写。
 schemes:
-  WatchWhisperMac:
+  MicodexMac:
     build:
       targets:
-        WatchWhisperMac: all
-  WatchWhisperWatch:
+        MicodexMac: all
+  MicodexWatch:
     build:
       targets:
-        WatchWhisperWatch: all
-  WatchWhisper:
+        MicodexWatch: all
+  Micodex:
     build:
       targets:
-        WatchWhisper: all
+        Micodex: all

@@ -1,7 +1,7 @@
 import XCTest
-@testable import WhisperCore
+@testable import MicodexCore
 
-final class WhisperCoreTests: XCTestCase {
+final class MicodexCoreTests: XCTestCase {
     private let key = Data(repeating: 0x41, count: 32)
     private let nonce = Data(repeating: 0x71, count: 16)
 

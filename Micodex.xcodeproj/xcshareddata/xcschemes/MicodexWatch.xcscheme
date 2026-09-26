@@ -15,10 +15,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D4D46B3A591B5345765E2DD1"
-               BuildableName = "WatchWhisper.app"
-               BlueprintName = "WatchWhisper"
-               ReferencedContainer = "container:WatchWhisper.xcodeproj">
+               BlueprintIdentifier = "D23DE6C31DEAA6C3DC35E58D"
+               BuildableName = "Micodex Watch.app"
+               BlueprintName = "MicodexWatch"
+               ReferencedContainer = "container:Micodex.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D4D46B3A591B5345765E2DD1"
-            BuildableName = "WatchWhisper.app"
-            BlueprintName = "WatchWhisper"
-            ReferencedContainer = "container:WatchWhisper.xcodeproj">
+            BlueprintIdentifier = "D23DE6C31DEAA6C3DC35E58D"
+            BuildableName = "Micodex Watch.app"
+            BlueprintName = "MicodexWatch"
+            ReferencedContainer = "container:Micodex.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -55,10 +55,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D4D46B3A591B5345765E2DD1"
-            BuildableName = "WatchWhisper.app"
-            BlueprintName = "WatchWhisper"
-            ReferencedContainer = "container:WatchWhisper.xcodeproj">
+            BlueprintIdentifier = "D23DE6C31DEAA6C3DC35E58D"
+            BuildableName = "Micodex Watch.app"
+            BlueprintName = "MicodexWatch"
+            ReferencedContainer = "container:Micodex.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,10 +72,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D4D46B3A591B5345765E2DD1"
-            BuildableName = "WatchWhisper.app"
-            BlueprintName = "WatchWhisper"
-            ReferencedContainer = "container:WatchWhisper.xcodeproj">
+            BlueprintIdentifier = "D23DE6C31DEAA6C3DC35E58D"
+            BuildableName = "Micodex Watch.app"
+            BlueprintName = "MicodexWatch"
+            ReferencedContainer = "container:Micodex.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

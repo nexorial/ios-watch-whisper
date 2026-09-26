@@ -1,6 +1,6 @@
 import Foundation
 import CryptoKit
-import WhisperCore
+import MicodexCore
 
 @MainActor
 final class WiFiHost: ObservableObject {

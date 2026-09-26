@@ -1,7 +1,7 @@
 import Foundation
 import CoreBluetooth
 import WatchKit
-import WhisperCore
+import MicodexCore
 
 @MainActor
 // Both managers and peripherals deliver callbacks on our central manager's main queue.
@@ -309,7 +309,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         guard central === self.central else { return }
         ConnectionTrace.record("watch", "discovered \(peripheral.identifier.uuidString.prefix(8)) RSSI=\(RSSI)")
-        let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? peripheral.name ?? "Whisper Mac"
+        let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? peripheral.name ?? "Micodex Mac"
         let mac = NearbyMac(id: peripheral.identifier, name: name, peripheral: peripheral)
         if let index = nearby.firstIndex(where: { $0.id == mac.id }) { nearby[index] = mac }
         else { nearby.append(mac) }

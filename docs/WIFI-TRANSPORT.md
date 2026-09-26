@@ -8,7 +8,7 @@
 
 ## 信任与配置
 
-使用期间保持 Mac 的 Watch Whisper 运行，手表选择「使用 Wi-Fi 直连」。若再次显示 `CBErrorDomain 15`，说明当前错误来自蓝牙路径，先切回 Wi-Fi 并检查 Mac 服务是否运行。2026-09-26 已按此路径恢复真实 Wi-Fi 连接；若 Mac 的应用内配对记录为空，需要重新核对两端六位码。
+使用期间保持 Mac 的 Micodex 运行，手表选择「使用 Wi-Fi 直连」。若再次显示 `CBErrorDomain 15`，说明当前错误来自蓝牙路径，先切回 Wi-Fi 并检查 Mac 服务是否运行。2026-09-26 已按此路径恢复真实 Wi-Fi 连接；若 Mac 的应用内配对记录为空，需要重新核对两端六位码。
 
 - Mac 使用本机生成的 TLS 身份，私钥只留在权限受限的 App Support 目录，不写入仓库或 Watch。
 - 本机开发安装脚本把 Mac 地址与完整证书 SHA-256 公钥摘要配置到手表构建。Watch 只接受这个证书，并进行系统信任评估；不接受任意自签名证书。
@@ -29,7 +29,7 @@
 
 ## 已取得的证据与剩余限制
 
-- `swift test --scratch-path /tmp/watch-whisper-tests`：28 项测试通过。
+- `swift test --scratch-path /tmp/micodex-tests`：28 项测试通过。
 - `bash scripts/test-wifi-security.sh`：真实 TLS/HTTP/配对服务通过本机集成测试，包括错误证书拒绝、关闭配对窗口、错误票据拒绝、认证会话／回执、重放拒绝和撤销后拒绝。使用独立测试凭据及 demo controller，不操作 Codex。
 - Mac 和 Watch 0.3.0 (4) 构建通过。Mac 已签名更新并运行，原生 UI 显示 Wi-Fi 已就绪。手表包的地址与完整证书摘要已和当前 Mac 独立比对一致。
 - 手表安装先返回 CoreDeviceError 4016 / unavailable；恢复 available 后，安装通道又返回 CoreDeviceError 4 / RemotePairingError 1007 / CBErrorDomain 15。尚未把 0.3.0 装到真表，真实 HTTPS、Watch 麦克风、滚动和 Codex 转写不能宣称通过。

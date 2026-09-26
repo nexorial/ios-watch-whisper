@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Watch Whisper</string>
+	<string>Micodex</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -41,9 +41,9 @@
 	<true/>
 	<key>WKWatchOnly</key>
 	<true/>
-	<key>WatchWhisperWiFiHost</key>
-	<string>$(WATCH_WHISPER_HOST)</string>
-	<key>WatchWhisperWiFiPin</key>
-	<string>$(WATCH_WHISPER_PIN)</string>
+	<key>MicodexWiFiHost</key>
+	<string>$(MICODEX_HOST)</string>
+	<key>MicodexWiFiPin</key>
+	<string>$(MICODEX_PIN)</string>
 </dict>
 </plist>

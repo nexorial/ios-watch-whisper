@@ -1,12 +1,12 @@
 # Watch 麦克风接入 Codex
 
-保留 Codex 内置听写。0.3 链路：Watch 内置麦克风 → 固定证书的 HTTPS 音频流（BLE 备用）→ Mac Watch Whisper → BlackHole 2ch → Codex。
+保留 Codex 内置听写。0.3 链路：Watch 内置麦克风 → 固定证书的 HTTPS 音频流（BLE 备用）→ Mac Micodex → BlackHole 2ch → Codex。
 
 ## 本机准备
 
 1. 安装 [BlackHole 2ch 官方驱动](https://github.com/ExistentialAudio/BlackHole)。已准备的 0.7.1 安装包在本机 `artifacts/BlackHole2ch-0.7.1.pkg`。它是系统音频组件，安装需要管理员授权，安装器声明需要重启；由用户确认后执行。
-2. 在 Mac Watch Whisper 点击 **「设为听写输入」**，或在系统「声音 → 输入」选择 **BlackHole 2ch**。Codex 的音频输入选择默认输入或 BlackHole 2ch。其他使用默认输入的应用也会受到影响；使用完毕可切回原麦克风。接收端仅在明确点击设置按钮时修改默认输入，不会因连接手表或开始听写而自动切换；不会修改扬声器输出。
-3. Mac Watch Whisper 点击「检查音频设备」，应显示 **Watch 音频 → BlackHole 2ch**。
+2. 在 Mac Micodex 点击 **「设为听写输入」**，或在系统「声音 → 输入」选择 **BlackHole 2ch**。Codex 的音频输入选择默认输入或 BlackHole 2ch。其他使用默认输入的应用也会受到影响；使用完毕可切回原麦克风。接收端仅在明确点击设置按钮时修改默认输入，不会因连接手表或开始听写而自动切换；不会修改扬声器输出。
+3. Mac Micodex 点击「检查音频设备」，应显示 **Watch 音频 → BlackHole 2ch**。
 4. 首次在 Watch 按住说话，确认系统麦克风授权。等「Watch 正在收音」出现后说话。
 5. 松开后，音频队列播放完毕再结束 Codex 听写。先核对转写文字，手动点 Enter。
 
