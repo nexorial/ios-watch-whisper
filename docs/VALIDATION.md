@@ -2,6 +2,12 @@
 
 > 当前产品已更名为 **Micodex**（Build 11）。以下历史上传／验证证据保留当时的应用名和原始文件路径。
 
+## 2026-09-27 · Micodex 已替换真表旧版
+
+- 按用户要求原位更新 Apple Watch Ultra 4，保留原 Bundle ID 和配对身份；没有卸载 App 或移除配对。
+- `scripts/install-watch.sh` 完成签名构建、安装和启动。随后独立查询真表应用清单，确认 **Micodex 0.3.0 (11)**；进程查询确认 `Micodex Watch.app/Micodex Watch` 正在运行（PID 912）。
+- 本机证据：`artifacts/micodex-build11-install-watch.log`、`artifacts/micodex-build11-installed-app.json`、`artifacts/micodex-build11-processes.json`。安装和运行已确认；本次未进行真实听写／表冠验收，未替换 Mac 接收端或上传 TestFlight。
+
 ## 2026-09-26 · Micodex 亮紫色与界面精简（Build 11）
 
 - 品牌、Mac / Watch 显示名、菜单、权限提示、蓝牙广播名、Xcode 工程 / schemes、Swift package 和构建脚本统一为 Micodex。历史安装身份、Keychain 服务、TLS 身份目录、HMAC 协议域保持不变，支持与旧版设备配对兼容。
