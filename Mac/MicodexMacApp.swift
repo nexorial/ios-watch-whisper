@@ -112,6 +112,7 @@ private struct HostView: View {
                     Divider()
                     advancedSection
                 }
+                .padding(.trailing, 16)
             }
             .padding(.top, 3)
 
