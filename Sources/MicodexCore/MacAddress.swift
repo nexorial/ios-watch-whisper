@@ -17,17 +17,17 @@ public enum MacAddress {
 
 public enum WiFiConnectionGuidance {
     public static func message(for error: Error, address: String) -> String {
-        guard let error = error as? URLError else { return "连接未完成：\(error.localizedDescription)" }
+        guard let error = error as? URLError else { return L10n.t("Connection incomplete: %@", error.localizedDescription) }
         switch error.code {
         case .notConnectedToInternet:
-            return "手表暂无可用网络。请在「设置 → Wi-Fi」核对网络，并与 Mac 连接同一局域网。"
+            return L10n.t("No network connection on Watch. Check Settings → Wi-Fi and use the same local network as your Mac.")
         case .cannotConnectToHost, .timedOut, .cannotFindHost, .networkConnectionLost:
-            return "无法连接 Mac（\(address)）。请确认 Mac 软件显示「Wi-Fi 已就绪」，并核对其 Mac IP 与这里一致。将自动重试，无需重新配对。"
+            return L10n.t("Cannot reach Mac (%@). Check that Mac shows “Wi-Fi Ready” and that its Mac IP matches this address. Retrying automatically; no need to pair again.", address)
         case .serverCertificateUntrusted, .serverCertificateHasBadDate, .serverCertificateHasUnknownRoot,
              .serverCertificateNotYetValid, .secureConnectionFailed, .cancelled:
-            return "无法验证 Mac 的安全连接。请确认 IP 属于原来配对的 Mac；更换电脑后需重新配置手表 App。"
+            return L10n.t("Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. A different Mac requires a new Watch app configuration.")
         default:
-            return "Wi-Fi 连接失败：\(error.localizedDescription)。请先检查 Mac 的接收服务状态。"
+            return L10n.t("Wi-Fi connection failed: %@. Check the receiver status on Mac first.", error.localizedDescription)
         }
     }
 }

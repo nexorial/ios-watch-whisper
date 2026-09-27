@@ -39,6 +39,6 @@ final class MicrophoneSamplesTests: XCTestCase {
         let converter = try MicrophoneSamples(source: format)
         let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 4800)!
         XCTAssertTrue(try converter.convert(buffer).isEmpty)
-        XCTAssertEqual(AudioLevel().caption, "尚未检测到声音")
+        XCTAssertEqual(AudioLevel().caption, L10n.t("No sound detected yet"))
     }
 }

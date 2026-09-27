@@ -1,0 +1,20 @@
+{
+  "Ready": "准备好了",
+  "Listening on Watch": "Watch 正在收音",
+  "Transcribing…": "正在转写…",
+  "Allow Accessibility on Mac": "请在 Mac 允许辅助功能",
+  "Open your task on Mac": "请在 Mac 打开目标任务",
+  "Dictation or input not found": "未找到听写或输入框",
+  "Action incomplete. Check Mac.": "操作未完成，请查看 Mac",
+  "No sound detected yet": "尚未检测到声音",
+  "Audio input detected": "已检测到输入音量",
+  "Silent": "静音",
+  "%@ s · Peak %@/32768 · RMS %@ · Nonzero %@": "%@ 秒 · 峰值 %@/32768 · RMS %@ · 非零 %@",
+  "Connection incomplete: %@": "连接未完成：%@",
+  "No network connection on Watch. Check Settings → Wi-Fi and use the same local network as your Mac.": "手表暂无可用网络。请在「设置 → Wi-Fi」核对网络，并与 Mac 连接同一局域网。",
+  "Cannot reach Mac (%@). Check that Mac shows “Wi-Fi Ready” and that its Mac IP matches this address. Retrying automatically; no need to pair again.": "无法连接 Mac（%@）。请确认 Mac 软件显示「Wi-Fi 已就绪」，并核对其 Mac IP 与这里一致。将自动重试，无需重新配对。",
+  "Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. A different Mac requires a new Watch app configuration.": "无法验证 Mac 的安全连接。请确认 IP 属于原来配对的 Mac；更换电脑后需重新配置手表 App。",
+  "Wi-Fi connection failed: %@. Check the receiver status on Mac first.": "Wi-Fi 连接失败：%@。请先检查 Mac 的接收服务状态。",
+  "Connect Mac to your local network first.": "请先连接 Mac 的局域网。",
+  "Too quiet — speak closer": "输入音量很低，请靠近手表说话"
+}

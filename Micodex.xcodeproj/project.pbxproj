@@ -15,9 +15,11 @@
 		34CE10E4DE841A8C199F6E0F /* LocalTLSIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F985FAA4BDB022D28261E6 /* LocalTLSIdentity.swift */; };
 		52328906890CECD6147CA371 /* WiFiNetworkInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */; };
 		52C1B5FA21806897EA31B233 /* WatchAudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */; };
+		56C057D863A9D98208FCBB8F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A5506C08F9F87F84A83F248 /* InfoPlist.strings */; };
 		62BDB0FAA6A44AF360C76069 /* BluetoothHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = C180B30971414F71F8DBADAC /* BluetoothHost.swift */; };
 		769DC7B498970D5A43685B34 /* WatchMicrophone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */; };
 		8C7919D2EA8141E8592D10C7 /* MicodexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89AB17F6A012B2C920CC380 /* MicodexApp.swift */; };
+		96570E82CFF697CA6F5ACEDB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A5506C08F9F87F84A83F248 /* InfoPlist.strings */; };
 		9C0AA554068EACDEE3DB28BE /* TLSHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0383EF77860F4707E6839B /* TLSHTTPServer.swift */; };
 		A34832A57F1576D8FB4607F0 /* MicodexStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */; };
 		A594F72EABA0D3B8B7E0FCA8 /* WiFiHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C4BA921586A3603CB13845 /* WiFiHost.swift */; };
@@ -27,6 +29,7 @@
 		B97745DA1700628F5E395757 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 502475A91D42AE5CAE9E12F2 /* Assets.xcassets */; };
 		C302609A8D7D74FB19AC95D8 /* AgentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75955C7535FC50E2A09E7077 /* AgentController.swift */; };
 		CE025C84D722AF331C96AEFD /* WiFiNetworkInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */; };
+		E7E010632BB63033351A8C87 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A5506C08F9F87F84A83F248 /* InfoPlist.strings */; };
 		F30E06CA1B6671DEC6E00B07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B50ED7B712D97AE6EDB12C0 /* Assets.xcassets */; };
 		FC0100A6B7D0DCFE2D84C8D2 /* MicodexMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */; };
 /* End PBXBuildFile section */
@@ -58,6 +61,7 @@
 /* Begin PBXFileReference section */
 		0C0383EF77860F4707E6839B /* TLSHTTPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TLSHTTPServer.swift; sourceTree = "<group>"; };
 		2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexMacApp.swift; sourceTree = "<group>"; };
+		4910A49D5B8B1C8A49EEA90A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMicrophone.swift; sourceTree = "<group>"; };
 		4C3F1656BE48EA5F1C1A77E6 /* WatchLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLink.swift; sourceTree = "<group>"; };
 		502475A91D42AE5CAE9E12F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -65,6 +69,7 @@
 		6B50ED7B712D97AE6EDB12C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		75955C7535FC50E2A09E7077 /* AgentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentController.swift; sourceTree = "<group>"; };
 		8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexStyle.swift; sourceTree = "<group>"; };
+		9498FE33FC609DC862C4E853 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		99C4BA921586A3603CB13845 /* WiFiHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiHost.swift; sourceTree = "<group>"; };
 		A00F4AD8680D677C24EC8172 /* ios-watch-whisper */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "ios-watch-whisper"; path = .; sourceTree = SOURCE_ROOT; };
 		A20BC01991389FA8F5374D3C /* Micodex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Micodex.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,6 +114,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		97029B61F05F79A82C9E04F8 /* AppResources */ = {
+			isa = PBXGroup;
+			children = (
+				4A5506C08F9F87F84A83F248 /* InfoPlist.strings */,
+			);
+			path = AppResources;
+			sourceTree = "<group>";
+		};
 		B30C827DE0595EF7B5EF6C94 /* Mac */ = {
 			isa = PBXGroup;
 			children = (
@@ -128,6 +141,7 @@
 		CB7CEC9011573C60CD80D736 = {
 			isa = PBXGroup;
 			children = (
+				97029B61F05F79A82C9E04F8 /* AppResources */,
 				B30C827DE0595EF7B5EF6C94 /* Mac */,
 				F021E9C83DEDEBEC4BAA9B3D /* Packages */,
 				F6937CE24220CF240E1E78BB /* Shared */,
@@ -174,6 +188,7 @@
 			buildConfigurationList = C48179EFA9728D3BA05D4C0E /* Build configuration list for PBXNativeTarget "Micodex" */;
 			buildPhases = (
 				C72CF1DA0A2572FA521767F6 /* Sources */,
+				4C145523650523C1CF1117EA /* Resources */,
 				563E5395D00B16BB9373A4B4 /* Embed Watch Content */,
 			);
 			buildRules = (
@@ -257,6 +272,7 @@
 			knownRegions = (
 				Base,
 				en,
+				"zh-Hans",
 			);
 			mainGroup = CB7CEC9011573C60CD80D736;
 			minimizedProjectReferenceProxies = 1;
@@ -281,6 +297,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				B97745DA1700628F5E395757 /* Assets.xcassets in Resources */,
+				96570E82CFF697CA6F5ACEDB /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4C145523650523C1CF1117EA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E7E010632BB63033351A8C87 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,6 +314,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F30E06CA1B6671DEC6E00B07 /* Assets.xcassets in Resources */,
+				56C057D863A9D98208FCBB8F /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,6 +368,18 @@
 			targetProxy = 25111DD06588F483D21E3E44 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		4A5506C08F9F87F84A83F248 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9498FE33FC609DC862C4E853 /* en */,
+				4910A49D5B8B1C8A49EEA90A /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		09885B1C79AED41CF86F879D /* Release */ = {
@@ -444,7 +482,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -512,7 +550,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_NS_ASSERTIONS = NO;

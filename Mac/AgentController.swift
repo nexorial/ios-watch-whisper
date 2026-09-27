@@ -11,7 +11,8 @@ final class AgentController: ObservableObject {
     }
     @Published var target: Target = .codex
     @Published var phase: HostPhase = .ready
-    @Published var detail = "将 Codex 的任务窗口放在前台，然后用手表操作。"
+    @Published var detailMessage: LocalizedMessage = L10n.message("Bring a Codex task window to the front, then use your Watch.")
+    var detail: String { detailMessage.localizedString }
     @Published var lastOperation = ""
     private var recordingWindow: AXUIElement?
     private var recordingPID: pid_t?
@@ -39,19 +40,19 @@ final class AgentController: ObservableObject {
 
     init(demo: Bool = false) {
         self.demo = demo
-        if demo { detail = "演示模式：不会操作任何其他应用。" }
+        if demo { detailMessage = L10n.message("Demo mode: other apps will not be controlled.") }
         leaseTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 500_000_000)
                 guard let self else { return }
                 if let deadline = self.stopDeadline, ProcessInfo.processInfo.systemUptime >= deadline {
                     self.stopDeadline = nil; self.lease.finish()
-                    self.phase = .failed; self.detail = "已停止 Watch 收音；Codex 尚未确认结束，请在 Mac 完成转写。"
+                    self.phase = .failed; self.detailMessage = L10n.message("Watch recording has stopped. Codex has not confirmed completion; finish transcription on your Mac.")
                 }
                 if self.lease.expired(at: ProcessInfo.processInfo.systemUptime) {
                     self.lease.finish()
                     _ = await self.perform(.finishReceivedAudio)
-                    self.detail = "手表连接中断或录音已达 2 分钟，已请求保留收到的内容进行转写。"
+                    self.detailMessage = L10n.message("The Watch disconnected or reached the 2-minute recording limit. Received audio has been kept for transcription.")
                 }
             }
         }
@@ -92,7 +93,7 @@ final class AgentController: ObservableObject {
         if action != .scroll { stopScrolling() }
         if recordingConfirmed { lease.renew(at: ProcessInfo.processInfo.systemUptime) }
         do {
-            guard accessibilityGranted else { throw Failure(.permissionRequired, "在系统设置 → 隐私与安全性 → 辅助功能中允许 Micodex。") }
+            guard accessibilityGranted else { throw Failure(.permissionRequired, L10n.message("Allow Micodex in System Settings → Privacy & Security → Accessibility.")) }
             switch action {
             case .heartbeat: break
             case .beginDictation: try await begin()
@@ -103,15 +104,15 @@ final class AgentController: ObservableObject {
             case .scroll: try scroll(value)
             }
         } catch let error as Failure {
-            phase = error.phase; detail = error.message
+            phase = error.phase; detailMessage = error.message
         } catch {
-            phase = .failed; detail = error.localizedDescription
+            phase = .failed; detailMessage = L10n.message("Operation failed: %@", error.localizedDescription)
         }
         if let stop = pendingStop {
             pendingStop = nil
             if stop == .finishReceivedAudio { await drainBeforePreserving?() }
             do { try await finish(cancel: stop == .cancelDictation) }
-            catch { phase = .failed; detail = "连接中断后无法确认停止，请在 Codex 检查录音。" }
+            catch { phase = .failed; detailMessage = L10n.message("Could not confirm recording stopped after disconnection. Check dictation in Codex.") }
         }
         if action != .scroll {
             lastOperation = "\(action) · \(phase.caption) · \(detail)"
@@ -121,23 +122,23 @@ final class AgentController: ObservableObject {
     }
 
     private func begin() async throws {
-        guard target == .codex else { throw Failure(.unavailable, "Claude 听写尚未适配。请使用 Codex，Claude 目前仅支持滚动和 Enter。") }
-        guard !pendingTranscription else { throw Failure(.transcribing, "正在确认上一次听写已停止，请稍后再开始。") }
+        guard target == .codex else { throw Failure(.unavailable, L10n.message("Dictation is not yet supported in Claude. Use Codex for dictation; Claude supports scrolling and Enter.")) }
+        guard !pendingTranscription else { throw Failure(.transcribing, L10n.message("Confirming the previous dictation has stopped. Wait before starting again.")) }
         if recordingWindow != nil { refresh(); return }
         let (app, window) = try await activateTargetWindow()
         let elements = descendants(window)
         guard buttons(elements, matching: ["Retry dictation", "重试听写"]).isEmpty else {
-            throw Failure(.failed, "Codex 上一次转写失败，请先在 Mac 重试听写或清除错误，再开始新录音。")
+            throw Failure(.failed, L10n.message("The previous Codex transcription failed. Retry dictation or clear the error on your Mac before recording again."))
         }
         let editor = try composer(elements, in: window)
         guard AXUIElementSetAttributeValue(editor, kAXFocusedAttribute as CFString, kCFBooleanTrue) == .success else {
-            throw Failure(.unavailable, "无法聚焦 Codex 任务输入框。")
+            throw Failure(.unavailable, L10n.message("Could not focus the Codex task input."))
         }
         guard buttons(elements, matching: AgentLabels.stop.union(AgentLabels.transcribing).union(AgentLabels.starting)).isEmpty else {
-            throw Failure(.unavailable, "目标已有听写或转写，请先在 Mac 完成。")
+            throw Failure(.unavailable, L10n.message("Dictation or transcription is already running. Finish it on your Mac first."))
         }
         let controls = buttons(elements, matching: AgentLabels.dictate)
-        guard controls.count == 1 else { throw Failure(.unavailable, "没有找到唯一的 Codex 听写按钮。请显示任务输入框，使用中／英文界面。") }
+        guard controls.count == 1 else { throw Failure(.unavailable, L10n.message("Could not identify the Codex dictation button. Show the task input and use the English or Chinese Codex interface.")) }
         recordingWindow = window; recordingPID = app.processIdentifier
         recordingTitle = string(window, kAXTitleAttribute)
         lease.begin(at: ProcessInfo.processInfo.systemUptime)
@@ -147,12 +148,12 @@ final class AgentController: ObservableObject {
             let stops = buttons(descendants(window), matching: AgentLabels.stop)
             if stops.count == 1 {
                 stopControl = stops[0]; phase = .listening; recordingConfirmed = true
-                detail = "Watch 麦克风经 BlackHole 送入 Codex 听写。"
+                detailMessage = L10n.message("Watch microphone audio is being sent through BlackHole to Codex dictation.")
                 return
             }
         }
         // Keep the lease alive so a late start is also cancelled by the watchdog.
-        throw Failure(.failed, "听写启动未获界面确认。请查看 Codex 的麦克风权限；手表不会自动重试。")
+        throw Failure(.failed, L10n.message("Could not confirm dictation started. Check Codex microphone permission; the Watch will not retry automatically."))
     }
 
     private func finish(cancel: Bool) async throws {
@@ -160,7 +161,7 @@ final class AgentController: ObservableObject {
         if pendingTranscription && !cancel { refresh(); return }
         guard string(window, kAXTitleAttribute) == recordingTitle else {
             lease.finish()
-            throw Failure(.failed, "任务窗口已切换，无法确认原录音。请在 Codex 手动停止。")
+            throw Failure(.failed, L10n.message("The task window changed, so the original recording cannot be verified. Stop dictation manually in Codex."))
         }
         let elements = descendants(window)
         var candidates = buttons(elements, matching: cancel ? AgentLabels.cancel : AgentLabels.stop)
@@ -172,13 +173,13 @@ final class AgentController: ObservableObject {
                 clearRecording(); phase = .ready; return
             }
             lease.finish()
-            throw Failure(.failed, "未找到原录音的停止控件，请在 Codex 停止听写。")
+            throw Failure(.failed, L10n.message("Could not find the stop control for this recording. Stop dictation in Codex."))
         }
         try press(candidates[0])
         // Preserve the exact window through the asynchronous transcription period.
         pendingTranscription = true; phase = .transcribing; recordingConfirmed = false
         lease.finish(); stopDeadline = ProcessInfo.processInfo.systemUptime + 5
-        detail = cancel ? "正在取消听写，不会发送消息。" : "正在结束 Codex 收音…"
+        detailMessage = cancel ? L10n.message("Canceling dictation. No message will be sent.") : L10n.message("Stopping Codex recording…")
         for _ in 0..<10 {
             try await Task.sleep(nanoseconds: 100_000_000)
             let current = descendants(window)
@@ -186,7 +187,7 @@ final class AgentController: ObservableObject {
             if buttons(current, matching: AgentLabels.stop.union(AgentLabels.starting)).isEmpty,
                !buttons(current, matching: finishedLabels).isEmpty {
                 lease.finish(); stopControl = nil; stopDeadline = nil
-                detail = cancel ? "已取消听写，不会发送消息。" : "已停止收音，等待 Codex 转写；检查文字后在手表点 Enter。"
+                detailMessage = cancel ? L10n.message("Dictation canceled. No message will be sent.") : L10n.message("Recording stopped. Wait for Codex to transcribe, review the text, then tap Enter on your Watch.")
                 refresh(); return
             }
         }
@@ -194,23 +195,23 @@ final class AgentController: ObservableObject {
         // itself must not loop forever. Never retry by pressing a start button.
         if cancel {
             lease.finish(); stopDeadline = nil
-            throw Failure(.failed, "已请求取消，但 Codex 仍显示录音。请在 Codex 手动停止。")
+            throw Failure(.failed, L10n.message("Cancellation requested, but Codex still shows recording. Stop it manually in Codex."))
         }
         // Codex drains its microphone asynchronously. Keep the bounded watchdog,
         // but don't report a failed stop merely because its UI takes over 1 s.
-        detail = "Watch 收音已停止，等待 Codex 完成尾音处理与转写。"
+        detailMessage = L10n.message("Watch recording stopped. Waiting for Codex to process the remaining audio and transcribe.")
     }
 
     private func refresh() {
         guard accessibilityGranted else { phase = .permissionRequired; return }
         if let window = recordingWindow {
             guard string(window, kAXTitleAttribute) == recordingTitle else {
-                phase = .failed; detail = "原任务已切换，请在 Mac 检查听写状态。"; return
+                phase = .failed; detailMessage = L10n.message("The original task changed. Check dictation on your Mac."); return
             }
             let elements = descendants(window)
             if !buttons(elements, matching: ["Retry dictation", "重试听写"]).isEmpty {
                 clearRecording(); phase = .failed
-                detail = "Codex 显示重试听写，本次未确认生成文字。请在 Mac 重试或清除错误。"
+                detailMessage = L10n.message("Codex shows Retry dictation; no transcription was confirmed. Retry or clear the error on your Mac.")
                 return
             }
             if !buttons(elements, matching: AgentLabels.stop).isEmpty {
@@ -225,7 +226,7 @@ final class AgentController: ObservableObject {
                 phase = .transcribing; return
             }
             if buttons(elements, matching: AgentLabels.dictate).count == 1 {
-                clearRecording(); phase = .ready; detail = "请检查 Codex 输入框里的文字，再点 Enter。"
+                clearRecording(); phase = .ready; detailMessage = L10n.message("Review the text in Codex, then tap Enter.")
             } else if pendingTranscription { phase = .transcribing }
             return
         }
@@ -236,34 +237,34 @@ final class AgentController: ObservableObject {
     }
 
     private func enter() throws {
-        guard recordingWindow == nil else { throw Failure(.transcribing, "请先停止听写，等转写完成后再点 Enter。") }
+        guard recordingWindow == nil else { throw Failure(.transcribing, L10n.message("Stop dictation and wait for transcription before tapping Enter.")) }
         let (app, window) = try frontWindow()
         let elements = descendants(window)
         guard buttons(elements, matching: AgentLabels.stop.union(AgentLabels.transcribing).union(AgentLabels.starting)).isEmpty else {
-            throw Failure(.transcribing, "Codex 还在收音或转写，请稍后发送。")
+            throw Failure(.transcribing, L10n.message("Codex is still recording or transcribing. Wait before sending."))
         }
         let editor = try composer(elements, in: window)
         let value = string(editor, kAXValueAttribute).trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !value.isEmpty else { throw Failure(.unavailable, "输入框是空的，不发送 Enter。") }
+        guard !value.isEmpty else { throw Failure(.unavailable, L10n.message("The input is empty. Enter was not sent.")) }
         guard AXUIElementSetAttributeValue(editor, kAXFocusedAttribute as CFString, kCFBooleanTrue) == .success else {
-            throw Failure(.unavailable, "无法聚焦任务输入框。")
+            throw Failure(.unavailable, L10n.message("Could not focus the task input."))
         }
         guard NSWorkspace.shared.frontmostApplication?.processIdentifier == app.processIdentifier else {
-            throw Failure(.targetInactive, "目标应用不在前台。")
+            throw Failure(.targetInactive, L10n.message("The target app is not in the foreground."))
         }
         let source = CGEventSource(stateID: .hidSystemState)
         guard let down = CGEvent(keyboardEventSource: source, virtualKey: 36, keyDown: true),
               let up = CGEvent(keyboardEventSource: source, virtualKey: 36, keyDown: false) else {
-            throw Failure(.failed, "无法创建 Enter 事件。")
+            throw Failure(.failed, L10n.message("Could not create the Enter key event."))
         }
         down.postToPid(app.processIdentifier); up.postToPid(app.processIdentifier)
-        phase = .ready; detail = "已向目标输入框发送 Enter。请以 Codex 实际任务状态为准。"
+        phase = .ready; detailMessage = L10n.message("Enter was sent to the task input. Check Codex for the task status.")
     }
 
     private func scroll(_ pixels: Int16) throws {
         let started = ProcessInfo.processInfo.systemUptime
         let (app, window) = try frontWindow()
-        guard let frame = rect(window) else { throw Failure(.unavailable, "无法定位任务窗口。") }
+        guard let frame = rect(window) else { throw Failure(.unavailable, L10n.message("Could not locate the task window.")) }
         let title = string(window, kAXTitleAttribute)
         let cached = scrollAnchor.map { anchor in
             anchor.pid == app.processIdentifier && CFEqual(anchor.window, window)
@@ -302,7 +303,7 @@ final class AgentController: ObservableObject {
                     do { try self.emitScrollFrame(self.scrollMotion.next()); frames += 1 }
                     catch {
                         self.scrollMotion.reset(); self.scrollAnchor = nil
-                        self.phase = .targetInactive; self.detail = "滚动目标已变化，已停止滚动。"; break
+                        self.phase = .targetInactive; self.detailMessage = L10n.message("The scroll target changed. Scrolling stopped."); break
                     }
                     totalMS += (ProcessInfo.processInfo.systemUptime - tick) * 1000
                     try? await Task.sleep(nanoseconds: 16_666_667)
@@ -314,8 +315,8 @@ final class AgentController: ObservableObject {
             }
         }
         if !isRecording { phase = .ready }
-        let message = pixels >= 0 ? "向下浏览 Codex 对话正文" : "向上浏览 Codex 对话正文"
-        if detail != message { detail = message }
+        let message = pixels >= 0 ? L10n.message("Scrolling down the Codex conversation") : L10n.message("Scrolling up the Codex conversation")
+        if detail != message.localizedString { detailMessage = message }
     }
     func stopScrolling() {
         scrollEpoch = UUID()
@@ -324,21 +325,21 @@ final class AgentController: ObservableObject {
     private func emitScrollFrame(_ pixels: Int16) throws {
         guard let anchor = scrollAnchor, NSWorkspace.shared.frontmostApplication?.processIdentifier == anchor.pid,
               rect(anchor.window) == anchor.frame,
-              anchor.editor == nil || anchor.editor.flatMap({ rect($0) }) == anchor.editorFrame else { throw Failure(.targetInactive, "目标窗口已变化。") }
+              anchor.editor == nil || anchor.editor.flatMap({ rect($0) }) == anchor.editorFrame else { throw Failure(.targetInactive, L10n.message("The target window changed.")) }
         var focused: CFTypeRef?
         guard AXUIElementCopyAttributeValue(AXUIElementCreateApplication(anchor.pid), kAXFocusedWindowAttribute as CFString, &focused) == .success,
-              let focused, CFEqual(focused, anchor.window) else { throw Failure(.targetInactive, "任务窗口已切换。") }
+              let focused, CFEqual(focused, anchor.window) else { throw Failure(.targetInactive, L10n.message("The task window changed.")) }
         var hit: AXUIElement?, hitPID: pid_t = 0
         guard AXUIElementCopyElementAtPosition(AXUIElementCreateSystemWide(), Float(anchor.point.x), Float(anchor.point.y), &hit) == .success,
-              let hit, AXUIElementGetPid(hit, &hitPID) == .success, hitPID == anchor.pid else { throw Failure(.targetInactive, "正文位置已被遮挡。") }
+              let hit, AXUIElementGetPid(hit, &hitPID) == .success, hitPID == anchor.pid else { throw Failure(.targetInactive, L10n.message("The conversation area is covered.")) }
         guard let event = CGEvent(scrollWheelEvent2Source: CGEventSource(stateID: .hidSystemState), units: .pixel,
-                                  wheelCount: 1, wheel1: -Int32(pixels), wheel2: 0, wheel3: 0) else { throw Failure(.failed, "无法创建滚动事件。") }
+                                  wheelCount: 1, wheel1: -Int32(pixels), wheel2: 0, wheel3: 0) else { throw Failure(.failed, L10n.message("Could not create the scroll event.")) }
         event.location = anchor.point; event.post(tap: .cghidEventTap)
     }
 
     private func activateTargetWindow() async throws -> (NSRunningApplication, AXUIElement) {
         guard let app = NSRunningApplication.runningApplications(withBundleIdentifier: target.bundleID).first else {
-            throw Failure(.targetInactive, "请先打开 \(target.rawValue) 的任务。")
+            throw Failure(.targetInactive, L10n.message("Open a task in %@ first.", target.rawValue))
         }
         app.activate(options: [.activateIgnoringOtherApps])
         for _ in 0..<20 {
@@ -350,7 +351,7 @@ final class AgentController: ObservableObject {
 
     private func frontWindow() throws -> (NSRunningApplication, AXUIElement) {
         guard let app = NSWorkspace.shared.frontmostApplication, app.bundleIdentifier == target.bundleID else {
-            throw Failure(.targetInactive, "请把 \(target.rawValue) 的任务窗口放在前台。不会把按键发给其他应用。")
+            throw Failure(.targetInactive, L10n.message("Bring the %@ task window to the front. Keystrokes will not be sent to other apps.", target.rawValue))
         }
         let root = AXUIElementCreateApplication(app.processIdentifier)
         if accessibilityPreparedPID != app.processIdentifier {
@@ -362,12 +363,12 @@ final class AgentController: ObservableObject {
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(root, kAXFocusedWindowAttribute as CFString, &value) == .success,
               let value, CFGetTypeID(value) == AXUIElementGetTypeID() else {
-            throw Failure(.unavailable, "没有可用的任务窗口。")
+            throw Failure(.unavailable, L10n.message("No task window is available."))
         }
         return (app, unsafeBitCast(value, to: AXUIElement.self))
     }
     private func composer(_ elements: [AXUIElement], in window: AXUIElement) throws -> AXUIElement {
-        guard let windowRect = rect(window) else { throw Failure(.unavailable, "无法定位任务窗口。") }
+        guard let windowRect = rect(window) else { throw Failure(.unavailable, L10n.message("Could not locate the task window.")) }
         let candidates = elements.enumerated().compactMap { index, element -> ComposerSelection.Candidate? in
             let role = string(element, kAXRoleAttribute)
             guard [kAXTextAreaRole, kAXTextFieldRole].contains(role), let frame = rect(element) else { return nil }
@@ -380,7 +381,7 @@ final class AgentController: ObservableObject {
                                                  dictateButtons: buttons(elements, matching: AgentLabels.dictate).compactMap { rect($0) }) {
             return elements[index]
         }
-        throw Failure(.unavailable, "尚未定位任务输入框。请保持 Codex 任务页面可见；搜索框或多个编辑面板可能造成歧义。")
+        throw Failure(.unavailable, L10n.message("Could not locate the task input. Keep the Codex task visible; search fields or multiple editors may prevent detection."))
     }
     private func clearRecording() {
         stopDeadline = nil; drainBeforePreserving = nil
@@ -414,7 +415,7 @@ final class AgentController: ObservableObject {
     }
     private func press(_ element: AXUIElement) throws {
         guard AXUIElementPerformAction(element, kAXPressAction as CFString) == .success else {
-            throw Failure(.failed, "目标控件没有接受操作。")
+            throw Failure(.failed, L10n.message("The target control did not accept the action."))
         }
     }
     private func rect(_ element: AXUIElement) -> CGRect? {
@@ -427,7 +428,7 @@ final class AgentController: ObservableObject {
               AXValueGetValue(unsafeBitCast(s, to: AXValue.self), .cgSize, &size) else { return nil }
         return CGRect(origin: point, size: size)
     }
-    private struct Failure: Error { let phase: HostPhase; let message: String
-        init(_ phase: HostPhase, _ message: String) { self.phase = phase; self.message = message }
+    private struct Failure: Error { let phase: HostPhase; let message: LocalizedMessage
+        init(_ phase: HostPhase, _ message: LocalizedMessage) { self.phase = phase; self.message = message }
     }
 }

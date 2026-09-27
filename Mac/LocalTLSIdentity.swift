@@ -1,4 +1,5 @@
 import Foundation
+import MicodexCore
 import Security
 import CryptoKit
 import SystemConfiguration
@@ -32,7 +33,7 @@ struct LocalTLSIdentity {
         }
         if needsPassword {
             var random = [UInt8](repeating: 0, count: 32)
-            guard SecRandomCopyBytes(kSecRandomDefault, random.count, &random) == errSecSuccess else { throw Failure("无法生成本机身份保护密码。") }
+            guard SecRandomCopyBytes(kSecRandomDefault, random.count, &random) == errSecSuccess else { throw Failure(L10n.message("Could not generate the local identity password.")) }
             try Data(random.map { String(format: "%02x", $0) }.joined().utf8).write(to: passwordFile, options: .atomic)
             try fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: passwordFile.path)
         }
@@ -46,17 +47,17 @@ struct LocalTLSIdentity {
             else { _ = try fm.replaceItemAt(archive, withItemAt: temporary) }
             try fm.removeItem(at: key)
         }
-        guard #available(macOS 15.0, *) else { throw Failure("Wi-Fi 直连需要 macOS 15 或更新版本。") }
+        guard #available(macOS 15.0, *) else { throw Failure(L10n.message("Wi-Fi direct connection requires macOS 15 or later.")) }
         let password = try String(contentsOf: passwordFile, encoding: .utf8)
         var items: CFArray?
         let result = SecPKCS12Import(try Data(contentsOf: archive) as CFData,
                                     [kSecImportExportPassphrase as String: password, kSecImportToMemoryOnly as String: true] as CFDictionary, &items)
         guard result == errSecSuccess, let first = (items as? [[String: Any]])?.first,
-              let value = first[kSecImportItemIdentity as String] else { throw Failure("无法读取本机 TLS 身份（\(result)）。") }
+              let value = first[kSecImportItemIdentity as String] else { throw Failure(L10n.message("Could not read the local TLS identity (%@).", String(result))) }
         let identity = value as! SecIdentity
         var certificate: SecCertificate?
         guard SecIdentityCopyCertificate(identity, &certificate) == errSecSuccess, let certificate else {
-            throw Failure("本机 TLS 证书不可用。")
+            throw Failure(L10n.message("The local TLS certificate is unavailable."))
         }
         let der = SecCertificateCopyData(certificate) as Data
         try der.write(to: directory.appendingPathComponent("certificate.der"), options: .atomic)
@@ -85,12 +86,13 @@ struct LocalTLSIdentity {
         try process.run()
         let data = errors.fileHandleForReading.readDataToEndOfFile(); process.waitUntilExit()
         guard process.terminationStatus == 0 else {
-            throw Failure("本机证书准备失败：\(String(decoding: data, as: UTF8.self).prefix(180))")
+            throw Failure(L10n.message("Could not prepare the local certificate: %@", String(String(decoding: data, as: UTF8.self).prefix(180))))
         }
     }
-    struct Failure: LocalizedError {
-        let message: String
-        init(_ message: String) { self.message = message }
-        var errorDescription: String? { message }
+    struct Failure: LocalizedMessageError {
+        let message: LocalizedMessage
+        init(_ message: LocalizedMessage) { self.message = message }
+        init(_ message: String) { self.message = L10n.message(message) }
+        var localizedMessage: LocalizedMessage { message }
     }
 }

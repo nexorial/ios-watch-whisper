@@ -5,7 +5,7 @@ import MicodexCore
 
 @MainActor
 final class WiFiHost: ObservableObject {
-    @Published var status = "正在准备 Wi-Fi 直连…"
+    @Published var status = L10n.t("Preparing Wi-Fi direct connection…")
     @Published var address = ""
     @Published var pairingOpen = false
     @Published var pendingCode: String?
@@ -51,7 +51,7 @@ final class WiFiHost: ObservableObject {
         self.controller = controller; self.preferences = preferences; self.accountPrefix = accountPrefix; self.port = port
         self.audioOverride = audioOverride
         pairedCount = approved.count
-        if demo { status = "演示模式" } else {
+        if demo { status = L10n.t("Demo mode") } else {
             start()
             networkTask = Task { [weak self] in
                 while !Task.isCancelled {
@@ -69,38 +69,38 @@ final class WiFiHost: ObservableObject {
         do {
             guard try lease.acquire(port: port) else {
                 duplicateReceiver = true
-                serviceIssue = "另一个 Micodex 接收端正在运行。请使用已打开的窗口；关闭它后，这里会自动接管。"
-                status = "已有接收端"; scheduleRetry(); return
+                serviceIssue = L10n.t("Another Micodex receiver is running. Use its open window; this receiver will take over automatically when it closes.")
+                status = L10n.t("Another receiver is running"); scheduleRetry(); return
             }
             duplicateReceiver = false
             guard let host = LocalTLSIdentity.localAddress() else {
-                address = ""; status = "尚未连接局域网"
-                serviceIssue = "请将 Mac 连上 Wi-Fi；网络恢复后会自动连接。"
+                address = ""; status = L10n.t("Not connected to a local network")
+                serviceIssue = L10n.t("Connect your Mac to Wi-Fi. Connection will resume automatically when the network returns.")
                 scheduleRetry(); return
             }
             address = host
             let identity = try LocalTLSIdentity.prepare()
             let token = UUID(); serverEpoch = token
             let server = TLSHTTPServer { [weak self] request in
-                guard let self else { return (503, WiFiReply("error", message: "接收端已退出")) }
+                guard let self else { return (503, WiFiReply("error", message: L10n.message("The receiver has closed"))) }
                 return await self.handle(request, epoch: token)
             }
             self.server = server
-            status = "正在启动接收服务…"
+            status = L10n.t("Starting the receiver…")
             try server.start(identity: identity.identity, address: host, portNumber: port) { [weak self] event in
                 Task { @MainActor in
                     guard let self, self.serverEpoch == token, !self.stopped else { return }
                     switch event {
                     case .ready:
                         self.serviceReady = true; self.serviceIssue = nil; self.retryAttempt = 0
-                        self.status = "Wi-Fi 已就绪 · 等待手表"
+                        self.status = L10n.t("Wi-Fi Ready · Waiting for Watch")
                     case .waiting(let error), .failed(let error):
                         self.serviceReady = false
-                        self.status = "接收服务暂不可用 · 自动重试中"
+                        self.status = L10n.t("Receiver unavailable · Retrying automatically")
                         if case .posix(.EADDRINUSE) = error {
-                            self.serviceIssue = "Mac 的接收端口被占用。请关闭其他 Micodex 或旧版 Watch Whisper；无需改手表 IP 或重新配对。端口释放后会自动恢复。"
+                            self.serviceIssue = L10n.t("The Mac receiver port is in use. Close other Micodex or older Watch Whisper instances. Keep the Watch IP and pairing; connection will recover when the port is free.")
                         } else {
-                            self.serviceIssue = "请检查 Mac 的局域网连接和本地网络权限。服务会自动重试。详情：\(error.localizedDescription)"
+                            self.serviceIssue = L10n.t("Check the Mac local network connection and Local Network permission. The service will retry automatically. Details: %@", error.localizedDescription)
                         }
                         ConnectionTrace.record("wifi-server", "port=\(self.port) listener error=\(error)")
                         self.retireServer(retry: true)
@@ -108,8 +108,8 @@ final class WiFiHost: ObservableObject {
                 }
             }
         } catch {
-            serviceIssue = "接收服务启动失败：\(error.localizedDescription)"
-            status = "接收服务暂不可用 · 自动重试中"
+            serviceIssue = L10n.t("Could not start the receiver: %@", error.localizedDescription)
+            status = L10n.t("Receiver unavailable · Retrying automatically")
             retireServer(retry: true)
         }
     }
@@ -153,7 +153,7 @@ final class WiFiHost: ObservableObject {
     func refreshNetwork() {
         guard canRefreshNetwork, !stopped else { return }
         retryTask?.cancel(); retryTask = nil; retryAttempt = 0
-        status = "正在重新连接局域网…"
+        status = L10n.t("Reconnecting to the local network…")
         if server == nil { start() } else { retireServer(retry: false) }
     }
     func refreshAddressIfNeeded() {
@@ -170,12 +170,12 @@ final class WiFiHost: ObservableObject {
     func allowPairing() {
         guard serviceReady else { refreshNetwork(); return }
         pairingUntil = Date().addingTimeInterval(60); pairingOpen = true; pending = nil; pendingCode = nil
-        status = "请在手表核对配对码"
+        status = L10n.t("Check the pairing code on your Watch")
         Task { [weak self] in
             try? await Task.sleep(nanoseconds: 60_000_000_000)
             guard let self, self.pairingUntil <= Date() else { return }
             self.pairingOpen = false; self.pending = nil; self.pendingCode = nil
-            if self.sessions.isEmpty { self.status = "配对窗口已结束" }
+            if self.sessions.isEmpty { self.status = L10n.t("The pairing window closed") }
         }
     }
     func approve() {
@@ -191,8 +191,8 @@ final class WiFiHost: ObservableObject {
             var ids = approved
             if !ids.contains(pending.id.uuidString) { ids.append(pending.id.uuidString) }; approved = ids
             grants[pending.id] = Pairing(id: pending.id, ticket: pending.ticket, expires: Date().addingTimeInterval(90))
-            self.pending = nil; pendingCode = nil; pairingOpen = false; status = "已允许手表，正在验证连接…"
-        } catch { status = "保存 Wi-Fi 配对失败：\(error.localizedDescription)" }
+            self.pending = nil; pendingCode = nil; pairingOpen = false; status = L10n.t("Watch allowed. Verifying the connection…")
+        } catch { status = L10n.t("Could not save Wi-Fi pairing: %@", error.localizedDescription) }
     }
     func revokeAll() {
         controller.stopScrolling()
@@ -204,45 +204,45 @@ final class WiFiHost: ObservableObject {
             if wasRecording { _ = await controller.perform(.cancelDictation) }
             do {
                 for id in ids { try KeychainStore.delete("\(accountPrefix)\(id)") }
-                status = "Wi-Fi 配对已移除"
-            } catch { status = "移除配对失败" }
+                status = L10n.t("Wi-Fi pairing removed")
+            } catch { status = L10n.t("Could not remove pairing") }
         }
     }
     private func handle(_ request: HTTPEnvelope, epoch: UUID) async -> (Int, WiFiReply) {
-        guard serverEpoch == epoch, serviceReady else { return (503, WiFiReply("error", message: "网络已刷新，请重新连接")) }
+        guard serverEpoch == epoch, serviceReady else { return (503, WiFiReply("error", message: L10n.message("The network was refreshed. Connect again."))) }
         if request.method == "GET", request.path == "/v1/hello" {
             return (200, WiFiReply("ok", name: Host.current().localizedName ?? "Mac"))
         }
         guard request.method == "POST", let input = try? JSONDecoder().decode(WiFiRequest.self, from: request.body),
-              let id = UUID(uuidString: input.id) else { return (400, WiFiReply("error", message: "请求格式错误")) }
+              let id = UUID(uuidString: input.id) else { return (400, WiFiReply("error", message: L10n.message("Invalid request format"))) }
         do {
             if request.path == "/v1/pair" { return try pair(id: id, input: input) }
             guard approved.contains(id.uuidString), let key = try KeychainStore.read("\(accountPrefix)\(id)"), key.count == 32 else {
-                return (403, WiFiReply("unpaired", message: "请在 Mac 允许这块手表"))
+                return (403, WiFiReply("unpaired", message: L10n.message("Click Allow This Watch on your Mac")))
             }
             if request.path == "/v1/session" {
                 guard let nonce = input.nonce.flatMap({ Data(base64Encoded: $0) }),
                       let proof = input.proof.flatMap({ Data(base64Encoded: $0) }),
                       WiFiWire.validProof(proof, id: id.uuidString, nonce: nonce, key: key) else {
-                    return (403, WiFiReply("unpaired", message: "配对验证失败，请重新配对"))
+                    return (403, WiFiReply("unpaired", message: L10n.message("Pairing verification failed. Pair again.")))
                 }
                 if let session = sessions[id], session.clientNonce == nonce {
                     return (200, WiFiReply("ok", challenge: session.challenge.base64EncodedString()))
                 }
                 guard !controller.isBusy, !sessions.values.contains(where: { $0.draining }),
-                      !controller.isRecording || controller.isFinishing else { return (409, WiFiReply("error", message: "请先结束当前听写")) }
+                      !controller.isRecording || controller.isFinishing else { return (409, WiFiReply("error", message: L10n.message("Finish the current dictation first"))) }
                 let challenge = try KeychainStore.random(count: 16)
                 sessions[id] = Session(key: key, challenge: challenge, clientNonce: nonce); grants[id] = nil
                 return (200, WiFiReply("ok", challenge: challenge.base64EncodedString()))
             }
-            guard var session = sessions[id] else { return (403, WiFiReply("sessionExpired", message: "连接需要重新验证")) }
+            guard var session = sessions[id] else { return (403, WiFiReply("sessionExpired", message: L10n.message("The connection needs verification again"))) }
             if request.path == "/v1/audio" {
                 guard (owner == id && controller.isRecording) || session.finalized else {
-                    return (409, WiFiReply("error", message: "当前没有此手表的录音会话"))
+                    return (409, WiFiReply("error", message: L10n.message("No recording session is active for this Watch")))
                 }
                 guard var gate = session.audioGate,
                       let packets = input.packets, !packets.isEmpty, packets.count <= 32 else {
-                    return (409, WiFiReply("error", message: "当前没有此手表的录音会话"))
+                    return (409, WiFiReply("error", message: L10n.message("No recording session is active for this Watch")))
                 }
                 var endpoint: SilenceEndpoint.Reason?
                 for packet in packets {
@@ -272,7 +272,7 @@ final class WiFiHost: ObservableObject {
                 return (200, WiFiReply("ok"))
             }
             guard request.path == "/v1/command", let packet = input.packet.flatMap({ Data(base64Encoded: $0) }) else {
-                return (404, WiFiReply("error", message: "未知请求"))
+                return (404, WiFiReply("error", message: L10n.message("Unknown request")))
             }
             let command = try Wire.decode(packet, key: session.key, challenge: session.challenge)
             try session.gate.accept(command); sessions[id] = session
@@ -286,7 +286,7 @@ final class WiFiHost: ObservableObject {
             }
             else if command.action == .beginDictation {
                 guard !controller.isRecording && !controller.isFinishing else {
-                    return (409, WiFiReply("error", message: "请等上一次听写结束后再开始"))
+                    return (409, WiFiReply("error", message: L10n.message("Wait for the previous dictation to finish before starting again")))
                 }
                 do {
                     try playback.start()
@@ -300,11 +300,11 @@ final class WiFiHost: ObservableObject {
                     }
                     else { playback.stop() }
                 } catch {
-                    playback.stop(); controller.phase = .failed; controller.detail = error.localizedDescription; phase = .failed
+                    playback.stop(); controller.phase = .failed; controller.detailMessage = (error as? LocalizedMessageError)?.localizedMessage ?? L10n.message("Audio failed: %@", error.localizedDescription); phase = .failed
                 }
             } else if [.finishDictation, .finishReceivedAudio].contains(command.action), owner == id {
                 guard command.action == .finishReceivedAudio || sessions[id]?.audioGate?.ended == true else {
-                    throw LocalTLSIdentity.Failure("手表音频尚未完整结束")
+                    throw LocalTLSIdentity.Failure(L10n.message("Watch audio has not finished completely"))
                 }
                 sessions[id]?.finalized = true; sessions[id]?.draining = true
                 phase = await finishAudio(id: id, challenge: session.challenge)
@@ -313,9 +313,9 @@ final class WiFiHost: ObservableObject {
             if [.beginDictation, .finishDictation, .cancelDictation, .finishReceivedAudio].contains(command.action) {
                 ConnectionTrace.record("audio", "\(command.action) phase=\(phase) samples=\(playback.receivedSamples) \(playback.captureSummary)")
             }
-            let newStatus = "Wi-Fi 已连接 · \(phase.caption)"
+            let newStatus = L10n.t("Wi-Fi connected · %@", phase.caption)
             if status != newStatus { status = newStatus }
-            return (200, WiFiReply("ok", message: controller.detail,
+            return (200, WiFiReply("ok", message: controller.detailMessage,
                                   packet: try Wire.status(phase, sequence: command.sequence, key: session.key,
                                                           challenge: session.challenge).base64EncodedString()))
         } catch {
@@ -326,7 +326,7 @@ final class WiFiHost: ObservableObject {
                     _ = await finishAudio(id: id, challenge: sessions[id]!.challenge)
                 }
             }
-            return (403, WiFiReply("error", message: "请求验证失败或音频传输中断"))
+            return (403, WiFiReply("error", message: L10n.message("Request verification failed or audio transfer was interrupted")))
         }
     }
     private func finishAudio(id: UUID, challenge: Data) async -> HostPhase {
@@ -343,12 +343,12 @@ final class WiFiHost: ObservableObject {
         let phase = await controller.perform(.finishDictation)
         if sessions[id]?.challenge == challenge { sessions[id]?.draining = false }
         if !controller.isRecording { owner = nil }
-        status = "Wi-Fi 已连接 · \(phase.caption)"
+        status = L10n.t("Wi-Fi connected · %@", phase.caption)
         return phase
     }
     private func pair(id: UUID, input: WiFiRequest) throws -> (Int, WiFiReply) {
         guard let ticket = input.ticket.flatMap({ Data(base64Encoded: $0) }), ticket.count == 32 else {
-            return (400, WiFiReply("error", message: "配对请求格式错误"))
+            return (400, WiFiReply("error", message: L10n.message("Invalid pairing request format")))
         }
         grants = grants.filter { $0.value.expires > Date() }
         if let grant = grants[id], grant.ticket == ticket,
@@ -356,15 +356,15 @@ final class WiFiHost: ObservableObject {
             return (200, WiFiReply("ok", name: Host.current().localizedName ?? "Mac", key: key.base64EncodedString()))
         }
         guard pairingOpen, Date() < pairingUntil else {
-            return (403, WiFiReply("pending", message: "在 Mac 点「允许 Wi-Fi 手表」"))
+            return (403, WiFiReply("pending", message: L10n.message("Click Allow Wi-Fi Watch on your Mac")))
         }
         if pending == nil {
             pending = Pairing(id: id, ticket: ticket, expires: pairingUntil)
             pendingCode = WiFiWire.pairingCode(id: id.uuidString, ticket: ticket)
         }
         guard pending?.id == id, pending?.ticket == ticket else {
-            return (409, WiFiReply("pending", message: "Mac 正在处理另一条配对请求"))
+            return (409, WiFiReply("pending", message: L10n.message("The Mac is handling another pairing request")))
         }
-        return (202, WiFiReply("pending", message: "请核对配对码，再在 Mac 允许这块手表"))
+        return (202, WiFiReply("pending", message: L10n.message("Check the pairing code, then click Codes Match — Allow on your Mac")))
     }
 }

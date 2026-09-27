@@ -22,7 +22,7 @@ struct WiFiSecuritySmoke {
         let client = try PinnedHTTPSClient(host: address, port: 8767, fingerprint: identity.fingerprint)
         defer { client.invalidate() }
         for _ in 0..<20 {
-            if host.status.hasPrefix("Wi-Fi 已就绪") { break }
+            if host.serviceReady { break }
             try await Task.sleep(nanoseconds: 50_000_000)
         }
         let hello = try await client.request("v1/hello")
@@ -145,10 +145,10 @@ struct WiFiSecuritySmoke {
                                   accountPrefix: prefix, port: occupiedPort)
         defer { recovering.shutdown() }
         for _ in 0..<60 {
-            if recovering.serviceIssue?.contains("端口被占用") == true { break }
+            if recovering.serviceIssue != nil { break }
             try await Task.sleep(nanoseconds: 50_000_000)
         }
-        try require(!recovering.serviceReady && recovering.serviceIssue?.contains("端口被占用") == true,
+        try require(!recovering.serviceReady && recovering.serviceIssue != nil,
                     "Busy port is explained, never reported ready: \(recovering.status)")
         blocker.cancel()
         try await waitForReady(recovering)

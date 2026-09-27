@@ -1,0 +1,8 @@
+/* Micodex system permission prompts. */
+"CFBundleDisplayName" = "Micodex";
+"NSBluetoothAlwaysUsageDescription" = "连接你批准的 Apple Watch 和 Mac，用于滚动、听写和 Enter 指令。";
+"NSBluetoothPeripheralUsageDescription" = "向 Apple Watch 广播本机，建立私人遥控连接。";
+"NSLocalNetworkUsageDescription" = "与你批准的 Apple Watch 建立加密的局域网遥控连接。";
+"NSLocationUsageDescription" = "仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。";
+"NSLocationWhenInUseUsageDescription" = "仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。";
+"NSMicrophoneUsageDescription" = "使用 Apple Watch 内置麦克风采集你主动说的话，通过配对的 Mac 交给 Codex 听写。";

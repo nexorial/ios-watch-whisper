@@ -5,11 +5,11 @@ import MicodexCore
 @MainActor
 // CoreBluetooth delivers every delegate callback on the explicitly selected main queue.
 final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeripheralManagerDelegate {
-    @Published var connection = "蓝牙未启动"
+    @Published var connection = L10n.t("Bluetooth has not started")
     @Published var pendingWatch: String?
     @Published var pairingOpen = false
     @Published var pairedCount = 0
-    @Published var radioStatus = "正在启动蓝牙"
+    @Published var radioStatus = L10n.t("Starting Bluetooth")
     private var serviceReady = false
     private var manager: CBPeripheralManager!
     private var statusCharacteristic: CBMutableCharacteristic!
@@ -31,9 +31,9 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
         self.controller = controller; self.demo = demo
         super.init()
         pairedCount = approvedIDs.count
-        if demo { connection = "演示模式 · 无蓝牙连接" }
+        if demo { connection = L10n.t("Demo mode · No Bluetooth connection") }
         else if enabled { manager = CBPeripheralManager(delegate: self, queue: .main) }
-        else { connection = "蓝牙备用未开启"; radioStatus = "Wi-Fi 直连优先" }
+        else { connection = L10n.t("Bluetooth backup is off"); radioStatus = L10n.t("Wi-Fi direct connection preferred") }
     }
     func enableBluetooth() {
         guard manager == nil, !demo else { return }
@@ -41,29 +41,29 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     }
     func allowPairing() {
         guard manager?.state == .poweredOn, serviceReady else {
-            refreshRadio(); connection = "蓝牙服务尚未就绪，请查看蓝牙状态。"; return
+            refreshRadio(); connection = L10n.t("Bluetooth is not ready. Check its status."); return
         }
         if !manager.isAdvertising { advertise() }
         refreshRadio()
         ConnectionTrace.record("mac", "pairing window opened; advertising=\(manager.isAdvertising)")
         pairingUntil = Date().addingTimeInterval(60); pairingOpen = true
-        connection = "60 秒内在手表选择这台 Mac"
+        connection = L10n.t("Select this Mac on your Watch within 60 seconds")
         Task { [weak self] in
             try? await Task.sleep(nanoseconds: 60_000_000_000)
             guard let self, self.pairingUntil <= Date() else { return }
             self.pairingOpen = false; self.pendingWatch = nil; self.pendingCentral = nil
-            if self.sessions.isEmpty { self.connection = "配对窗口已结束，可重新允许手表。" }
+            if self.sessions.isEmpty { self.connection = L10n.t("The pairing window closed. Allow your Watch again to retry.") }
             self.refreshRadio()
         }
     }
     func refreshRadio() {
-        guard !demo else { radioStatus = "演示模式"; return }
-        guard manager != nil else { radioStatus = "蓝牙备用未开启"; return }
+        guard !demo else { radioStatus = L10n.t("Demo mode"); return }
+        guard manager != nil else { radioStatus = L10n.t("Bluetooth backup is off"); return }
         switch manager?.state {
-        case .poweredOn: radioStatus = manager.isAdvertising ? "Mac 蓝牙广播中" : "Mac 蓝牙已开，广播未启动"
-        case .unauthorized: radioStatus = "Micodex 尚未获蓝牙权限"
-        case .poweredOff: radioStatus = "Mac 蓝牙已关闭"
-        default: radioStatus = "蓝牙服务正在准备"
+        case .poweredOn: radioStatus = manager.isAdvertising ? L10n.t("Mac Bluetooth is advertising") : L10n.t("Mac Bluetooth is on, but advertising has not started")
+        case .unauthorized: radioStatus = L10n.t("Micodex needs Bluetooth permission")
+        case .poweredOff: radioStatus = L10n.t("Mac Bluetooth is off")
+        default: radioStatus = L10n.t("Preparing Bluetooth")
         }
     }
     func restartAdvertising() {
@@ -82,8 +82,8 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
             var ids = approvedIDs; if !ids.contains(id.uuidString) { ids.append(id.uuidString) }; approvedIDs = ids
             ConnectionTrace.record("mac", "watch approved \(id.uuidString.prefix(8))")
             pendingWatch = nil; pendingCentral = nil; pairingOpen = false
-            connection = "已允许这块手表，正在建立加密连接…"
-        } catch { connection = "无法保存配对密钥：\(error.localizedDescription)" }
+            connection = L10n.t("Watch allowed. Establishing an encrypted connection…")
+        } catch { connection = L10n.t("Could not save the pairing key: %@", error.localizedDescription) }
     }
     func revokeAll() {
         Task {
@@ -92,15 +92,15 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
             do {
                 for id in approvedIDs { try KeychainStore.delete("watch-\(id)") }
                 approvedIDs = []; sessions = [:]; owner = nil; work = []; pendingNotifications = []
-                connection = "已移除配对，请在手表也点忘记 Mac"
-            } catch { connection = "移除配对失败：\(error.localizedDescription)" }
+                connection = L10n.t("Pairing removed. Tap Forget Mac on your Watch too.")
+            } catch { connection = L10n.t("Could not remove pairing: %@", error.localizedDescription) }
         }
     }
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         serviceReady = false; refreshRadio()
         ConnectionTrace.record("mac", "peripheral manager state=\(peripheral.state.rawValue)")
         guard peripheral.state == .poweredOn else {
-            connection = peripheral.state == .unauthorized ? "请在系统设置允许蓝牙" : "请打开 Mac 蓝牙"
+            connection = peripheral.state == .unauthorized ? L10n.t("Allow Bluetooth in System Settings") : L10n.t("Turn on Bluetooth on your Mac")
             audio.stop(); sessions = [:]; work = []; owner = nil
             Task { _ = await controller.perform(.cancelDictation) }
             return
@@ -117,7 +117,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     }
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
         guard error == nil else {
-            connection = "蓝牙服务失败：\(error!.localizedDescription)"
+            connection = L10n.t("Bluetooth service failed: %@", error!.localizedDescription)
             ConnectionTrace.record("mac", connection); return
         }
         serviceReady = true; ConnectionTrace.record("mac", "GATT service registered")
@@ -125,7 +125,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
     }
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
         refreshRadio()
-        connection = error == nil ? "等待已配对手表 · 蓝牙直连" : "广播失败：\(error!.localizedDescription)"
+        connection = error == nil ? L10n.t("Waiting for a paired Watch · Bluetooth direct") : L10n.t("Bluetooth advertising failed: %@", error!.localizedDescription)
         ConnectionTrace.record("mac", "advertising=\(peripheral.isAdvertising) error=\(String(describing: error))")
     }
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
@@ -138,7 +138,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
                 guard approvedIDs.contains(id.uuidString), let key = try KeychainStore.read("watch-\(id)") else {
                     if pairingOpen && Date() < pairingUntil && (pendingCentral == nil || pendingCentral == id) {
                         pendingCentral = id; pendingWatch = String(id.uuidString.prefix(8))
-                        connection = "手表请求配对，请核对手表上的请求后允许"
+                        connection = L10n.t("A Watch requested pairing. Check the request on your Watch, then allow it.")
                     }
                     peripheral.respond(to: request, withResult: .insufficientAuthorization); return
                 }
@@ -160,7 +160,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
             guard request.offset <= payload.count else { peripheral.respond(to: request, withResult: .invalidOffset); return }
             request.value = payload.subdata(in: request.offset..<payload.count)
             peripheral.respond(to: request, withResult: .success)
-        } catch { peripheral.respond(to: request, withResult: .unlikelyError); connection = "配对数据不可用" }
+        } catch { peripheral.respond(to: request, withResult: .unlikelyError); connection = L10n.t("Pairing data is unavailable") }
     }
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         for request in requests where request.characteristic.uuid == CBUUID(string: AudioWire.characteristic) { receiveAudio(request) }
@@ -199,7 +199,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
             sessions[id]?.audioGate = nil
             Task {
                 _ = await controller.perform(.finishReceivedAudio)
-                controller.phase = .failed; controller.detail = "Watch 音频传输失败：\(error.localizedDescription)"
+                controller.phase = .failed; controller.detailMessage = (error as? LocalizedMessageError)?.localizedMessage ?? L10n.message("Watch audio transfer failed: %@", error.localizedDescription)
             }
         }
     }
@@ -225,19 +225,19 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
                                 sessions[central.identifier]?.audioGate = AudioGate(stream: command.sequence)
                             } else { audio.stop() }
                         } catch {
-                            audio.stop(); controller.phase = .failed; controller.detail = error.localizedDescription
+                            audio.stop(); controller.phase = .failed; controller.detailMessage = (error as? LocalizedMessageError)?.localizedMessage ?? L10n.message("Audio failed: %@", error.localizedDescription)
                             phase = .failed
                         }
                     } else if [.finishDictation, .finishReceivedAudio].contains(command.action), owner == central.identifier {
                         do {
                             guard command.action == .finishReceivedAudio || sessions[central.identifier]?.audioGate?.ended == true else {
-                                throw WatchAudioOutput.AudioFailure("手表音频未完整结束，已保留收到的部分。")
+                                throw WatchAudioOutput.AudioFailure(L10n.message("Watch audio did not finish completely. Received audio has been kept."))
                             }
                             try await audio.drain()
                             phase = await controller.perform(.finishDictation)
                         } catch {
                             _ = await controller.perform(.finishReceivedAudio)
-                            controller.phase = .failed; controller.detail = error.localizedDescription; phase = .failed
+                            controller.phase = .failed; controller.detailMessage = (error as? LocalizedMessageError)?.localizedMessage ?? L10n.message("Audio failed: %@", error.localizedDescription); phase = .failed
                         }
                         audio.stop(); sessions[central.identifier]?.audioGate = nil
                     } else {
@@ -251,7 +251,7 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
                         pendingNotifications.append((data, central))
                     }
                 }
-                connection = "手表已连接 · \(phase.caption)"
+                connection = L10n.t("Watch connected · %@", phase.caption)
             }
             draining = false
         }
@@ -277,6 +277,6 @@ final class BluetoothHost: NSObject, ObservableObject, @preconcurrency CBPeriphe
                 if owner == central.identifier { owner = nil }
             }
         }
-        connection = "手表已断开 · 等待自动重连"
+        connection = L10n.t("Watch disconnected · Waiting to reconnect")
     }
 }

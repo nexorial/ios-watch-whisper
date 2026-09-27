@@ -10,13 +10,13 @@ public enum HostPhase: UInt8, Sendable {
 
     public var caption: String {
         switch self {
-        case .ready: return "准备好了"
-        case .listening: return "Watch 正在收音"
-        case .transcribing: return "正在转写…"
-        case .permissionRequired: return "请在 Mac 允许辅助功能"
-        case .targetInactive: return "请在 Mac 打开目标任务"
-        case .unavailable: return "未找到听写或输入框"
-        case .failed: return "操作未完成，请查看 Mac"
+        case .ready: return L10n.t("Ready")
+        case .listening: return L10n.t("Listening on Watch")
+        case .transcribing: return L10n.t("Transcribing…")
+        case .permissionRequired: return L10n.t("Allow Accessibility on Mac")
+        case .targetInactive: return L10n.t("Open your task on Mac")
+        case .unavailable: return L10n.t("Dictation or input not found")
+        case .failed: return L10n.t("Action incomplete. Check Mac.")
         }
     }
 }

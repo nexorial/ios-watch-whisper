@@ -16,6 +16,8 @@ public struct WiFiRequest: Codable, Sendable {
 public struct WiFiReply: Codable, Sendable {
     public var status: String
     public var message: String?
+    public var messageKey: String?
+    public var messageArguments: [String]?
     public var name: String?
     public var key: String?
     public var challenge: String?
@@ -24,6 +26,16 @@ public struct WiFiReply: Codable, Sendable {
                 challenge: String? = nil, packet: String? = nil) {
         self.status = status; self.message = message; self.name = name; self.key = key
         self.challenge = challenge; self.packet = packet
+    }
+    public init(_ status: String, message: LocalizedMessage, name: String? = nil, key: String? = nil,
+                challenge: String? = nil, packet: String? = nil) {
+        self.init(status, message: message.localizedString, name: name, key: key, challenge: challenge, packet: packet)
+        messageKey = message.key; messageArguments = message.arguments
+    }
+    public var localizedMessage: String? { renderedMessage() }
+    public func renderedMessage(language: String? = nil) -> String? {
+        guard let messageKey else { return message }
+        return L10n.render(messageKey, arguments: messageArguments ?? [], language: language)
     }
 }
 public enum WiFiWire {

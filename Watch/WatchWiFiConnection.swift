@@ -5,7 +5,7 @@ import MicodexCore
 @MainActor
 final class WatchWiFiConnection: ObservableObject {
     @Published var connected = false
-    @Published var status = "正在通过 Wi-Fi 寻找 Mac…"
+    @Published var status = L10n.t("Looking for your Mac over Wi-Fi…")
     @Published var phase: HostPhase = .ready
     @Published var macName = "Mac"
     @Published var pairingCode: String?
@@ -72,7 +72,7 @@ final class WatchWiFiConnection: ObservableObject {
                 do {
                     let hello = try await self.client.request("v1/hello")
                     try self.check(token)
-                    guard hello.status == "ok" else { throw Failure("Mac Wi-Fi 服务不可用") }
+                    guard hello.status == "ok" else { throw Failure(L10n.t("The Mac Wi-Fi service is unavailable.")) }
                     self.macName = hello.name ?? "Mac"
                     if self.key == nil {
                         if self.ticket == nil { self.ticket = try KeychainStore.random(count: 32) }
@@ -81,7 +81,7 @@ final class WatchWiFiConnection: ObservableObject {
                         let reply = try await self.client.request("v1/pair", WiFiRequest(id: self.id.uuidString, ticket: ticket.base64EncodedString()))
                         try self.check(token)
                         guard reply.status == "ok", let key = reply.key.flatMap({ Data(base64Encoded: $0) }), key.count == 32 else {
-                            self.status = reply.message ?? "请在 Mac 允许 Wi-Fi 手表"
+                            self.status = reply.localizedMessage ?? L10n.t("Click “Allow Wi-Fi Watch” on your Mac.")
                             try await Task.sleep(nanoseconds: 1_500_000_000); continue
                         }
                         try KeychainStore.save(key, account: self.account); self.key = key; self.pairingCode = nil
@@ -94,16 +94,16 @@ final class WatchWiFiConnection: ObservableObject {
                         try KeychainStore.delete(self.account); self.key = nil; self.ticket = nil; continue
                     }
                     guard reply.status == "ok", let challenge = reply.challenge.flatMap({ Data(base64Encoded: $0) }), challenge.count == 16 else {
-                        throw Failure(reply.message ?? "Mac 会话未准备好")
+                        throw Failure(reply.localizedMessage ?? L10n.t("The Mac session is not ready."))
                     }
                     self.challenge = challenge; self.sequence = 1
                     let heartbeat = try Wire.encode(Command(.heartbeat, sequence: 1), key: key, challenge: challenge)
                     let acknowledgement = try await self.client.request("v1/command", WiFiRequest(id: self.id.uuidString, packet: heartbeat.base64EncodedString()))
                     try self.check(token)
-                    guard let data = acknowledgement.packet.flatMap({ Data(base64Encoded: $0) }) else { throw Failure("Mac 未确认连接") }
+                    guard let data = acknowledgement.packet.flatMap({ Data(base64Encoded: $0) }) else { throw Failure(L10n.t("Your Mac did not confirm the connection.")) }
                     let (phase, sequence) = try Wire.decodeStatus(data, key: key, challenge: challenge)
                     guard sequence == 1 else { throw WireError.replay }
-                    self.connected = true; self.phase = phase; self.status = "Wi-Fi 已连接 \(self.macName)"
+                    self.connected = true; self.phase = phase; self.status = L10n.t("Connected to %@ over Wi-Fi", self.macName)
                     ConnectionTrace.record("wifi", "authenticated HTTPS heartbeat received")
                 } catch {
                     guard self.epoch == token, !Task.isCancelled else { return }
@@ -125,28 +125,28 @@ final class WatchWiFiConnection: ObservableObject {
             active = true; suspendAfterFinish = true
             send(.finishDictation)
         case .disconnect:
-            reset(preserveReceivedAudio: false); status = "抬腕后恢复 Wi-Fi 连接"
+            reset(preserveReceivedAudio: false); status = L10n.t("Raise your wrist to reconnect over Wi-Fi.")
         }
     }
     func setRecordingLocked(_ locked: Bool) { recordingLocked = locked && recordingRequested && !stopping }
     func disconnect() { visible = false; reset(preserveReceivedAudio: true) }
     func forget() {
         reset(preserveReceivedAudio: true); try? KeychainStore.delete(account)
-        key = nil; ticket = nil; pairingCode = nil; status = "正在重新配对 Wi-Fi…"; connect()
+        key = nil; ticket = nil; pairingCode = nil; status = L10n.t("Pairing again over Wi-Fi…"); connect()
     }
     func send(_ action: RemoteAction, value: Int16 = 0) {
         guard connected else { return }
         if action == .beginDictation {
             guard visible, !recordingRequested, !stopping else { return }
-            clearAudio(); recordingRequested = true; status = "正在开启 Watch 麦克风…"
-            microphoneLevel = "正在开启 Watch 麦克风…"
+            clearAudio(); recordingRequested = true; status = L10n.t("Starting the Watch microphone…")
+            microphoneLevel = L10n.t("Starting the Watch microphone…")
             let token = epoch
             micTask = Task { [weak self] in
                 guard let self else { return }
                 do {
                     try await self.microphone.start(onSilence: { [weak self] reason in
                         self?.send(.finishDictation)
-                        self?.microphoneLevel = reason == .quietAfterSound ? "安静 2 秒，已停止收音" : "未检测到声音，已停止收音"
+                        self?.microphoneLevel = reason == .quietAfterSound ? L10n.t("Recording stopped after 2 seconds of silence") : L10n.t("No sound detected. Recording stopped.")
                     }, onFailure: { [weak self] in self?.fail($0) }) { [weak self] in self?.capture($0) }
                     try self.check(token)
                     guard self.recordingRequested else { self.microphone.stop(); return }
@@ -164,12 +164,12 @@ final class WatchWiFiConnection: ObservableObject {
             microphone.stop(); finishing = true
             recordingLocked = false
             stopping = true; phase = .transcribing
-            status = "Watch 收音已停止，正在传完尾音…"
-            microphoneLevel = "收音已停止"
+            status = L10n.t("Watch recording stopped. Sending the remaining audio…")
+            microphoneLevel = L10n.t("Recording stopped")
             if stream == 0 {
                 queue.removeAll { $0.0 == .beginDictation }; clearAudio()
                 if suspendAfterFinish && !visible { reset(preserveReceivedAudio: false) }
-                phase = .ready; status = "已停止 Watch 收音"; return
+                phase = .ready; status = L10n.t("Watch recording stopped"); return
             }
             packAudio(ending: true); drainAudio()
         } else if action == .cancelDictation { clearAudio(); enqueue(action) }
@@ -182,7 +182,7 @@ final class WatchWiFiConnection: ObservableObject {
             queue[queue.count - 1].1 = Int16(max(-600, min(600, Int(last.1) + Int(value))))
         } else {
             if queue.count >= 12 { queue.removeAll { $0.0 == .scroll || $0.0 == .heartbeat } }
-            guard queue.count < 16 else { fail("指令积压，已停止"); return }
+            guard queue.count < 16 else { fail(L10n.t("Too many pending commands. Stopped.")); return }
             queue.append((action, value))
         }
         drainControls()
@@ -202,14 +202,14 @@ final class WatchWiFiConnection: ObservableObject {
                     let reply = try await self.client.request("v1/command", WiFiRequest(id: self.id.uuidString, packet: packet.base64EncodedString()))
                     try self.check(token)
                     guard reply.status == "ok", let data = reply.packet.flatMap({ Data(base64Encoded: $0) }) else {
-                        throw Failure(reply.message ?? "Mac 未确认操作")
+                        throw Failure(reply.localizedMessage ?? L10n.t("Your Mac did not confirm the action."))
                     }
                     let (phase, returnedSequence) = try Wire.decodeStatus(data, key: key, challenge: challenge)
                     guard sequence == returnedSequence else { throw WireError.replay }
                     // A late begin/heartbeat acknowledgement cannot put the UI
                     // back into listening after the finger has already lifted.
                     self.phase = self.stopping && phase == .listening ? .transcribing : phase
-                    if !(self.stopping && phase == .listening) { self.status = reply.message ?? phase.caption }
+                    if !(self.stopping && phase == .listening) { self.status = reply.localizedMessage ?? phase.caption }
                     if action == .beginDictation {
                         if phase == .listening { self.audioAccepted = true; self.drainAudio(); WKInterfaceDevice.current().play(.start) }
                         else { self.clearAudio() }
@@ -217,13 +217,13 @@ final class WatchWiFiConnection: ObservableObject {
                         self.clearAudio(); WKInterfaceDevice.current().play(.stop)
                         if self.suspendAfterFinish && !self.visible {
                             self.reset(preserveReceivedAudio: false)
-                            self.status = "已交给 Mac 转写，抬腕后恢复连接"; return
+                            self.status = L10n.t("Sent to your Mac for transcription. Raise your wrist to reconnect."); return
                         }
                     }
                     else if [.failed, .unavailable, .permissionRequired].contains(phase) || (self.audioAccepted && phase != .listening) { self.clearAudio() }
                 } catch {
                     guard self.epoch == token, !Task.isCancelled else { return }
-                    self.fail("Wi-Fi 操作失败：\(error.localizedDescription)"); return
+                    self.fail(L10n.t("Wi-Fi action failed: %@", error.localizedDescription)); return
                 }
             }
         }
@@ -232,7 +232,7 @@ final class WatchWiFiConnection: ObservableObject {
         guard recordingRequested, !finishing else { return }
         if visible { var level = AudioLevel(); level.append(chunk); microphoneLevel = level.caption }
         guard Int(audioOffset) + samples.count + chunk.count <= 1_920_000,
-              samples.count + chunk.count <= 32_000, audioPackets.count < 80 else { fail("音频积压或录音达到上限"); return }
+              samples.count + chunk.count <= 32_000, audioPackets.count < 80 else { fail(L10n.t("Audio transfer fell behind or recording reached its limit.")); return }
         samples.append(contentsOf: chunk); packAudio(); drainAudio()
     }
     private func packAudio(ending: Bool = false) {
@@ -250,7 +250,7 @@ final class WatchWiFiConnection: ObservableObject {
                 audioPackets.append(try AudioWire.encode(samples: [], stream: stream, sequence: audioSequence,
                                                        offset: audioOffset, ended: true, key: key, challenge: challenge))
             }
-        } catch { fail("音频编码失败") }
+        } catch { fail(L10n.t("Audio encoding failed.")) }
     }
     private func drainAudio() {
         guard audioAccepted, audioTask == nil else { return }
@@ -265,7 +265,7 @@ final class WatchWiFiConnection: ObservableObject {
                                                                                    packets: batch.map { $0.base64EncodedString() }))
                     try self.check(token)
                     guard self.audioEpoch == audioToken else { throw CancellationError() }
-                    guard reply.status == "ok" else { throw Failure(reply.message ?? "音频未被接收") }
+                    guard reply.status == "ok" else { throw Failure(reply.localizedMessage ?? L10n.t("Audio was not received.")) }
                 }
                 if self.finishing && self.audioPackets.isEmpty {
                     self.finishing = false; self.recordingRequested = false; self.phase = .transcribing
@@ -273,7 +273,7 @@ final class WatchWiFiConnection: ObservableObject {
                 }
             } catch {
                 guard self.epoch == token, !Task.isCancelled else { return }
-                self.fail("Wi-Fi 音频中断：\(error.localizedDescription)")
+                self.fail(L10n.t("Wi-Fi audio interrupted: %@", error.localizedDescription))
             }
         }
     }
@@ -297,7 +297,7 @@ final class WatchWiFiConnection: ObservableObject {
         active = visible; suspendAfterFinish = false
     }
     private func fail(_ message: String) {
-        reset(preserveReceivedAudio: true); status = message + "；Mac 将保留已收到的声音"; phase = .failed
+        reset(preserveReceivedAudio: true); status = L10n.t("%@; your Mac will keep the audio it received.", message); phase = .failed
         ConnectionTrace.record("wifi", message); WKInterfaceDevice.current().play(.failure)
         Task { [weak self] in try? await Task.sleep(nanoseconds: 2_000_000_000); self?.connect() }
     }

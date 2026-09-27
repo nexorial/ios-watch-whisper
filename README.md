@@ -26,6 +26,14 @@ Build 9 增加说话后约 2 秒静音自动停止、Mac 接收端的静音保�
 
 **普通侧边按钮、表冠按压不能任意重映射。** 自动 Enter、后台持续遥控和 Mac 唤醒没有实现。Claude 仅有桌面目标的滚动／Enter 适配代码，未验证；Claude 听写明确禁用。
 
+## Language
+
+Micodex follows each device’s preferred app/system language. English and Simplified Chinese are supported; English is the development language and fallback. The Mac and Watch select their own language independently. No global language setting or per-user override is written.
+
+UI labels, accessibility copy, connection and audio messages, and permission prompts are localized. Wi-Fi replies include translation keys and arguments so the Watch can display a message in its own language, with the original readable message retained for older clients. Device names, SSIDs, IP addresses, pairing codes, and Codex accessibility matching identifiers are not translated.
+
+Edit the reviewed English → Chinese catalogs in `Localization/*.json`, then run `python3 scripts/generate-localizations.py`. The generated native `.strings` resources are bundled by SwiftPM. System prompts are in `AppResources/{en,zh-Hans}.lproj/InfoPlist.strings`. `python3 scripts/generate-localizations.py --check` verifies catalog/source coverage and format arguments, and runs as part of `scripts/build.sh`.
+
 ## 项目
 
 | 路径 | 内容 |

@@ -17,7 +17,7 @@ final class TLSHTTPServer: @unchecked Sendable {
     func start(identity: SecIdentity, address: String, portNumber: UInt16 = LocalTLSIdentity.port,
                onState: @escaping @Sendable (Event) -> Void) throws {
         let tls = NWProtocolTLS.Options()
-        guard let identity = sec_identity_create(identity) else { throw LocalTLSIdentity.Failure("无法创建 TLS 身份。") }
+        guard let identity = sec_identity_create(identity) else { throw LocalTLSIdentity.Failure(L10n.message("Could not create the TLS identity.")) }
         sec_protocol_options_set_local_identity(tls.securityProtocolOptions, identity)
         sec_protocol_options_set_min_tls_protocol_version(tls.securityProtocolOptions, .TLSv13)
         let tcp = NWProtocolTCP.Options()

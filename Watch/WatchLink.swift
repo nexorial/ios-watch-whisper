@@ -7,7 +7,7 @@ import MicodexCore
 @MainActor
 final class WatchLink: ObservableObject {
     @Published var connected = false
-    @Published var status = "正在连接 Mac…"
+    @Published var status = L10n.t("Connecting to your Mac…")
     @Published var phase: HostPhase = .ready
     @Published var macName = "Mac"
     @Published var demo = false
@@ -54,7 +54,7 @@ final class WatchLink: ObservableObject {
         guard let (_, pin) = WatchWiFiConnection.configuration else { return }
         do {
             guard let normalized = MacAddress.ipv4(host) else {
-                status = "请填写 Mac 软件显示的完整 IP 地址，例如 192.168.1.20。"; return
+                status = L10n.t("Enter the full IP address shown in Micodex on your Mac, such as 192.168.1.20."); return
             }
             let replacement = try WatchWiFiConnection(host: normalized, pin: pin)
             wifi?.disconnect(); bluetooth?.disconnect(); observer?.cancel()
@@ -63,7 +63,7 @@ final class WatchLink: ObservableObject {
             wifi?.setActive(active)
             observer = wifi?.objectWillChange.sink { [weak self] in DispatchQueue.main.async { self?.sync() } }
             sync()
-        } catch { status = "Mac 地址无效：\(error.localizedDescription)" }
+        } catch { status = L10n.t("Invalid Mac address: %@", error.localizedDescription) }
     }
     func setActive(_ active: Bool) {
         self.active = active
@@ -92,7 +92,7 @@ final class WatchLink: ObservableObject {
         } else if let bluetooth {
             connected = bluetooth.connected; status = bluetooth.status; phase = bluetooth.phase; macName = bluetooth.macName
             demo = bluetooth.demo; nearby = bluetooth.nearby; pairingCode = nil
-            microphoneLevel = "Watch 麦克风 · 最长 2 分钟"
+            microphoneLevel = L10n.t("Watch microphone · Up to 2 minutes")
             stopping = bluetooth.stopping
             recordingLocked = bluetooth.recordingLocked
             recordingRequested = bluetooth.recordingRequested || (bluetooth.demo && bluetooth.phase == .listening)

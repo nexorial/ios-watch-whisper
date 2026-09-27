@@ -1,0 +1,8 @@
+/* Micodex system permission prompts. */
+"CFBundleDisplayName" = "Micodex";
+"NSBluetoothAlwaysUsageDescription" = "Connect your approved Apple Watch and Mac for scrolling, dictation, and Enter commands.";
+"NSBluetoothPeripheralUsageDescription" = "Make this Mac discoverable to your Apple Watch for a private remote connection.";
+"NSLocalNetworkUsageDescription" = "Create an encrypted local-network connection with your approved Apple Watch.";
+"NSLocationUsageDescription" = "Show the current Wi-Fi name to help you check your Mac and Watch connection. Micodex does not collect location coordinates.";
+"NSLocationWhenInUseUsageDescription" = "Show the current Wi-Fi name to help you check your Mac and Watch connection. Micodex does not collect location coordinates.";
+"NSMicrophoneUsageDescription" = "Use the built-in Apple Watch microphone to send your speech to Codex dictation on your paired Mac.";

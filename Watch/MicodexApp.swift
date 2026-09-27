@@ -35,7 +35,7 @@ private struct RemoteView: View {
     @State private var fingerDown = false
     @State private var crown = 0.0
     @State private var accumulator = CrownAccumulator()
-    @State private var scrollHint = "转动表冠浏览"
+    @State private var scrollHint = L10n.t("Turn Crown to scroll")
     @FocusState private var crownFocused: Bool
     private var talking: Bool { connection.recordingRequested && !connection.stopping }
 
@@ -44,7 +44,7 @@ private struct RemoteView: View {
         VStack(spacing: 6) {
             HStack(spacing: 5) {
                 Circle().fill(connection.demo ? Color.orange : MicodexStyle.accent).frame(width: 4, height: 4)
-                Text("Micodex").font(.system(size: 13, weight: .semibold, design: .rounded))
+                Text(L10n.t("Micodex")).font(.system(size: 13, weight: .semibold, design: .rounded))
                 Spacer()
                 Button {
                     stop(); showingConnection = true
@@ -52,12 +52,12 @@ private struct RemoteView: View {
                     Image(systemName: "slider.horizontal.3").font(.system(size: 12, weight: .medium))
                         .frame(width: 44, height: 32).contentShape(Rectangle())
                 }
-                .buttonStyle(.plain).accessibilityLabel("连接设置")
+                .buttonStyle(.plain).accessibilityLabel(L10n.t("Connection settings"))
             }.foregroundStyle(.secondary).frame(height: 26)
             VStack(spacing: 7) {
                 Image(systemName: connection.stopping ? "ellipsis" : (talking ? (gesture.state == .locked ? "lock.fill" : "waveform") : "mic.fill"))
                     .font(.system(size: geometry.size.height < 180 ? 24 : 30, weight: .medium))
-                Text(connection.stopping ? "正在转写…" : (talking ? (gesture.state == .locked ? "点击停止" : "松开结束") : "按住说话"))
+                Text(connection.stopping ? L10n.t("Transcribing…") : (talking ? (gesture.state == .locked ? L10n.t("Tap to stop") : L10n.t("Release to stop")) : L10n.t("Hold to talk")))
                     .font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -81,8 +81,8 @@ private struct RemoteView: View {
                     connection.setRecordingLocked(gesture.state == .locked)
                 })
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(talking ? "停止听写" : "开始听写，使用 Watch 麦克风")
-            .accessibilityHint(connection.recordingLocked ? "锁定录音会在熄屏后继续，最长两分钟" : "短按或向右滑锁定录音")
+            .accessibilityLabel(talking ? L10n.t("Stop Dictation") : L10n.t("Start dictation with the Watch microphone"))
+            .accessibilityHint(connection.recordingLocked ? L10n.t("Locked recording continues with the screen off, for up to two minutes") : L10n.t("Tap or swipe right to lock recording"))
             .accessibilityAddTraits(.isButton)
             .accessibilityAction {
                 if talking { stop() }
@@ -97,19 +97,19 @@ private struct RemoteView: View {
                         .frame(width: 44, height: 44)
                         .background(Color.white.opacity(0.09), in: Circle())
                 }
-                .accessibilityLabel("停止听写")
+                .accessibilityLabel(L10n.t("Stop Dictation"))
                 Button {
                     if talking { stop() } else { connection.send(.enter) }
                 } label: {
                     HStack(spacing: 8) {
-                        Text("Enter")
+                        Text(L10n.t("Enter"))
                         Image(systemName: "return")
                     }.font(.system(size: 14, weight: .semibold))
                         .frame(maxWidth: .infinity).frame(height: 44)
                         .background(Color.white.opacity(0.09), in: Capsule())
                 }
                 .disabled(connection.phase == .transcribing)
-                .accessibilityHint(talking ? "先停止听写，再次点击发送" : "发送 Mac 输入框中的文字")
+                .accessibilityHint(talking ? L10n.t("Stop dictation first, then tap again to send") : L10n.t("Send the text in the Mac input field"))
             }.buttonStyle(.plain).foregroundStyle(.primary)
             Text(footer)
                 .font(.system(size: 10)).foregroundStyle(.secondary)
@@ -122,7 +122,7 @@ private struct RemoteView: View {
         .digitalCrownRotation($crown, from: -10000, through: 10000, by: 0.1, sensitivity: .medium, isContinuous: true, isHapticFeedbackEnabled: true)
         .onChange(of: crown) { [crown] value in
             let pixels = accumulator.add(value - crown)
-            if pixels != 0 { connection.send(.scroll, value: pixels); scrollHint = pixels > 0 ? "↓ 向下浏览" : "↑ 向上浏览" }
+            if pixels != 0 { connection.send(.scroll, value: pixels); scrollHint = pixels > 0 ? L10n.t("↓ Scroll down") : L10n.t("↑ Scroll up") }
         }
         .onChange(of: connection.phase) { gesture.hostChanged($0) }
         .onAppear {
@@ -139,9 +139,9 @@ private struct RemoteView: View {
     }
 
     private var footer: String {
-        if connection.demo { return "演示 · 不连接 Mac" }
-        if connection.stopping { return "正在传完尾音，请稍候" }
-        if talking { return gesture.state == .locked ? connection.microphoneLevel : "右滑锁定 · 松开结束" }
+        if connection.demo { return L10n.t("Demo · No Mac connection") }
+        if connection.stopping { return L10n.t("Finishing audio…") }
+        if talking { return gesture.state == .locked ? connection.microphoneLevel : L10n.t("Swipe right to lock") }
         return connection.phase == .ready ? scrollHint : connection.phase.caption
     }
 
@@ -164,21 +164,21 @@ private struct ConnectionView: View {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(spacing: 7) {
                     Image(systemName: "waveform").foregroundStyle(MicodexStyle.accent)
-                    Text("Micodex").font(.system(size: 16, weight: .semibold, design: .rounded))
+                    Text(L10n.t("Micodex")).font(.system(size: 16, weight: .semibold, design: .rounded))
                 }
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(connection.connected ? "Mac 已连接" : "连接你的 Mac").font(.headline)
+                    Text(connection.connected ? L10n.t("Mac Connected") : L10n.t("Connect Your Mac")).font(.headline)
                     Text(connection.status).font(.caption2).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 if connection.usesWiFi || connection.canUseWiFi {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("手表当前 Wi-Fi").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
-                        Text(network.name ?? "名称未获取").font(.system(size: 13, weight: .medium))
+                        Text(L10n.t("Watch Wi-Fi")).font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
+                        Text(network.name ?? L10n.t("Name unavailable")).font(.system(size: 13, weight: .medium))
                         if network.name == nil {
                             Text(network.explanation).font(.caption2).foregroundStyle(.secondary)
                             if network.needsAuthorization {
-                                Button("显示 Wi-Fi 名称") { network.requestNameAccess() }.font(.caption)
+                                Button(L10n.t("Show Wi-Fi Name")) { network.requestNameAccess() }.font(.caption)
                             }
                         }
                     }
@@ -187,29 +187,29 @@ private struct ConnectionView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(code).font(.system(size: 28, weight: .medium, design: .monospaced))
                             .tracking(2).foregroundStyle(MicodexStyle.accent)
-                        Text("在 Mac 核对六位码并允许配对。").font(.caption2).foregroundStyle(.secondary)
+                        Text(L10n.t("Check the six-digit code on your Mac and allow pairing.")).font(.caption2).foregroundStyle(.secondary)
                     }.padding(.vertical, 4)
                 }
                 if connection.connected {
-                    Button("返回遥控") { showingConnection = false }.buttonStyle(.borderedProminent)
+                    Button(L10n.t("Back to Remote")) { showingConnection = false }.buttonStyle(.borderedProminent)
                 }
                 if connection.usesWiFi {
                     VStack(alignment: .leading, spacing: 7) {
-                        Text("Mac IP 地址").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
-                        Text("输入 Mac 软件上「Mac IP」显示的地址，不是手表自己的 IP。")
+                        Text(L10n.t("Mac IP Address")).font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
+                        Text(L10n.t("Enter the “Mac IP” shown in the Mac app, not your watch’s IP."))
                             .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                        TextField("例如 192.168.1.20", text: $wifiHost)
-                            .font(.system(size: 13, design: .monospaced)).accessibilityLabel("Mac IP 地址，填写 Mac 软件上显示的地址")
-                        Button("保存并连接") {
+                        TextField(L10n.t("e.g. 192.168.1.20"), text: $wifiHost)
+                            .font(.system(size: 13, design: .monospaced)).accessibilityLabel(L10n.t("Mac IP Address. Enter the address shown in the Mac app."))
+                        Button(L10n.t("Save & Connect")) {
                             guard let address = MacAddress.ipv4(wifiHost) else {
-                                addressError = "请填入完整的 Mac IP，例如 192.168.1.20。"; return
+                                addressError = L10n.t("Enter the full Mac IP address, such as 192.168.1.20."); return
                             }
                             addressError = nil; wifiHost = address; connection.updateWiFiHost(address)
                         }
                             .font(.system(size: 12, weight: .medium))
                         if let addressError { Text(addressError).font(.caption2).foregroundStyle(.orange) }
                         if !connection.macAddress.isEmpty {
-                            Text("已保存的 Mac IP：\(connection.macAddress)").font(.caption2).foregroundStyle(.secondary)
+                            Text(L10n.t("Saved Mac IP: %@", connection.macAddress)).font(.caption2).foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -219,7 +219,7 @@ private struct ConnectionView: View {
                             Label(mac.name, systemImage: "laptopcomputer").font(.caption)
                         }
                     }
-                    Text(connection.usesWiFi ? "Mac 需保持 Micodex 打开并显示「Wi-Fi 已就绪」。首次连接，再在 Mac 点「允许 Wi-Fi 手表」并核对配对码。已配对时无需重复配对。" : "在 Mac 的 Micodex 中开启蓝牙备用，再选择你的电脑。")
+                    Text(connection.usesWiFi ? L10n.t("Keep Micodex open on your Mac with “Wi-Fi Ready” showing. For first-time pairing, click “Allow Wi-Fi Watch” on the Mac and check the code. Paired devices do not need to pair again.") : L10n.t("Enable Bluetooth Backup in Micodex on your Mac, then choose your computer."))
                         .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }
                 Divider()
@@ -227,7 +227,7 @@ private struct ConnectionView: View {
                     showingMore.toggle()
                 } label: {
                     HStack {
-                        Text("更多选项")
+                        Text(L10n.t("More Options"))
                         Spacer()
                         Image(systemName: showingMore ? "chevron.up" : "chevron.down")
                     }.font(.system(size: 12)).frame(minHeight: 36)
@@ -235,16 +235,16 @@ private struct ConnectionView: View {
                 if showingMore {
                     VStack(alignment: .leading, spacing: 10) {
                         if connection.connected {
-                            Button("忘记 Mac", role: .destructive) { connection.forget() }
+                            Button(L10n.t("Forget Mac"), role: .destructive) { connection.forget() }
                         } else {
-                            Button("重新配对") { connection.forget() }
-                            Button("试用界面") { connection.enableDemo(); showingConnection = false }
-                            if connection.usesWiFi { Button("使用蓝牙备用") { connection.useBluetooth() } }
-                            else if connection.canUseWiFi { Button("使用 Wi-Fi 直连") { connection.useWiFi() } }
+                            Button(L10n.t("Pair Again")) { connection.forget() }
+                            Button(L10n.t("Try Demo")) { connection.enableDemo(); showingConnection = false }
+                            if connection.usesWiFi { Button(L10n.t("Use Bluetooth Backup")) { connection.useBluetooth() } }
+                            else if connection.canUseWiFi { Button(L10n.t("Use Direct Wi-Fi")) { connection.useWiFi() } }
                         }
-                        Button("屏幕与录音") { showingScreenHelp.toggle() }
+                        Button(L10n.t("Screen & Recording")) { showingScreenHelp.toggle() }
                         if showingScreenHelp {
-                            Text("右滑锁定后，放下手腕仍可录音。说话后安静约 2 秒自动停止，只转写不发送，最长 2 分钟。常亮可在系统「显示与亮度 → 始终显示」中设置，屏幕仍会调暗。")
+                            Text(L10n.t("Swipe right to lock recording and keep recording with your wrist down. It stops after about 2 seconds of silence after speech, or at 2 minutes, and transcribes without sending. Enable Always On in Settings → Display & Brightness; the screen will still dim."))
                                 .font(.caption2).foregroundStyle(.secondary)
                         }
                     }.font(.caption)

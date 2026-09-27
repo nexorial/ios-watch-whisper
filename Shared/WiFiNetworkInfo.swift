@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import CoreLocation
+import MicodexCore
 #if os(macOS)
 import CoreWLAN
 #elseif os(watchOS)
@@ -11,7 +12,7 @@ import NetworkExtension
 @MainActor
 final class WiFiNetworkInfo: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published private(set) var name: String?
-    @Published private(set) var explanation = "正在读取网络名称…"
+    @Published private(set) var explanation = L10n.t("Reading network name…")
     @Published private(set) var needsAuthorization = false
     private let location = CLLocationManager()
     private var generation = 0
@@ -40,7 +41,7 @@ final class WiFiNetworkInfo: NSObject, ObservableObject, CLLocationManagerDelega
         let authorization = location.authorizationStatus
         needsAuthorization = authorization == .notDetermined
         guard CLLocationManager.locationServicesEnabled() else {
-            name = nil; explanation = "定位服务已关闭；请在系统设置中查看 Wi-Fi 名称"; return
+            name = nil; explanation = L10n.t("Location Services are off. Check the Wi-Fi name in system settings."); return
         }
         #if os(macOS)
         let authorized = authorization == .authorizedAlways
@@ -49,24 +50,24 @@ final class WiFiNetworkInfo: NSObject, ObservableObject, CLLocationManagerDelega
         #endif
         guard authorized else {
             name = nil
-            explanation = needsAuthorization ? "显示名称需要定位授权，仅用于读取 Wi-Fi 名称" : "未获定位授权；请在系统设置中查看 Wi-Fi 名称"
+            explanation = needsAuthorization ? L10n.t("Allow location access to display the Wi-Fi name. Access is used only to read the network name.") : L10n.t("Location access is not allowed. Check the Wi-Fi name in system settings.")
             return
         }
         needsAuthorization = false
         #if os(macOS)
         let interface = CWWiFiClient.shared().interface()
         name = interface?.ssid()
-        explanation = interface?.powerOn() == false ? "Wi-Fi 已关闭" : "未连接 Wi-Fi，或系统未提供名称"
+        explanation = interface?.powerOn() == false ? L10n.t("Wi-Fi is off") : L10n.t("No Wi-Fi connection, or the system did not provide its name.")
         #elseif os(watchOS)
         guard location.accuracyAuthorization == .fullAccuracy else {
-            name = nil; explanation = "需在定位设置中允许精确位置，才能读取 Wi-Fi 名称"; return
+            name = nil; explanation = L10n.t("Allow Precise Location in location settings to read the Wi-Fi name."); return
         }
         NEHotspotNetwork.fetchCurrent { [weak self] network in
             let ssid = network?.ssid
             Task { @MainActor in
                 guard let self, self.generation == token else { return }
                 self.name = ssid
-                self.explanation = "系统未提供名称；请在手表「设置 → Wi-Fi」查看当前网络"
+                self.explanation = L10n.t("The system did not provide a name. Check the current network in Settings → Wi-Fi on your watch.")
             }
         }
         #endif

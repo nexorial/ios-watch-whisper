@@ -22,12 +22,13 @@ public struct AudioLevel: Sendable {
         return 10 * log10(sumSquares / Double(sampleCount) / (32768 * 32768))
     }
     public var caption: String {
-        guard let rmsDecibels else { return "尚未检测到声音" }
-        return rmsDecibels < -50 ? "输入音量很低，请靠近手表说话" : "已检测到输入音量"
+        guard let rmsDecibels else { return L10n.t("No sound detected yet") }
+        return rmsDecibels < -50 ? L10n.t("Too quiet — speak closer") : L10n.t("Audio input detected")
     }
     public var diagnostic: String {
-        let rms = rmsDecibels.map { String(format: "%.1f dBFS", $0) } ?? "静音"
-        return String(format: "%.1f 秒", Double(sampleCount) / 16000)
-            + " · 峰值 \(peak)/32768 · RMS \(rms) · 非零 \(nonzeroCount)"
+        let rms = rmsDecibels.map { String(format: "%.1f dBFS", $0) } ?? L10n.t("Silent")
+        return L10n.t("%@ s · Peak %@/32768 · RMS %@ · Nonzero %@",
+                      String(format: "%.1f", locale: Locale.current, Double(sampleCount) / 16000),
+                      String(peak), rms, String(nonzeroCount))
     }
 }

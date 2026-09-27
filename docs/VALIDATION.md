@@ -2,6 +2,16 @@
 
 > 当前产品已更名为 **Micodex**（Build 11）。以下历史上传／验证证据保留当时的应用名和原始文件路径。
 
+## 2026-09-27 · Device-language UI (Build 13)
+
+- Added 331 English/Simplified Chinese catalog entries, native SwiftPM localization resources, and localized InfoPlist permission prompts for Mac, Watch, and the Watch-only distribution container. English is the development/fallback language. Each app uses its own device/app language without writing a global setting or a user-specific override.
+- Localized UI labels, accessibility text, connection/recovery states, microphone feedback, and errors. Preserved device names, SSIDs, addresses, protocol identifiers, pairing data, and English/Chinese Codex accessibility matching labels.
+- Added structured `LocalizedMessage` metadata to Wi-Fi replies while retaining the legacy rendered message. New Watch builds localize messages on receipt instead of inheriting the Mac’s UI language. Message formatting validates argument counts and only permits string/escaped-percent directives.
+- 57 Swift tests pass, including English/Chinese/fallback selection, cross-language JSON reply rendering, old reply compatibility, and unsafe-format rejection. The catalog checker verifies source coverage and placeholder parity. Real HTTPS recovery/security/audio regression also passes.
+- Mac, Watch Simulator, and the Watch-only Release distribution container builds passed. The outer container also includes both localized permission files. Watch screenshots show English on the 40mm simulator and Chinese on Ultra; the installed Mac UI was independently observed in English under the user’s existing English preference, with the current Wi-Fi name/IP still displayed. System language was not changed.
+- Both device packages are Build **0.3.0 (13)** and include English/Chinese UI resources and permission prompts. The Mac update was signed/installed/launched. The physical Watch install and launch returned success; independent live queries confirmed Build 13 and the running Micodex process (PID 930), recorded in `artifacts/micodex-build13-installed-app.json` and `artifacts/micodex-build13-processes.json`. Simulator language/layout checks do not substitute for a physical Watch screenshot.
+- Evidence: `artifacts/micodex-build13-{tests,security,mac,sim,install-mac,install-watch}.log`, `artifacts/micodex-build13-ui/watch-{en-small,zh}.png`. No TestFlight upload.
+
 ## 2026-09-27 · Wi-Fi 服务自动恢复与两端网络指引（Build 12）
 
 - 修复 Mac 监听失败后仍保留失效 listener、没有自动恢复的问题。单接收端文件锁、完整取消后重绑、endpoint reuse、退避重试与每 5 秒检查 IP 共同处理重复接收端、短暂端口占用与网络变化；未就绪不能开放配对。

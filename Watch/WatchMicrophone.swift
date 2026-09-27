@@ -12,7 +12,7 @@ final class WatchMicrophone {
             AVAudioSession.sharedInstance().requestRecordPermission { continuation.resume(returning: $0) }
         }
         try Task.checkCancellation()
-        guard granted else { throw MicFailure("请在手表设置允许 Micodex 使用麦克风。") }
+        guard granted else { throw MicFailure(L10n.t("Allow Micodex to use the microphone in Watch Settings.")) }
         let session = AVAudioSession.sharedInstance()
         // Speech capture needs normal input processing, not measurement mode's
         // reduced dynamics processing. Never override an OS microphone mute.
@@ -20,32 +20,32 @@ final class WatchMicrophone {
         try session.setActive(true)
         if #available(watchOS 10.0, *), AVAudioApplication.shared.isInputMuted {
             try? session.setActive(false)
-            throw MicFailure("手表系统已将麦克风静音，请先在手表解除静音。")
+            throw MicFailure(L10n.t("Your Watch microphone is muted. Unmute it on your Watch first."))
         }
         // watchOS chooses the recording input; unlike iOS, setPreferredInput is
         // unavailable. Refuse an external route instead of silently using it.
         guard session.currentRoute.inputs.contains(where: { $0.portType == .builtInMic }) else {
             try? session.setActive(false)
-            throw MicFailure("未能启用 Apple Watch 内置麦克风。")
+            throw MicFailure(L10n.t("Could not activate the built-in Apple Watch microphone."))
         }
         let engine = AVAudioEngine(), input = engine.inputNode
         let source = input.outputFormat(forBus: 0)
         let converter: MicrophoneSamples
         do { converter = try MicrophoneSamples(source: source) }
-        catch { try? session.setActive(false); throw MicFailure("手表音频格式不可用。") }
+        catch { try? session.setActive(false); throw MicFailure(L10n.t("The Watch audio format is unavailable.")) }
         let id = UUID(); captureID = id; silenceEndpoint = SilenceEndpoint()
         observers.append(NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: session, queue: .main) { [weak self] notification in
             guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
                   raw == AVAudioSession.InterruptionType.began.rawValue else { return }
             Task { @MainActor in
                 guard self?.captureID == id else { return }
-                self?.stop(); onFailure("录音被系统中断，已请求保留收到的内容")
+                self?.stop(); onFailure(L10n.t("Recording was interrupted by the system. Your Mac was asked to keep the audio it received."))
             }
         })
         observers.append(NotificationCenter.default.addObserver(forName: AVAudioSession.routeChangeNotification, object: session, queue: .main) { [weak self] _ in
             Task { @MainActor in
                 guard self?.captureID == id, !session.currentRoute.inputs.contains(where: { $0.portType == .builtInMic }) else { return }
-                self?.stop(); onFailure("Watch 内置麦克风已断开，已请求保留收到的内容")
+                self?.stop(); onFailure(L10n.t("The built-in Watch microphone disconnected. Your Mac was asked to keep the audio it received."))
             }
         })
         input.installTap(onBus: 0, bufferSize: AVAudioFrameCount(source.sampleRate / 10), format: source) { [weak self] buffer, _ in
@@ -63,7 +63,7 @@ final class WatchMicrophone {
             } catch {
                 Task { @MainActor in
                     guard self?.captureID == id else { return }
-                    self?.stop(); onFailure("手表音频格式发生变化，请重新开始录音。")
+                    self?.stop(); onFailure(L10n.t("The Watch audio format changed. Please start recording again."))
                 }
             }
         }
