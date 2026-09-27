@@ -2,6 +2,17 @@
 
 > 当前产品已更名为 **Micodex**（Build 11）。以下历史上传／验证证据保留当时的应用名和原始文件路径。
 
+## 2026-09-27 · Wi-Fi 服务自动恢复与两端网络指引（Build 12）
+
+- 修复 Mac 监听失败后仍保留失效 listener、没有自动恢复的问题。单接收端文件锁、完整取消后重绑、endpoint reuse、退避重试与每 5 秒检查 IP 共同处理重复接收端、短暂端口占用与网络变化；未就绪不能开放配对。
+- 两端分别读取并显示自己的 Wi-Fi 名称，未授权或系统未返回名称时显示原因。Mac 用 CoreWLAN；Watch 用 `NEHotspotNetwork.fetchCurrent` 和 Access Wi-Fi Information entitlement。仅请求授权，不读取位置坐标。Mac hardened runtime 的定位 entitlement 同时加入项目和安装脚本的实际 codesign 参数，并在安装前验证，避免有用途说明却无法弹出权限请求。
+- 明确提示手表输入 Mac 面板的「Mac IP」，增加地址格式校验和三步连接说明。首次配对与日常自动连接分开，连接失败不会要求清除已有配对。
+- **53 项单元测试通过**。HTTPS 集成回归通过，新增 8 次连续刷新、重复接收端排他、未就绪禁止配对、真实 `EADDRINUSE` 后自动恢复、重复 shutdown 不重启；原有配对、认证、证书固定、重放和音频结束回归全部通过。
+- Mac / Watch Simulator 构建、真表签名构建通过。Xcode CLI 首次因账号和旧 profile 缺少 Wi-Fi 能力失败；用户验证账号后，通过 Xcode Signing & Capabilities 自动更新 profile，后续构建通过。真表安装首次遇开发隧道超时，保持 AWDL 服务发现后重试成功，**没有卸载或重新配对**。
+- 已安装并启动双端 **0.3.0 (12)**。独立真表应用清单确认 Build 12，进程确认 `Micodex Watch.app/Micodex Watch`（PID 920）。Mac 实际签名含定位 entitlement，运行端口只有一个接收进程；UI 曾确认原配对手表自动连接，定位授权后实际显示当前 SSID。
+- 本次随后观察到 Mac 局域网地址变化，最新 UI 显示新 IP 与「Wi-Fi 已就绪 · 等待手表」；手表仍需使用 Mac 当前显示的 IP。未将之前网络上的连接证明当作新网络已重连。Watch 名称读取功能已签名安装，其授权后的具体 SSID 显示仍待用户在真表确认。
+- 证据保存在 `artifacts/micodex-build12-*`：`tests.log`、`security.log`、`install-mac-authorized.log`、`watch-install.json`、`watch-launch.json`、`installed-app-verified.json`、`processes-verified.json`；失败日志保留，未上传 TestFlight。
+
 ## 2026-09-27 · Micodex 已替换真表旧版
 
 - 按用户要求原位更新 Apple Watch Ultra 4，保留原 Bundle ID 和配对身份；没有卸载 App 或移除配对。

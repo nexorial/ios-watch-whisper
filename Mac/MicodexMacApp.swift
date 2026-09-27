@@ -54,6 +54,7 @@ private struct HostView: View {
     @ObservedObject var wifi: WiFiHost
     @ObservedObject var controller: AgentController
     let demo: Bool
+    @StateObject private var network = WiFiNetworkInfo()
     @State private var showingConnection = false
     @State private var showingAdvanced = false
     @State private var copiedAddress = false
@@ -133,9 +134,15 @@ private struct HostView: View {
         .padding(.horizontal, 26).padding(.top, 36).padding(.bottom, 20)
         .frame(width: 420, height: 550)
         .tint(MicodexStyle.accent)
+        .task {
+            while !Task.isCancelled {
+                network.refresh()
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             controller.objectWillChange.send(); host.audio.refresh(); host.refreshRadio(); wifi.audio.refresh()
-            wifi.refreshAddressIfNeeded()
+            wifi.refreshAddressIfNeeded(); network.refresh()
         }
     }
 
@@ -153,6 +160,22 @@ private struct HostView: View {
                     .buttonStyle(.borderless).font(.system(size: 11))
                     .accessibilityLabel(showingConnection ? "收起连接设置" : "展开连接设置")
             }
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text("Mac 当前 Wi-Fi").foregroundStyle(.secondary)
+                    Spacer(minLength: 8)
+                    Text(network.name ?? "名称未获取").textSelection(.enabled)
+                        .multilineTextAlignment(.trailing)
+                }
+                if network.name == nil {
+                    Text(network.explanation).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if network.needsAuthorization {
+                        Button("显示 Wi-Fi 名称") { network.requestNameAccess() }
+                            .buttonStyle(.borderless).disabled(demo)
+                    }
+                }
+            }.font(.system(size: 11)).padding(.leading, 31)
             HStack(spacing: 6) {
                 Text("Mac IP").foregroundStyle(.secondary)
                 Text(wifi.address.isEmpty ? "未连接局域网" : wifi.address)
@@ -169,15 +192,33 @@ private struct HostView: View {
             }
             .font(.system(size: 11)).padding(.leading, 31)
             .onChange(of: wifi.address) { _ in copiedAddress = false }
+            Text("请在手表的「Mac IP 地址」输入这里显示的地址。")
+                .font(.system(size: 11)).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true).padding(.leading, 31)
+            if let issue = wifi.serviceIssue {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(issue).fixedSize(horizontal: false, vertical: true)
+                    HStack {
+                        Button("重试接收服务") { wifi.refreshNetwork() }.disabled(!wifi.canRefreshNetwork)
+                        if wifi.duplicateReceiver {
+                            Button("打开已运行的接收端") {
+                                NSWorkspace.shared.runningApplications.first {
+                                    $0.bundleIdentifier == Bundle.main.bundleIdentifier && $0.processIdentifier != ProcessInfo.processInfo.processIdentifier
+                                }?.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
+                            }
+                        }
+                    }.controlSize(.small)
+                }.font(.system(size: 11)).foregroundStyle(.orange).padding(.leading, 31)
+            }
             if showingConnection || wifi.pendingCode != nil || (!demo && wifi.pairedCount == 0) {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("连接同一局域网，在手表填入上方 Mac IP，再核对配对码。")
+                    Text("1. 两端连接可互访的局域网（建议同一 Wi-Fi）。\n2. 手表输入上方 Mac IP，点「保存并连接」。\n3. 首次连接时，在这里允许手表并核对六位码；已配对设备会自动连接。")
                         .font(.system(size: 11)).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack {
                         Button(wifi.pairingOpen ? "等待手表…" : "允许 Wi-Fi 手表") { wifi.allowPairing() }
-                            .buttonStyle(.borderedProminent).disabled(wifi.pairingOpen || demo)
-                        Button("刷新网络") { wifi.refreshNetwork() }.disabled(demo || !wifi.canRefreshNetwork)
+                            .buttonStyle(.borderedProminent).disabled(wifi.pairingOpen || demo || !wifi.serviceReady)
+                        Button("重新连接网络") { wifi.refreshNetwork(); network.refresh() }.disabled(demo || !wifi.canRefreshNetwork)
                         Spacer()
                     }.controlSize(.small)
                     if wifi.pairedCount > 0 {

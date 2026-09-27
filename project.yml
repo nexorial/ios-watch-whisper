@@ -9,7 +9,7 @@ settings:
   base:
     SWIFT_VERSION: '5.0'
     MARKETING_VERSION: '0.3.0'
-    CURRENT_PROJECT_VERSION: 11
+    CURRENT_PROJECT_VERSION: 12
     DEVELOPMENT_TEAM: JNN5TPN23D
     CODE_SIGN_STYLE: Automatic
 packages:
@@ -19,6 +19,10 @@ targets:
   MicodexMac:
     type: application
     productName: Micodex
+    entitlements:
+      path: Config/Mac.entitlements
+      properties:
+        com.apple.security.personal-information.location: true
     platform: macOS
     sources: [Mac, Shared]
     dependencies:
@@ -35,12 +39,14 @@ targets:
     info:
       path: Config/Mac-Info.plist
       properties:
+        NSLocationWhenInUseUsageDescription: 仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。
         CFBundleDisplayName: Micodex
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSBluetoothAlwaysUsageDescription: 与你批准的 Apple Watch 连接，接收滚动、听写和 Enter 指令。
         NSLocalNetworkUsageDescription: 与你批准的 Apple Watch 建立加密的局域网遥控连接。
         NSBluetoothPeripheralUsageDescription: 向 Apple Watch 广播本机，建立私人遥控连接。
+        NSLocationUsageDescription: 仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。
         LSApplicationCategoryType: public.app-category.productivity
         NSHumanReadableCopyright: Copyright © 2026 Nexorial
   Micodex:
@@ -55,6 +61,7 @@ targets:
     info:
       path: Config/Container-Info.plist
       properties:
+        NSLocationWhenInUseUsageDescription: 仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。
         CFBundleDisplayName: Micodex
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -63,6 +70,10 @@ targets:
   MicodexWatch:
     type: application
     productName: Micodex Watch
+    entitlements:
+      path: Config/Watch.entitlements
+      properties:
+        com.apple.developer.networking.wifi-info: true
     platform: watchOS
     sources: [Watch, Shared]
     dependencies:
@@ -81,6 +92,7 @@ targets:
     info:
       path: Config/Watch-Info.plist
       properties:
+        NSLocationWhenInUseUsageDescription: 仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。
         CFBundleDisplayName: Micodex
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)

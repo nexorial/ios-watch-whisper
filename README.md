@@ -58,6 +58,13 @@ swift test --scratch-path /tmp/micodex-tests
 
 scratch path 放在 Documents 外，避免同步文件的扩展属性影响 XCTest 签名。
 
+## 日常 Wi-Fi 连接
+
+1. 在 Mac 和手表打开 Micodex，两端使用可互访的局域网（建议同一 Wi-Fi）。两端连接页分别显示 **Mac 当前 Wi-Fi** / **手表当前 Wi-Fi**。首次点「显示 Wi-Fi 名称」并允许系统定位授权；手表还需允许精确位置。仅用于读取 SSID，不采集坐标；未授权或系统无法返回名称时明确提示原因。
+2. Mac 显示 **Wi-Fi 已就绪** 后，将它的 **Mac IP** 填入手表的 **Mac IP 地址**，点击「保存并连接」。填写电脑的地址，不是手表的地址，也不带 `https://` 或端口。
+3. **首次配对**才需要在 Mac 点「允许 Wi-Fi 手表」，核对六位码后批准。已配对设备会自动连接，不要因临时失败反复移除配对。
+4. 如果 Mac 提示端口被占用，检查并关闭其他 Micodex / 旧版接收端。服务会在端口释放后自动恢复；无需改手表 IP。Mac 换网络或 DHCP 地址改变时，服务会在空闲时自动重新绑定，但手表已保存的 IP 仍需与 Mac 上的新地址核对。
+
 ## 安装与试用
 
 1. Mac 构建 `MicodexMac`，或运行 `scripts/install-mac.sh 'Apple Development: Your Name (...)'`。安装到 `~/Applications/Micodex.app`。更新前需结束听写并退出旧接收端；脚本会备份并替换旧名称的 App，保留配对数据。

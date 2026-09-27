@@ -5,12 +5,17 @@ import MicodexCore
 
 final class TLSHTTPServer: @unchecked Sendable {
     typealias Handler = @Sendable (HTTPEnvelope) async -> (Int, WiFiReply)
+    enum Event: Sendable { case ready, waiting(NWError), failed(NWError) }
     private let queue = DispatchQueue(label: "Micodex.https")
     private var listener: NWListener?
     private var connections: [UUID: HTTPConnection] = [:]
+    private var stopping = false
+    private var stopCompletions: [@Sendable () -> Void] = []
+    private var stoppingRetain: TLSHTTPServer?
     private let handler: Handler
     init(handler: @escaping Handler) { self.handler = handler }
-    func start(identity: SecIdentity, address: String, portNumber: UInt16 = LocalTLSIdentity.port, onState: @escaping @Sendable (String) -> Void) throws {
+    func start(identity: SecIdentity, address: String, portNumber: UInt16 = LocalTLSIdentity.port,
+               onState: @escaping @Sendable (Event) -> Void) throws {
         let tls = NWProtocolTLS.Options()
         guard let identity = sec_identity_create(identity) else { throw LocalTLSIdentity.Failure("无法创建 TLS 身份。") }
         sec_protocol_options_set_local_identity(tls.securityProtocolOptions, identity)
@@ -18,20 +23,31 @@ final class TLSHTTPServer: @unchecked Sendable {
         let tcp = NWProtocolTCP.Options()
         tcp.noDelay = true
         let parameters = NWParameters(tls: tls, tcp: tcp)
+        // Rebind after recently closed HTTP connections (TIME_WAIT). The process
+        // lease still guarantees a single Micodex receiver per port.
+        parameters.allowLocalEndpointReuse = true
         let port = NWEndpoint.Port(rawValue: portNumber)!
         parameters.requiredLocalEndpoint = .hostPort(host: NWEndpoint.Host(address), port: port)
         let listener = try NWListener(using: parameters)
         self.listener = listener
-        listener.stateUpdateHandler = { state in
+        listener.stateUpdateHandler = { [weak self] state in
+            guard let self else { return }
             switch state {
-            case .ready: onState("Wi-Fi 已就绪 · \(address)")
-            case .failed(let error): onState("Wi-Fi 服务失败：\(error.localizedDescription)")
-            case .waiting(let error): onState("等待本地网络：\(error.localizedDescription)")
+            case .cancelled:
+                self.listener?.stateUpdateHandler = nil
+                self.listener?.newConnectionHandler = nil
+                self.listener = nil
+                let completions = self.stopCompletions; self.stopCompletions = []
+                completions.forEach { $0() }
+                self.stoppingRetain = nil
+            case .ready where !self.stopping: onState(.ready)
+            case .failed(let error) where !self.stopping: onState(.failed(error))
+            case .waiting(let error) where !self.stopping: onState(.waiting(error))
             default: break
             }
         }
         listener.newConnectionHandler = { [weak self] connection in
-            guard let self, self.connections.count < 16 else { connection.cancel(); return }
+            guard let self, !self.stopping, self.connections.count < 16 else { connection.cancel(); return }
             let id = UUID()
             let client = HTTPConnection(connection: connection, queue: self.queue, handler: self.handler) { [weak self] in
                 self?.connections[id] = nil
@@ -41,16 +57,11 @@ final class TLSHTTPServer: @unchecked Sendable {
         listener.start(queue: queue)
     }
     func stop(completion: @escaping @Sendable () -> Void = {}) {
-        // Retain the server until cancellation completes; a weak capture can
-        // disappear before releasing its port when a host replaces the server.
         queue.async {
             guard let listener = self.listener else { completion(); return }
-            listener.stateUpdateHandler = { state in
-                guard case .cancelled = state else { return }
-                listener.stateUpdateHandler = nil
-                self.listener = nil
-                completion()
-            }
+            self.stopCompletions.append(completion)
+            guard !self.stopping else { return }
+            self.stopping = true; self.stoppingRetain = self
             let clients = Array(self.connections.values); self.connections = [:]
             clients.forEach { $0.stop() }
             listener.cancel()

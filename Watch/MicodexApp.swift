@@ -154,7 +154,9 @@ private struct RemoteView: View {
 private struct ConnectionView: View {
     @ObservedObject var connection: WatchLink
     @Binding var showingConnection: Bool
+    @StateObject private var network = WiFiNetworkInfo()
     @State private var wifiHost = ""
+    @State private var addressError: String?
     @State private var showingMore = false
     @State private var showingScreenHelp = false
     var body: some View {
@@ -169,6 +171,18 @@ private struct ConnectionView: View {
                     Text(connection.status).font(.caption2).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                if connection.usesWiFi || connection.canUseWiFi {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("手表当前 Wi-Fi").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
+                        Text(network.name ?? "名称未获取").font(.system(size: 13, weight: .medium))
+                        if network.name == nil {
+                            Text(network.explanation).font(.caption2).foregroundStyle(.secondary)
+                            if network.needsAuthorization {
+                                Button("显示 Wi-Fi 名称") { network.requestNameAccess() }.font(.caption)
+                            }
+                        }
+                    }
+                }
                 if let code = connection.pairingCode {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(code).font(.system(size: 28, weight: .medium, design: .monospaced))
@@ -181,13 +195,21 @@ private struct ConnectionView: View {
                 }
                 if connection.usesWiFi {
                     VStack(alignment: .leading, spacing: 7) {
-                        Text("目标 Mac IP").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
-                        TextField("填写 Mac 显示的 IP", text: $wifiHost)
-                            .font(.system(size: 13, design: .monospaced)).accessibilityLabel("目标 Mac IP")
-                        Button("保存并连接") { connection.updateWiFiHost(wifiHost) }
+                        Text("Mac IP 地址").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
+                        Text("输入 Mac 软件上「Mac IP」显示的地址，不是手表自己的 IP。")
+                            .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                        TextField("例如 192.168.1.20", text: $wifiHost)
+                            .font(.system(size: 13, design: .monospaced)).accessibilityLabel("Mac IP 地址，填写 Mac 软件上显示的地址")
+                        Button("保存并连接") {
+                            guard let address = MacAddress.ipv4(wifiHost) else {
+                                addressError = "请填入完整的 Mac IP，例如 192.168.1.20。"; return
+                            }
+                            addressError = nil; wifiHost = address; connection.updateWiFiHost(address)
+                        }
                             .font(.system(size: 12, weight: .medium))
+                        if let addressError { Text(addressError).font(.caption2).foregroundStyle(.orange) }
                         if !connection.macAddress.isEmpty {
-                            Text("当前：\(connection.macAddress)").font(.caption2).foregroundStyle(.secondary)
+                            Text("已保存的 Mac IP：\(connection.macAddress)").font(.caption2).foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -197,7 +219,7 @@ private struct ConnectionView: View {
                             Label(mac.name, systemImage: "laptopcomputer").font(.caption)
                         }
                     }
-                    Text(connection.usesWiFi ? "Mac 打开 Micodex，点「允许 Wi-Fi 手表」。两台设备需在同一局域网。" : "在 Mac 的 Micodex 中开启蓝牙备用，再选择你的电脑。")
+                    Text(connection.usesWiFi ? "Mac 需保持 Micodex 打开并显示「Wi-Fi 已就绪」。首次连接，再在 Mac 点「允许 Wi-Fi 手表」并核对配对码。已配对时无需重复配对。" : "在 Mac 的 Micodex 中开启蓝牙备用，再选择你的电脑。")
                         .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }
                 Divider()
@@ -229,5 +251,11 @@ private struct ConnectionView: View {
                 }
             }.frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4)
         }.onAppear { wifiHost = WatchWiFiConnection.configuration?.0 ?? "" }
+        .task {
+            while !Task.isCancelled {
+                network.refresh()
+                try? await Task.sleep(nanoseconds: 5_000_000_000)
+            }
+        }
     }
 }

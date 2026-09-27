@@ -107,7 +107,7 @@ final class WatchWiFiConnection: ObservableObject {
                     ConnectionTrace.record("wifi", "authenticated HTTPS heartbeat received")
                 } catch {
                     guard self.epoch == token, !Task.isCancelled else { return }
-                    self.status = "Wi-Fi 连接失败：\(error.localizedDescription)"
+                    self.status = WiFiConnectionGuidance.message(for: error, address: self.macAddress)
                     ConnectionTrace.record("wifi", self.status)
                     try? await Task.sleep(nanoseconds: 2_000_000_000)
                 }

@@ -30,5 +30,9 @@
 	<string>Copyright © 2026 Nexorial</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>与你批准的 Apple Watch 建立加密的局域网遥控连接。</string>
+	<key>NSLocationUsageDescription</key>
+	<string>仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。</string>
 </dict>
 </plist>

@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import Network
 import MicodexCore
 
 @MainActor
@@ -10,6 +11,14 @@ final class WiFiHost: ObservableObject {
     @Published var pendingCode: String?
     @Published var pairedCount = 0
     @Published private(set) var refreshingNetwork = false
+    @Published private(set) var serviceReady = false
+    @Published private(set) var serviceIssue: String?
+    @Published private(set) var duplicateReceiver = false
+    private let lease = ReceiverLease()
+    private var retryTask: Task<Void, Never>?
+    private var networkTask: Task<Void, Never>?
+    private var retryAttempt = 0
+    private var stopped = false
     let audio = WatchAudioOutput()
     private let audioOverride: WatchAudioPlayback?
     private var playback: WatchAudioPlayback { audioOverride ?? audio }
@@ -42,53 +51,124 @@ final class WiFiHost: ObservableObject {
         self.controller = controller; self.preferences = preferences; self.accountPrefix = accountPrefix; self.port = port
         self.audioOverride = audioOverride
         pairedCount = approved.count
-        if demo { status = "演示模式" } else { start() }
+        if demo { status = "演示模式" } else {
+            start()
+            networkTask = Task { [weak self] in
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    guard !Task.isCancelled, let self, !self.stopped else { return }
+                    self.refreshAddressIfNeeded()
+                }
+            }
+        }
     }
     func start() {
-        guard server == nil, !refreshingNetwork else { return }
+        guard !stopped, server == nil, !refreshingNetwork else { return }
+        retryTask?.cancel(); retryTask = nil
+        serviceReady = false
         do {
-            let identity = try LocalTLSIdentity.prepare()
-            guard let host = LocalTLSIdentity.localAddress() else { status = "请连接 Mac 的 Wi-Fi 局域网"; return }
+            guard try lease.acquire(port: port) else {
+                duplicateReceiver = true
+                serviceIssue = "另一个 Micodex 接收端正在运行。请使用已打开的窗口；关闭它后，这里会自动接管。"
+                status = "已有接收端"; scheduleRetry(); return
+            }
+            duplicateReceiver = false
+            guard let host = LocalTLSIdentity.localAddress() else {
+                address = ""; status = "尚未连接局域网"
+                serviceIssue = "请将 Mac 连上 Wi-Fi；网络恢复后会自动连接。"
+                scheduleRetry(); return
+            }
             address = host
+            let identity = try LocalTLSIdentity.prepare()
             let token = UUID(); serverEpoch = token
             let server = TLSHTTPServer { [weak self] request in
                 guard let self else { return (503, WiFiReply("error", message: "接收端已退出")) }
                 return await self.handle(request, epoch: token)
             }
             self.server = server
-            try server.start(identity: identity.identity, address: host, portNumber: port) { [weak self] state in
+            status = "正在启动接收服务…"
+            try server.start(identity: identity.identity, address: host, portNumber: port) { [weak self] event in
                 Task { @MainActor in
-                    guard self?.serverEpoch == token else { return }
-                    self?.status = state
+                    guard let self, self.serverEpoch == token, !self.stopped else { return }
+                    switch event {
+                    case .ready:
+                        self.serviceReady = true; self.serviceIssue = nil; self.retryAttempt = 0
+                        self.status = "Wi-Fi 已就绪 · 等待手表"
+                    case .waiting(let error), .failed(let error):
+                        self.serviceReady = false
+                        self.status = "接收服务暂不可用 · 自动重试中"
+                        if case .posix(.EADDRINUSE) = error {
+                            self.serviceIssue = "Mac 的接收端口被占用。请关闭其他 Micodex 或旧版 Watch Whisper；无需改手表 IP 或重新配对。端口释放后会自动恢复。"
+                        } else {
+                            self.serviceIssue = "请检查 Mac 的局域网连接和本地网络权限。服务会自动重试。详情：\(error.localizedDescription)"
+                        }
+                        ConnectionTrace.record("wifi-server", "port=\(self.port) listener error=\(error)")
+                        self.retireServer(retry: true)
+                    }
                 }
             }
-        } catch { server = nil; status = error.localizedDescription }
+        } catch {
+            serviceIssue = "接收服务启动失败：\(error.localizedDescription)"
+            status = "接收服务暂不可用 · 自动重试中"
+            retireServer(retry: true)
+        }
+    }
+    private func scheduleRetry() {
+        guard !stopped, retryTask == nil else { return }
+        let delay = min(30, 1 << min(retryAttempt, 5)); retryAttempt += 1
+        retryTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
+            guard !Task.isCancelled, let self else { return }
+            self.retryTask = nil; self.start()
+        }
+    }
+    private func retireServer(retry: Bool) {
+        let previous = server
+        serverEpoch = UUID(); serviceReady = false
+        controller.stopScrolling()
+        sessions = [:]; owner = nil; grants = [:]
+        pending = nil; pendingCode = nil; pairingOpen = false; pairingUntil = .distantPast
+        if controller.isRecording && !controller.isFinishing {
+            Task { _ = await controller.perform(.finishReceivedAudio); playback.stop() }
+        } else { playback.stop() }
+        guard let previous else {
+            if retry { scheduleRetry() }
+            return
+        }
+        refreshingNetwork = true
+        // Keep the old server referenced until its cancellation callback. Failed
+        // listeners must be discarded too, otherwise start() stays a no-op.
+        previous.stop { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.server = nil; self.refreshingNetwork = false
+                guard !self.stopped else { self.lease.release(); return }
+                if retry { self.scheduleRetry() } else { self.start() }
+            }
+        }
     }
     var canRefreshNetwork: Bool {
         !refreshingNetwork && !controller.isRecording && !controller.isFinishing && !controller.isBusy && !sessions.values.contains { $0.draining }
     }
     func refreshNetwork() {
-        guard canRefreshNetwork else { return }
-        let previous = server
-        serverEpoch = UUID(); server = nil; controller.stopScrolling(); playback.stop()
-        sessions = [:]; owner = nil; grants = [:]
-        pending = nil; pendingCode = nil; pairingOpen = false; pairingUntil = .distantPast
-        address = ""; status = "正在刷新本地网络…"
-        guard let previous else { start(); return }
-        refreshingNetwork = true
-        previous.stop { [weak self] in
-            Task { @MainActor in
-                guard let self else { return }
-                self.refreshingNetwork = false; self.start()
-            }
-        }
+        guard canRefreshNetwork, !stopped else { return }
+        retryTask?.cancel(); retryTask = nil; retryAttempt = 0
+        status = "正在重新连接局域网…"
+        if server == nil { start() } else { retireServer(retry: false) }
     }
     func refreshAddressIfNeeded() {
+        guard !stopped else { return }
         if LocalTLSIdentity.localAddress() != address { refreshNetwork() }
+        else if server == nil && retryTask == nil && !refreshingNetwork { start() }
     }
-    func shutdown() { serverEpoch = UUID(); controller.stopScrolling(); server?.stop(); server = nil; playback.stop() }
+    func shutdown() {
+        stopped = true
+        networkTask?.cancel(); networkTask = nil; retryTask?.cancel(); retryTask = nil
+        retireServer(retry: false)
+        if server == nil { lease.release() }
+    }
     func allowPairing() {
-        guard server != nil else { start(); return }
+        guard serviceReady else { refreshNetwork(); return }
         pairingUntil = Date().addingTimeInterval(60); pairingOpen = true; pending = nil; pendingCode = nil
         status = "请在手表核对配对码"
         Task { [weak self] in
@@ -129,7 +209,7 @@ final class WiFiHost: ObservableObject {
         }
     }
     private func handle(_ request: HTTPEnvelope, epoch: UUID) async -> (Int, WiFiReply) {
-        guard serverEpoch == epoch else { return (503, WiFiReply("error", message: "网络已刷新，请重新连接")) }
+        guard serverEpoch == epoch, serviceReady else { return (503, WiFiReply("error", message: "网络已刷新，请重新连接")) }
         if request.method == "GET", request.path == "/v1/hello" {
             return (200, WiFiReply("ok", name: Host.current().localizedName ?? "Mac"))
         }

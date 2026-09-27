@@ -22,6 +22,10 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>MicodexWiFiHost</key>
+	<string>$(MICODEX_HOST)</string>
+	<key>MicodexWiFiPin</key>
+	<string>$(MICODEX_PIN)</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
@@ -29,6 +33,8 @@
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>与你的 Mac 直接连接，用表冠滚动、传输你的语音和发送 Enter。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>仅用于显示当前 Wi-Fi 网络名称，帮助你核对 Mac 与手表的连接；不会采集位置坐标。</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>使用 Apple Watch 内置麦克风采集你主动说的话，通过配对的 Mac 交给 Codex 听写。</string>
 	<key>UIBackgroundModes</key>
@@ -41,9 +47,5 @@
 	<true/>
 	<key>WKWatchOnly</key>
 	<true/>
-	<key>MicodexWiFiHost</key>
-	<string>$(MICODEX_HOST)</string>
-	<key>MicodexWiFiPin</key>
-	<string>$(MICODEX_PIN)</string>
 </dict>
 </plist>

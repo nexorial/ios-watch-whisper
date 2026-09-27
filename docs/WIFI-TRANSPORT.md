@@ -48,3 +48,18 @@ Apple 的 [TN3135](https://developer.apple.com/documentation/technotes/tn3135-lo
 本次已准备 `artifacts/testflight-0.3.0/WatchWhisper.ipa`（755524 字节），SHA-256：`a6d2c51d29a66003c9015c51f7ad9f2bbbfb8fe8df1c212b437f0ffb3bc1d4c5`。
 
 后续可以用 `bash scripts/prepare-testflight.sh <新输出目录>` 重现准备流程；脚本只导出，不上传，并拒绝覆盖已有输出。用户已授权本次创建记录、上传及仅本人内部测试；此范围不包括外部测试者或 App Review。
+
+## Build 12：接收服务恢复与网络指引
+
+`EADDRINUSE`（错误 48）表示 Mac 无法占用接收端口，并不说明手表输入的 IP 错误。旧实现虽在手动刷新时等待取消，监听失败后却保留失败对象，导致后续 `start()` 被 guard 挡住，也没有后台自动恢复。
+
+- 每个端口使用 OS advisory lock，避免 Micodex 多个进程 / 副本同时启动接收服务。进程退出或崩溃自动释放锁，遗留锁文件不会阻止下次启动。
+- 保留同一个 cancellation handler，聚合重复 stop 的完成回调；完整取消 listener 后才丢弃旧对象和重新绑定。开启本地 endpoint reuse 以处理刚结束的 HTTP 连接。
+- 失败后按 1、2、4、8、16、30 秒间隔重试；成功后重置间隔。后台每 5 秒检查局域网地址，空闲时自动重建服务。配对记录与证书身份保留，停止 / 失败不会误显示为就绪，未就绪不能开放配对。
+- UI 明确区分接收端服务状态、两端各自的 Wi-Fi 名称、Mac IP 与手表保存的目标。错误提示给出下一步，不引导用户因暂时断线删除配对。
+- Wi-Fi 名称使用 Mac CoreWLAN 和 Watch `NEHotspotNetwork.fetchCurrent`；仅显式点击后请求 Core Location 授权，不调用位置更新或读取坐标。Watch 包含 Access Wi-Fi Information entitlement；未授权、精确位置关闭或系统返回 nil 均显示明确原因。
+- 自动化回归使用独立端口与测试凭据，覆盖 8 次连续 HTTP 重连、重复接收端、不可用时禁止配对、真实端口占用 / 释放后的自动恢复，以及重复 shutdown 后不会再次启动。不会操作 Codex 或修改生产配对。
+
+第三方进程持续占用端口、路由器设备隔离、系统权限拒绝仍可能阻止连接；应用会明确显示问题，不承诺任何网络环境下永不失败。
+
+Apple 文档：[macOS SSID 的定位权限要求](https://developer.apple.com/forums/thread/732431)、[读取当前 Wi-Fi 网络及权限要求](https://developer.apple.com/documentation/networkextension/nehotspotnetwork/fetchcurrent(completionhandler:))、[本地 endpoint reuse](https://developer.apple.com/documentation/network/nwparameters/allowlocalendpointreuse)。

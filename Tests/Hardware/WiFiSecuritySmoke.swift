@@ -1,4 +1,5 @@
 import Foundation
+import Network
 import MicodexCore
 
 @main
@@ -115,7 +116,57 @@ struct WiFiSecuritySmoke {
         host.revokeAll()
         let revoked = try await client.request("v1/command", command)
         try require(revoked.status == "unpaired", "Revoked device rejected")
+        // Repeated refreshes after real keep-alive requests must release the old
+        // listener completely, including back-to-back refresh requests.
+        for _ in 0..<8 {
+            host.refreshNetwork(); host.refreshNetwork()
+            try await waitForReady(host)
+            try require(try await client.request("v1/hello").status == "ok", "Repeated refresh remains reachable")
+        }
+        let duplicate = WiFiHost(controller: AgentController(demo: true), demo: false, preferences: preferences,
+                                 accountPrefix: prefix, port: 8767)
+        try require(duplicate.duplicateReceiver && !duplicate.serviceReady, "Second receiver cannot claim the same port")
+        duplicate.allowPairing()
+        try require(!duplicate.pairingOpen, "Pairing cannot open on an unavailable receiver")
+        duplicate.shutdown()
+
+        // Reproduce a genuine EADDRINUSE from a non-Micodex listener. The host
+        // must recover automatically after the owner releases the port.
+        let blocker = try NWListener(using: .tcp, on: .any)
+        blocker.newConnectionHandler = { $0.cancel() }
+        blocker.start(queue: .main)
+        defer { blocker.cancel() }
+        for _ in 0..<60 {
+            if case .ready = blocker.state { break }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        guard let occupiedPort = blocker.port?.rawValue else { throw Failure("Blocker did not bind") }
+        let recovering = WiFiHost(controller: AgentController(demo: true), demo: false, preferences: preferences,
+                                  accountPrefix: prefix, port: occupiedPort)
+        defer { recovering.shutdown() }
+        for _ in 0..<60 {
+            if recovering.serviceIssue?.contains("端口被占用") == true { break }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        try require(!recovering.serviceReady && recovering.serviceIssue?.contains("端口被占用") == true,
+                    "Busy port is explained, never reported ready: \(recovering.status)")
+        blocker.cancel()
+        try await waitForReady(recovering)
+        let recoveredClient = try PinnedHTTPSClient(host: address, port: occupiedPort, fingerprint: identity.fingerprint)
+        defer { recoveredClient.invalidate() }
+        try require(try await recoveredClient.request("v1/hello").status == "ok", "Automatically recovers after external port owner exits")
+        recovering.shutdown(); recovering.shutdown()
+        try await Task.sleep(nanoseconds: 100_000_000)
+        try require(!recovering.serviceReady, "Shutdown never restarts a pending recovery")
+        print("PASS: 8 rapid refresh cycles, duplicate receiver exclusion, pairing readiness, real EADDRINUSE and automatic recovery, repeated shutdown")
         print("PASS: pinned HTTPS, pairing approval, ticket binding, authenticated session, replay rejection, silence stop, late cancel/release/audio protection, new stream and manual stop, network refresh/reconnect, wrong-pin rejection, revocation")
+    }
+    @MainActor static func waitForReady(_ host: WiFiHost) async throws {
+        for _ in 0..<160 {
+            if host.serviceReady { return }
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        throw Failure("Receiver did not recover: \(host.status) / \(host.serviceIssue ?? "none")")
     }
     static func require(_ condition: Bool, _ message: String) throws { if !condition { throw Failure(message) } }
     struct Failure: LocalizedError {

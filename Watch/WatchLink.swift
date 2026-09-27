@@ -53,7 +53,9 @@ final class WatchLink: ObservableObject {
     func updateWiFiHost(_ host: String) {
         guard let (_, pin) = WatchWiFiConnection.configuration else { return }
         do {
-            let normalized = host.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard let normalized = MacAddress.ipv4(host) else {
+                status = "请填写 Mac 软件显示的完整 IP 地址，例如 192.168.1.20。"; return
+            }
             let replacement = try WatchWiFiConnection(host: normalized, pin: pin)
             wifi?.disconnect(); bluetooth?.disconnect(); observer?.cancel()
             wifi = replacement; usesWiFi = true

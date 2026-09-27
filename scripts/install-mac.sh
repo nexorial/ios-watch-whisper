@@ -23,8 +23,10 @@ for binary in "$micodex_bundle"/Contents/MacOS/*.dylib; do
     test -f "$binary" || continue
     codesign --force --sign "$micodex_identity" --options runtime --timestamp=none "$binary"
 done
-codesign --force --sign "$micodex_identity" --options runtime --timestamp=none "$micodex_bundle"
+codesign --force --sign "$micodex_identity" --options runtime --timestamp=none --entitlements Config/Mac.entitlements "$micodex_bundle"
 codesign --verify --deep --strict "$micodex_bundle"
+codesign -d --entitlements :- "$micodex_bundle" > "$micodex_stage/entitlements.plist" 2>/dev/null
+test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.personal-information.location' "$micodex_stage/entitlements.plist")" = true
 micodex_check_closed
 mkdir -p "$HOME/Applications"
 # Verify ownership before touching either installation. Preferences and pairing

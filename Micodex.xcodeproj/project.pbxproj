@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		112D8760ABFB1121DE381013 /* ReceiverLease.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB099F72C13AE4954284B35 /* ReceiverLease.swift */; };
 		15EDD641C4D7CDD2E351F561 /* Micodex Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D948F6D3C1F72D84E65A0931 /* Micodex Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		19CA057FA093318A79B60FE9 /* WatchWiFiConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B586EF779EA2301362C85FBD /* WatchWiFiConnection.swift */; };
 		1DCDCCBF08CFFA4C2BB4071E /* MicodexCore in Frameworks */ = {isa = PBXBuildFile; productRef = D60509EED89C117B33B5991F /* MicodexCore */; };
 		275E6F5BC2ABA49AA07A7C64 /* MicodexStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */; };
 		34CE10E4DE841A8C199F6E0F /* LocalTLSIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F985FAA4BDB022D28261E6 /* LocalTLSIdentity.swift */; };
+		52328906890CECD6147CA371 /* WiFiNetworkInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */; };
 		52C1B5FA21806897EA31B233 /* WatchAudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */; };
 		62BDB0FAA6A44AF360C76069 /* BluetoothHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = C180B30971414F71F8DBADAC /* BluetoothHost.swift */; };
 		769DC7B498970D5A43685B34 /* WatchMicrophone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */; };
@@ -24,6 +26,7 @@
 		B6DC78C6369CEDAE2807658A /* MicodexCore in Frameworks */ = {isa = PBXBuildFile; productRef = 65CA20A636FB87CA7A833F1E /* MicodexCore */; };
 		B97745DA1700628F5E395757 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 502475A91D42AE5CAE9E12F2 /* Assets.xcassets */; };
 		C302609A8D7D74FB19AC95D8 /* AgentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75955C7535FC50E2A09E7077 /* AgentController.swift */; };
+		CE025C84D722AF331C96AEFD /* WiFiNetworkInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */; };
 		F30E06CA1B6671DEC6E00B07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B50ED7B712D97AE6EDB12C0 /* Assets.xcassets */; };
 		FC0100A6B7D0DCFE2D84C8D2 /* MicodexMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */; };
 /* End PBXBuildFile section */
@@ -69,6 +72,8 @@
 		B586EF779EA2301362C85FBD /* WatchWiFiConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWiFiConnection.swift; sourceTree = "<group>"; };
 		C180B30971414F71F8DBADAC /* BluetoothHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothHost.swift; sourceTree = "<group>"; };
 		C8971E3471ED09EB2EECE676 /* WatchConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnection.swift; sourceTree = "<group>"; };
+		CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiNetworkInfo.swift; sourceTree = "<group>"; };
+		CEB099F72C13AE4954284B35 /* ReceiverLease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiverLease.swift; sourceTree = "<group>"; };
 		D948F6D3C1F72D84E65A0931 /* Micodex Watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Micodex Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F89AB17F6A012B2C920CC380 /* MicodexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexApp.swift; sourceTree = "<group>"; };
 		FB77D33E9B06F1AF13AB7CB2 /* Micodex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Micodex.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,6 +117,7 @@
 				C180B30971414F71F8DBADAC /* BluetoothHost.swift */,
 				56F985FAA4BDB022D28261E6 /* LocalTLSIdentity.swift */,
 				2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */,
+				CEB099F72C13AE4954284B35 /* ReceiverLease.swift */,
 				0C0383EF77860F4707E6839B /* TLSHTTPServer.swift */,
 				AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */,
 				99C4BA921586A3603CB13845 /* WiFiHost.swift */,
@@ -155,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */,
+				CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -298,6 +305,7 @@
 				B5A5F176E4DBE8B1F5C4CBDB /* WatchLink.swift in Sources */,
 				769DC7B498970D5A43685B34 /* WatchMicrophone.swift in Sources */,
 				19CA057FA093318A79B60FE9 /* WatchWiFiConnection.swift in Sources */,
+				52328906890CECD6147CA371 /* WiFiNetworkInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,9 +325,11 @@
 				34CE10E4DE841A8C199F6E0F /* LocalTLSIdentity.swift in Sources */,
 				FC0100A6B7D0DCFE2D84C8D2 /* MicodexMacApp.swift in Sources */,
 				275E6F5BC2ABA49AA07A7C64 /* MicodexStyle.swift in Sources */,
+				112D8760ABFB1121DE381013 /* ReceiverLease.swift in Sources */,
 				9C0AA554068EACDEE3DB28BE /* TLSHTTPServer.swift in Sources */,
 				52C1B5FA21806897EA31B233 /* WatchAudioOutput.swift in Sources */,
 				A594F72EABA0D3B8B7E0FCA8 /* WiFiHost.swift in Sources */,
+				CE025C84D722AF331C96AEFD /* WiFiNetworkInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,6 +349,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/Mac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -358,6 +369,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/Watch.entitlements;
 				INFOPLIST_FILE = "Config/Watch-Info.plist";
 				MICODEX_HOST = "";
 				MICODEX_PIN = "";
@@ -432,7 +444,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -500,7 +512,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -531,6 +543,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/Watch.entitlements;
 				INFOPLIST_FILE = "Config/Watch-Info.plist";
 				MICODEX_HOST = "";
 				MICODEX_PIN = "";
@@ -547,6 +560,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/Mac.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
