@@ -26,12 +26,16 @@ final class WatchLink: ObservableObject {
     private var active = true
     init() {
         if ProcessInfo.processInfo.arguments.contains("--demo") { useBluetooth() }
-        else if canUseWiFi { useWiFi() }
-        else { useBluetooth() }
+        else { useWiFi() }
     }
     func useWiFi() {
-        guard let (host, pin) = WatchWiFiConnection.configuration else { return }
         bluetooth?.disconnect(); observer?.cancel()
+        usesWiFi = true
+        guard let (host, pin) = WatchWiFiConnection.configuration else {
+            status = L10n.t("Copy the connection code from Micodex on your Mac to get started.")
+            connected = false
+            return
+        }
         do {
             if wifi == nil { wifi = try WatchWiFiConnection(host: host, pin: pin) }
             usesWiFi = true; wifi?.setActive(active)
@@ -52,14 +56,20 @@ final class WatchLink: ObservableObject {
     }
     func updateWiFiHost(_ host: String) {
         guard let (_, pin) = WatchWiFiConnection.configuration else { return }
+        guard let configuration = WiFiConfiguration(host: host, fingerprint: pin) else {
+            status = L10n.t("Enter the full IP address shown in Micodex on your Mac, such as 192.168.1.20.")
+            return
+        }
+        configureWiFi(configuration)
+    }
+    func configureWiFi(_ configuration: WiFiConfiguration) {
+        guard !recordingRequested, !stopping else { return }
         do {
-            guard let normalized = MacAddress.ipv4(host) else {
-                status = L10n.t("Enter the full IP address shown in Micodex on your Mac, such as 192.168.1.20."); return
-            }
-            let replacement = try WatchWiFiConnection(host: normalized, pin: pin)
+            let replacement = try WatchWiFiConnection(host: configuration.host, pin: configuration.fingerprint)
             wifi?.disconnect(); bluetooth?.disconnect(); observer?.cancel()
             wifi = replacement; usesWiFi = true
-            UserDefaults.standard.set(normalized, forKey: "wifiHostOverride")
+            UserDefaults.standard.set(configuration.host, forKey: "wifiHostOverride")
+            UserDefaults.standard.set(configuration.fingerprint, forKey: "wifiPinOverride")
             wifi?.setActive(active)
             observer = wifi?.objectWillChange.sink { [weak self] in DispatchQueue.main.async { self?.sync() } }
             sync()

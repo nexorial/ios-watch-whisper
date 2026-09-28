@@ -25,7 +25,7 @@ public enum WiFiConnectionGuidance {
             return L10n.t("Cannot reach Mac (%@). Check that Mac shows “Wi-Fi Ready” and that its Mac IP matches this address. Retrying automatically; no need to pair again.", address)
         case .serverCertificateUntrusted, .serverCertificateHasBadDate, .serverCertificateHasUnknownRoot,
              .serverCertificateNotYetValid, .secureConnectionFailed, .cancelled:
-            return L10n.t("Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. A different Mac requires a new Watch app configuration.")
+            return L10n.t("Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. For a different Mac, use “Set Up Another Mac” and copy its connection code.")
         default:
             return L10n.t("Wi-Fi connection failed: %@. Check the receiver status on Mac first.", error.localizedDescription)
         }

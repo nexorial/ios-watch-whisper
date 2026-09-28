@@ -7,3 +7,18 @@ xcuserdata/
 Config/Local.xcconfig
 artifacts/*
 !artifacts/.gitkeep
+
+# Signing, credentials, local exports, and legacy generated projects
+*.p12
+*.p8
+*.pem
+*.key
+*.mobileprovision
+*.provisionprofile
+*.password
+*.ipa
+*.xcarchive/
+.env
+.env.*
+!.env.example
+WatchWhisper*.xcodeproj/

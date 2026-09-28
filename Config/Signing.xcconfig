@@ -1,0 +1,2 @@
+// Optional local signing configuration; never commit your local copy.
+#include? "Local.xcconfig"

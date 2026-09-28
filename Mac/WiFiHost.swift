@@ -7,6 +7,11 @@ import MicodexCore
 final class WiFiHost: ObservableObject {
     @Published var status = L10n.t("Preparing Wi-Fi direct connection…")
     @Published var address = ""
+    @Published private(set) var fingerprint = ""
+    var connectionCode: String? {
+        guard serviceReady else { return nil }
+        return WiFiConfiguration(host: address, fingerprint: fingerprint)?.connectionCode
+    }
     @Published var pairingOpen = false
     @Published var pendingCode: String?
     @Published var pairedCount = 0
@@ -80,6 +85,7 @@ final class WiFiHost: ObservableObject {
             }
             address = host
             let identity = try LocalTLSIdentity.prepare()
+            fingerprint = identity.fingerprint
             let token = UUID(); serverEpoch = token
             let server = TLSHTTPServer { [weak self] request in
                 guard let self else { return (503, WiFiReply("error", message: L10n.message("The receiver has closed"))) }

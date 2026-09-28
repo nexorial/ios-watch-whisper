@@ -12,13 +12,17 @@
 		19CA057FA093318A79B60FE9 /* WatchWiFiConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B586EF779EA2301362C85FBD /* WatchWiFiConnection.swift */; };
 		1DCDCCBF08CFFA4C2BB4071E /* MicodexCore in Frameworks */ = {isa = PBXBuildFile; productRef = D60509EED89C117B33B5991F /* MicodexCore */; };
 		275E6F5BC2ABA49AA07A7C64 /* MicodexStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */; };
+		3253F8D000D8FF6040A46E1A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FAECF6D55A6ED48F67A749E5 /* PrivacyInfo.xcprivacy */; };
+		32E94F192A8FF3859A183F81 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FAECF6D55A6ED48F67A749E5 /* PrivacyInfo.xcprivacy */; };
 		32EF29EA21D372D9F6020C99 /* CrownScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977DD65A266B8FB39B09B6BA /* CrownScrollingTests.swift */; };
 		34CE10E4DE841A8C199F6E0F /* LocalTLSIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F985FAA4BDB022D28261E6 /* LocalTLSIdentity.swift */; };
 		52328906890CECD6147CA371 /* WiFiNetworkInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */; };
 		52C1B5FA21806897EA31B233 /* WatchAudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */; };
 		56C057D863A9D98208FCBB8F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A5506C08F9F87F84A83F248 /* InfoPlist.strings */; };
 		62BDB0FAA6A44AF360C76069 /* BluetoothHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = C180B30971414F71F8DBADAC /* BluetoothHost.swift */; };
+		6EBE7D4622779A4101A7F21F /* ConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098F6B68249EBA55CF325D85 /* ConnectionView.swift */; };
 		769DC7B498970D5A43685B34 /* WatchMicrophone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */; };
+		8ADC8CF14337AFC113C0E790 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = FAECF6D55A6ED48F67A749E5 /* PrivacyInfo.xcprivacy */; };
 		8C7919D2EA8141E8592D10C7 /* MicodexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89AB17F6A012B2C920CC380 /* MicodexApp.swift */; };
 		96570E82CFF697CA6F5ACEDB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A5506C08F9F87F84A83F248 /* InfoPlist.strings */; };
 		9C0AA554068EACDEE3DB28BE /* TLSHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0383EF77860F4707E6839B /* TLSHTTPServer.swift */; };
@@ -31,6 +35,7 @@
 		C302609A8D7D74FB19AC95D8 /* AgentController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75955C7535FC50E2A09E7077 /* AgentController.swift */; };
 		CE025C84D722AF331C96AEFD /* WiFiNetworkInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */; };
 		E7E010632BB63033351A8C87 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4A5506C08F9F87F84A83F248 /* InfoPlist.strings */; };
+		EDFAFD6A2FE8019213299181 /* RemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD0D82E8B86C45828C96E62 /* RemoteView.swift */; };
 		F30E06CA1B6671DEC6E00B07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B50ED7B712D97AE6EDB12C0 /* Assets.xcassets */; };
 		FC0100A6B7D0DCFE2D84C8D2 /* MicodexMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */; };
 /* End PBXBuildFile section */
@@ -67,8 +72,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		098F6B68249EBA55CF325D85 /* ConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionView.swift; sourceTree = "<group>"; };
 		0C0383EF77860F4707E6839B /* TLSHTTPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TLSHTTPServer.swift; sourceTree = "<group>"; };
 		2595E73AFE8076A6046048C0 /* MicodexMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexMacApp.swift; sourceTree = "<group>"; };
+		39DC384273CE605038CBBDB0 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
+		3FD0D82E8B86C45828C96E62 /* RemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteView.swift; sourceTree = "<group>"; };
 		4910A49D5B8B1C8A49EEA90A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchMicrophone.swift; sourceTree = "<group>"; };
 		4C3F1656BE48EA5F1C1A77E6 /* WatchLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLink.swift; sourceTree = "<group>"; };
@@ -91,6 +99,7 @@
 		CEB099F72C13AE4954284B35 /* ReceiverLease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiverLease.swift; sourceTree = "<group>"; };
 		D948F6D3C1F72D84E65A0931 /* Micodex Watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Micodex Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F89AB17F6A012B2C920CC380 /* MicodexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexApp.swift; sourceTree = "<group>"; };
+		FAECF6D55A6ED48F67A749E5 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		FB77D33E9B06F1AF13AB7CB2 /* Micodex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Micodex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -137,6 +146,7 @@
 		97029B61F05F79A82C9E04F8 /* AppResources */ = {
 			isa = PBXGroup;
 			children = (
+				FAECF6D55A6ED48F67A749E5 /* PrivacyInfo.xcprivacy */,
 				4A5506C08F9F87F84A83F248 /* InfoPlist.strings */,
 			);
 			path = AppResources;
@@ -158,10 +168,19 @@
 			path = Mac;
 			sourceTree = "<group>";
 		};
+		C86212F52320417E7AB10748 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				39DC384273CE605038CBBDB0 /* Signing.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		CB7CEC9011573C60CD80D736 = {
 			isa = PBXGroup;
 			children = (
 				97029B61F05F79A82C9E04F8 /* AppResources */,
+				C86212F52320417E7AB10748 /* Config */,
 				B30C827DE0595EF7B5EF6C94 /* Mac */,
 				F021E9C83DEDEBEC4BAA9B3D /* Packages */,
 				F6937CE24220CF240E1E78BB /* Shared */,
@@ -175,7 +194,9 @@
 			isa = PBXGroup;
 			children = (
 				502475A91D42AE5CAE9E12F2 /* Assets.xcassets */,
+				098F6B68249EBA55CF325D85 /* ConnectionView.swift */,
 				F89AB17F6A012B2C920CC380 /* MicodexApp.swift */,
+				3FD0D82E8B86C45828C96E62 /* RemoteView.swift */,
 				C8971E3471ED09EB2EECE676 /* WatchConnection.swift */,
 				4C3F1656BE48EA5F1C1A77E6 /* WatchLink.swift */,
 				4AD28434F1BE5A13A255C991 /* WatchMicrophone.swift */,
@@ -292,20 +313,20 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					24F89534F4C622DB2DDE02D2 = {
-						DevelopmentTeam = JNN5TPN23D;
+						DevelopmentTeam = "$(MICODEX_DEVELOPMENT_TEAM)";
 						ProvisioningStyle = Automatic;
 						TestTargetID = D23DE6C31DEAA6C3DC35E58D;
 					};
 					3DCBF2650B5B0DA4F90E78A5 = {
-						DevelopmentTeam = JNN5TPN23D;
+						DevelopmentTeam = "$(MICODEX_DEVELOPMENT_TEAM)";
 						ProvisioningStyle = Automatic;
 					};
 					55967A5A3F5CFE4990178203 = {
-						DevelopmentTeam = JNN5TPN23D;
+						DevelopmentTeam = "$(MICODEX_DEVELOPMENT_TEAM)";
 						ProvisioningStyle = Automatic;
 					};
 					D23DE6C31DEAA6C3DC35E58D = {
-						DevelopmentTeam = JNN5TPN23D;
+						DevelopmentTeam = "$(MICODEX_DEVELOPMENT_TEAM)";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -343,6 +364,7 @@
 			files = (
 				B97745DA1700628F5E395757 /* Assets.xcassets in Resources */,
 				96570E82CFF697CA6F5ACEDB /* InfoPlist.strings in Resources */,
+				32E94F192A8FF3859A183F81 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -351,6 +373,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E7E010632BB63033351A8C87 /* InfoPlist.strings in Resources */,
+				3253F8D000D8FF6040A46E1A /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,6 +383,7 @@
 			files = (
 				F30E06CA1B6671DEC6E00B07 /* Assets.xcassets in Resources */,
 				56C057D863A9D98208FCBB8F /* InfoPlist.strings in Resources */,
+				8ADC8CF14337AFC113C0E790 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -370,8 +394,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6EBE7D4622779A4101A7F21F /* ConnectionView.swift in Sources */,
 				8C7919D2EA8141E8592D10C7 /* MicodexApp.swift in Sources */,
 				A34832A57F1576D8FB4607F0 /* MicodexStyle.swift in Sources */,
+				EDFAFD6A2FE8019213299181 /* RemoteView.swift in Sources */,
 				B6793AE5769CACB5339194C5 /* WatchConnection.swift in Sources */,
 				B5A5F176E4DBE8B1F5C4CBDB /* WatchLink.swift in Sources */,
 				769DC7B498970D5A43685B34 /* WatchMicrophone.swift in Sources */,
@@ -507,6 +533,7 @@
 		};
 		6BD4785563D1C82E1F4EB911 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 39DC384273CE605038CBBDB0 /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -540,9 +567,9 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = JNN5TPN23D;
+				DEVELOPMENT_TEAM = "$(MICODEX_DEVELOPMENT_TEAM)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -561,7 +588,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -575,6 +602,7 @@
 		};
 		94D23369A89D63527B003669 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 39DC384273CE605038CBBDB0 /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -608,9 +636,9 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = JNN5TPN23D;
+				DEVELOPMENT_TEAM = "$(MICODEX_DEVELOPMENT_TEAM)";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -623,7 +651,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.3.0;
+				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

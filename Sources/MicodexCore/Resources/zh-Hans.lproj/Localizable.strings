@@ -45,6 +45,7 @@
 "Cancellation requested, but Codex still shows recording. Stop it manually in Codex." = "已请求取消，但 Codex 仍显示录音。请在 Codex 手动停止。";
 "Cannot reach Mac (%@). Check that Mac shows “Wi-Fi Ready” and that its Mac IP matches this address. Retrying automatically; no need to pair again." = "无法连接 Mac（%@）。请确认 Mac 软件显示「Wi-Fi 已就绪」，并核对其 Mac IP 与这里一致。将自动重试，无需重新配对。";
 "Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. A different Mac requires a new Watch app configuration." = "无法验证 Mac 的安全连接。请确认 IP 属于原来配对的 Mac；更换电脑后需重新配置手表 App。";
+"Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. For a different Mac, use “Set Up Another Mac” and copy its connection code." = "无法验证与 Mac 的安全连接。请检查 IP 是否属于已配对的 Mac。更换 Mac 时，请点“设置另一台 Mac”并复制其连接码。";
 "Check Devices" = "检查设备";
 "Check the Mac local network connection and Local Network permission. The service will retry automatically. Details: %@" = "请检查 Mac 的局域网连接和本地网络权限。服务会自动重试。详情：%@";
 "Check the pairing code on your Watch" = "请在手表核对配对码";
@@ -71,7 +72,9 @@
 "Connection lost. Looking for your Mac again…" = "连接中断，正在重新搜索 Mac…";
 "Connection settings" = "连接设置";
 "Control target" = "控制目标";
+"Copy Connection Code" = "复制连接码";
 "Copy IP" = "复制 IP";
+"Copy the connection code from Micodex on your Mac to get started." = "请先复制 Mac 端 Micodex 的连接码。";
 "Could not activate the built-in Apple Watch microphone." = "未能启用 Apple Watch 内置麦克风。";
 "Could not authenticate the Mac status. Please pair again." = "Mac 状态认证失败，请重新配对";
 "Could not authenticate the command. Please pair again." = "无法认证指令，请重新配对";
@@ -127,6 +130,7 @@
 "Finish dictation before changing the input device." = "请先结束当前听写，再更改输入设备。";
 "Finish the current dictation first" = "请先结束当前听写";
 "Finishing audio…" = "正在传完尾音，请稍候";
+"For a new Watch installation, copy this Mac’s connection code into the Watch app first." = "首次安装手表 App 时，请先将此 Mac 的连接码复制到手表 App。";
 "Forget Mac" = "忘记 Mac";
 "Hide" = "收起";
 "Hide audio settings" = "收起音频设置";
@@ -149,6 +153,7 @@
 "Mac Bluetooth is off" = "Mac 蓝牙已关闭";
 "Mac Bluetooth is on, but advertising has not started" = "Mac 蓝牙已开，广播未启动";
 "Mac Connected" = "Mac 已连接";
+"Mac Connection Code" = "Mac 连接码";
 "Mac IP" = "Mac IP";
 "Mac IP Address" = "Mac IP 地址";
 "Mac IP Address. Enter the address shown in the Mac app." = "Mac IP 地址，填写 Mac 软件上显示的地址";
@@ -171,6 +176,7 @@
 "No sound detected. Recording stopped." = "未检测到声音，已停止收音";
 "No task window is available." = "没有可用的任务窗口。";
 "Not connected to a local network" = "尚未连接局域网";
+"On your Mac, click “Copy Connection Code”. Paste it here using the iPhone keyboard, or enter it exactly. Only use a code from your own Mac." = "在 Mac 上点“复制连接码”，通过 iPhone 键盘粘贴到这里，或完整输入。请只使用你自己 Mac 上的连接码。";
 "Open Micodex" = "打开 Micodex";
 "Open Running Receiver" = "打开已运行的接收端";
 "Open Settings" = "打开设置";
@@ -187,6 +193,7 @@
 "Pairing timed out. Approve it on your Mac, then try again." = "配对超时，请在 Mac 允许后重试";
 "Pairing verification failed. Pair again." = "配对验证失败，请重新配对";
 "Pairing was not approved. Please try again on your Mac." = "配对未获允许，请在 Mac 重试";
+"Paste the complete connection code from your Mac. It includes the IP and 64-character certificate fingerprint." = "请粘贴 Mac 上的完整连接码，其中包含 IP 和 64 位证书指纹。";
 "Preparing Bluetooth" = "蓝牙服务正在准备";
 "Preparing Wi-Fi direct connection…" = "正在准备 Wi-Fi 直连…";
 "Quit Micodex" = "退出 Micodex";
@@ -217,6 +224,7 @@
 "Select this Mac on your Watch within 60 seconds" = "60 秒内在手表选择这台 Mac";
 "Send the text in the Mac input field" = "发送 Mac 输入框中的文字";
 "Sent to your Mac for transcription. Raise your wrist to reconnect." = "已交给 Mac 转写，抬腕后恢复连接";
+"Set Up Another Mac" = "设置另一台 Mac";
 "Set dictation input to BlackHole 2ch" = "请将听写音频输入设为 BlackHole 2ch";
 "Set the system sound input to BlackHole 2ch, and set Codex to use the default input or BlackHole 2ch." = "请在系统声音设置将输入设为 BlackHole 2ch，并让 Codex 使用默认输入或 BlackHole 2ch。";
 "Settings" = "设置";
@@ -276,6 +284,7 @@
 "Too many pending commands. Stopped." = "指令积压，已停止";
 "Too quiet — speak closer" = "输入音量很低，请靠近手表说话";
 "Transcribing…" = "正在转写…";
+"Trust This Mac & Connect" = "信任此 Mac 并连接";
 "Try Demo" = "试用界面";
 "Turn Crown to scroll" = "转动表冠浏览";
 "Turn on Bluetooth on your Mac" = "请打开 Mac 蓝牙";
@@ -327,6 +336,7 @@
 "Your Mac rejected the command (%@)" = "Mac 拒绝了指令（%@）";
 "Your Watch microphone is muted. Unmute it on your Watch first." = "手表系统已将麦克风静音，请先在手表解除静音。";
 "e.g. 192.168.1.20" = "例如 192.168.1.20";
+"micodex:IP:fingerprint" = "micodex:IP:证书指纹";
 "·" = "·";
 "↑ Scroll up" = "↑ 向上浏览";
 "↓ Scroll down" = "↓ 向下浏览";

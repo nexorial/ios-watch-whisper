@@ -1,0 +1,25 @@
+name: Build and test
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  core:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check localization
+        run: python3 scripts/generate-localizations.py --check
+      - name: Test core behavior
+        run: swift test --scratch-path "$RUNNER_TEMP/micodex-tests"
+      - name: Build Mac and Watch simulator
+        run: |
+          brew install xcodegen
+          xcodegen generate
+          xcodebuild -project Micodex.xcodeproj -scheme MicodexMac -configuration Debug -derivedDataPath "$RUNNER_TEMP/micodex-mac" CODE_SIGNING_ALLOWED=NO build
+          xcodebuild -project Micodex.xcodeproj -scheme MicodexWatch -sdk watchsimulator -destination 'generic/platform=watchOS Simulator' -derivedDataPath "$RUNNER_TEMP/micodex-watch" CODE_SIGNING_ALLOWED=NO build

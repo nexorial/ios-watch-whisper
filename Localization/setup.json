@@ -1,0 +1,12 @@
+{
+  "Copy the connection code from Micodex on your Mac to get started.": "请先复制 Mac 端 Micodex 的连接码。",
+  "Mac Connection Code": "Mac 连接码",
+  "On your Mac, click “Copy Connection Code”. Paste it here using the iPhone keyboard, or enter it exactly. Only use a code from your own Mac.": "在 Mac 上点“复制连接码”，通过 iPhone 键盘粘贴到这里，或完整输入。请只使用你自己 Mac 上的连接码。",
+  "micodex:IP:fingerprint": "micodex:IP:证书指纹",
+  "Trust This Mac & Connect": "信任此 Mac 并连接",
+  "Paste the complete connection code from your Mac. It includes the IP and 64-character certificate fingerprint.": "请粘贴 Mac 上的完整连接码，其中包含 IP 和 64 位证书指纹。",
+  "Set Up Another Mac": "设置另一台 Mac",
+  "For a new Watch installation, copy this Mac’s connection code into the Watch app first.": "首次安装手表 App 时，请先将此 Mac 的连接码复制到手表 App。",
+  "Copy Connection Code": "复制连接码",
+  "Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. For a different Mac, use “Set Up Another Mac” and copy its connection code.": "无法验证与 Mac 的安全连接。请检查 IP 是否属于已配对的 Mac。更换 Mac 时，请点“设置另一台 Mac”并复制其连接码。"
+}

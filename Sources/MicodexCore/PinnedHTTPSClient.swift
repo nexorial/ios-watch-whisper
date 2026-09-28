@@ -42,8 +42,8 @@ public final class PinnedHTTPSClient: NSObject, URLSessionDelegate, URLSessionTa
         }
         let actual = SHA256.hash(data: SecCertificateCopyData(certificate) as Data).map { String(format: "%02x", $0) }.joined()
         guard actual == fingerprint else { completionHandler(.cancelAuthenticationChallenge, nil); return }
-        // The complete certificate pin is provisioned over the trusted developer
-        // install path. It identifies this Mac independently of its changing LAN IP.
+        // The complete certificate pin is copied by the user from their Mac or
+        // provisioned at development install. Never trust a pin from the network.
         guard SecTrustSetAnchorCertificates(trust, [certificate] as CFArray) == errSecSuccess,
               SecTrustSetAnchorCertificatesOnly(trust, true) == errSecSuccess,
               SecTrustSetPolicies(trust, SecPolicyCreateBasicX509()) == errSecSuccess,

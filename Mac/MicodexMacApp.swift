@@ -216,6 +216,16 @@ private struct HostView: View {
                     Text(L10n.t("1. Connect both devices to the same local network, ideally the same Wi-Fi.\n2. On your watch, enter the Mac IP above and tap “Save & Connect”.\n3. For first-time pairing, allow the watch here and check the six-digit code. Paired devices connect automatically."))
                         .font(.system(size: 11)).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+                    if let code = wifi.connectionCode {
+                        Text(L10n.t("For a new Watch installation, copy this Mac’s connection code into the Watch app first."))
+                            .font(.system(size: 11)).foregroundStyle(.secondary)
+                        Text(code).font(.system(size: 10, design: .monospaced))
+                            .textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
+                        Button(L10n.t("Copy Connection Code")) {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(code, forType: .string)
+                        }.controlSize(.small)
+                    }
                     HStack {
                         Button(wifi.pairingOpen ? L10n.t("Waiting for Watch…") : L10n.t("Allow Wi-Fi Watch")) { wifi.allowPairing() }
                             .buttonStyle(.borderedProminent).disabled(wifi.pairingOpen || demo || !wifi.serviceReady)

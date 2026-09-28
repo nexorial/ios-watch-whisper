@@ -25,6 +25,10 @@ struct WiFiSecuritySmoke {
             if host.serviceReady { break }
             try await Task.sleep(nanoseconds: 50_000_000)
         }
+        guard let code = host.connectionCode,
+              let configuration = WiFiConfiguration(connectionCode: code) else { throw Failure("Portable connection code") }
+        try require(configuration.host == address && configuration.fingerprint == identity.fingerprint,
+                    "Mac connection code binds the complete TLS identity")
         let hello = try await client.request("v1/hello")
         try require(hello.status == "ok", "Pinned TLS health")
         let denied = try await client.request("v1/command", WiFiRequest(id: id, packet: Data(repeating: 0, count: 20).base64EncodedString()))

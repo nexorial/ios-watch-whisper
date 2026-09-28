@@ -1,52 +1,16 @@
-# Watch 麦克风接入 Codex
+# Watch audio setup
 
-保留 Codex 内置听写。0.3 链路：Watch 内置麦克风 → 固定证书的 HTTPS 音频流（BLE 备用）→ Mac Micodex → BlackHole 2ch → Codex。
+Micodex keeps Codex's built-in dictation:
 
-## 本机准备
+**Watch microphone → pinned HTTPS → Mac receiver → BlackHole 2ch → Codex dictation.**
 
-1. 安装 [BlackHole 2ch 官方驱动](https://github.com/ExistentialAudio/BlackHole)。已准备的 0.7.1 安装包在本机 `artifacts/BlackHole2ch-0.7.1.pkg`。它是系统音频组件，安装需要管理员授权，安装器声明需要重启；由用户确认后执行。
-2. 在 Mac Micodex 点击 **「设为听写输入」**，或在系统「声音 → 输入」选择 **BlackHole 2ch**。Codex 的音频输入选择默认输入或 BlackHole 2ch。其他使用默认输入的应用也会受到影响；使用完毕可切回原麦克风。接收端仅在明确点击设置按钮时修改默认输入，不会因连接手表或开始听写而自动切换；不会修改扬声器输出。
-3. Mac Micodex 点击「检查音频设备」，应显示 **Watch 音频 → BlackHole 2ch**。
-4. 首次在 Watch 按住说话，确认系统麦克风授权。等「Watch 正在收音」出现后说话。
-5. 松开后，音频队列播放完毕再结束 Codex 听写。先核对转写文字，手动点 Enter。
+1. Install [BlackHole 2ch from its official project](https://github.com/ExistentialAudio/BlackHole). It is a separate system audio driver with its own license and installer permissions.
+2. In the Mac receiver, check the audio device, then explicitly select BlackHole as the dictation input. Codex must use BlackHole or the system default input. Other apps using the default input are also affected; switch back afterward. Micodex does not change the speaker output.
+3. Allow Codex microphone access and Micodex Accessibility access on the Mac. Allow the Watch microphone when starting a recording.
+4. Hold to talk and wait for the recording indication. Release to stop capture, allow the tail to drain and transcription to finish, then inspect the text before tapping Enter.
 
-尚未安装驱动或路由不正确时，明确报错并停止；不回退到 Mac 麦克风。Build 8 起，已在前台开始的 Wi-Fi 锁定录音可利用后台音频继续，普通录音离开前台会结束并保留已收到的内容；尚待新版真表验证。
+There is no fallback to the Mac microphone. Audio is buffered in bounded memory queues, never saved as a recording by Micodex. Codex's own data handling and transcription service remain separate.
 
-Build 10 将同样的锁定、熄屏和停止状态补到蓝牙备用：放下手腕不主动结束锁定录音，重新进入界面后第一次点击即可停止原录音。系统中断、蓝牙音频错误或断开会请求转写已收到的部分；不能保证尚未送达 Mac 的音频。Wi-Fi 在后台完成收音后结束连接。显式启用 `WKSupportsAlwaysOnDisplay`，保留 `UIBackgroundModes=audio`；这不覆盖系统的亮度、低电量或用户常亮设置。支持的手表可在「设置 → 显示与亮度 → 始终显示」允许本 App，后台录音期间画面仍可能调暗。参考 [Apple 常亮界面说明](https://developer.apple.com/documentation/watchos-apps/designing-your-app-for-the-always-on-state)。
+The optional `./scripts/test-audio-output.sh` plays one second of test audio into BlackHole and checks queue drain; run it only when no other app is recording that input. It does not validate live Watch capture or transcription.
 
-Build 9 加入说话后约两秒静音自动结束。手表先停本地采集，再发送尾音；Mac 对认证音频提供相同保护，兼容旧 Watch。初始无声会等待八秒，锁定仍受静音和两分钟上限约束。结束后的迟到取消或音频不再打断转写。能量检测不等同于语音识别，嘈杂环境和很轻的讲话仍需实机验证；松开／停止按钮继续可用，Enter 始终由用户点击。
-
-Mac 面板保留最近一次录音的接收秒数和峰值，重新激活面板不会清除这些数字。仅是音频链路诊断，不保存音频或识别文字。首次 Wi-Fi 真机测试中听写已能触发但没有转写；后续修复输入框等待与启动音频队列上限，真实转写仍待复测。
-
-Build 6 将 Watch 会话从 `measurement` 改为 `default`。Apple 说明 [measurement 会关闭部分动态处理](https://developer.apple.com/documentation/avfaudio/avaudiosession/mode-swift.struct/measurement)；这提供了调整录音模式的依据，尚未证明它是本次无转写的唯一原因。系统输入静音时只提示用户，不自动解除。手表显示是否有输入音量；Mac 记录精确峰值、RMS 与非零采样数，以区分完全静音和低音量。松开后还会确认 Codex 停止控件消失，并识别转写重试状态。
-
-Build 6 真表后来已收到峰值 10192 / RMS -31.5 dBFS 的 14.4 秒音频；用户反馈剩余问题是松开后停止不及时。Build 7 保留物理触摸到松开的状态，立即关闭 Watch 麦克风，并单独显示正在传完尾音；延迟的主机回执不会恢复收音显示。正常结束不再仅因 Codex 界面超过 1 秒未切换就报错，仍保留停止请求后的有限确认窗口与取消保护。验收应使用「按住说第一句，松开后说第二句」，确认第二句不进入转写，而非仅看 Codex 波纹消失时间。
-
-## 安装包核验
-
-- 来源：`https://existential.audio/downloads/BlackHole2ch-0.7.1.pkg`
-- SHA-256：`57b540f27a3e29c37e310e01bee0fdfab76733087e47f997ef9dccf851400dcf`
-- 签名：Developer ID Installer: Existential Audio Inc. (Q5C99V536K)
-- 本机 `pkgutil --check-signature`：可信 Apple 签名及 notarization。
-
-## 验收
-
-- 不聚焦输入框时转表冠，对话正文上下滚动，输入框内容不滚动。
-- 在另一个普通 App 前台开始录音，Codex 激活并自动聚焦当前任务编辑器。
-- 对手表说话，Mac 接收秒数增长，Codex 生成文字；在 Mac 旁讲话、远离手表时不应替代 Watch 收音。
-- 短按锁定和右滑锁定、松开停止、结束标记／尾音、手动 Enter 分别验收。
-- 锁定后放下手腕并继续说话，再抬腕点击停止：前后两段都应进入转写。普通按住录音退后台应结束；静音两秒和两分钟上限仍生效。
-- 蓝牙中断或音频设备切换：停止录音并请求保留已收到的部分，不能自动发送。
-- 安装、编码测试、蓝牙连通都不能代替以上端到端验收。
-
-## Mac 虚拟通道实测
-
-2026-09-25 重启后，系统已加载 BlackHole 2ch 0.7.1。用户授权后用接收端按钮切换，独立系统查询确认默认输入为 BlackHole 2ch、输出仍为 DELL U2718Q。
-
-以下测试直接编译生产输出类，向 BlackHole 播放一秒 16 kHz 单声道测试音，并确认音频队列排空；不读取麦克风、不启动 Codex 听写：
-
-```sh
-bash scripts/test-audio-output.sh
-```
-
-实测返回 `PASS: 16000 mono samples routed to BlackHole and playback queue drained`。这只确认 Mac 定向输出及播放完成；真实 Watch 收音、BLE 音频流和 Codex 转写仍需设备验收。
+Real-device checks: release before saying a second sentence; check only the first sentence was captured. Separately test lock → lower wrist → continue speaking → raise wrist → stop, two-second silence, manual stop, interruption, and Enter. The system may dim the Watch screen. Build and protocol tests cannot replace these checks.

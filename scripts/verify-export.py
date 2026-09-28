@@ -28,10 +28,16 @@ with zipfile.ZipFile(ipa) as archive:
     # Apple checks the outer watch-only container too (ITMS-90683).
     assert root.get('NSMicrophoneUsageDescription'), 'Missing container microphone purpose string'
     assert watch.get('NSMicrophoneUsageDescription'), 'Missing Watch microphone purpose string'
-    if 'MicodexWiFiPin' in watch:
-        pin = watch['MicodexWiFiPin']
-        assert len(pin) == 64 and all(c in '0123456789abcdefABCDEF' for c in pin), 'Invalid Wi-Fi certificate pin'
-        assert watch.get('MicodexWiFiHost') and '$(' not in watch['MicodexWiFiHost'], 'Missing local Mac address'
+    # Public builds must start with the user's own Mac, not a developer endpoint.
+    assert not watch.get('MicodexWiFiPin'), 'Public build contains a developer certificate pin'
+    assert not watch.get('MicodexWiFiHost'), 'Public build contains a developer Mac address'
+    for prefix in (roots[0].removesuffix('Info.plist'), watches[0].removesuffix('Info.plist')):
+        privacy = plistlib.loads(archive.read(prefix + 'PrivacyInfo.xcprivacy'))
+        assert privacy['NSPrivacyTracking'] is False
+        assert not privacy['NSPrivacyCollectedDataTypes']
+        reasons = {api['NSPrivacyAccessedAPIType']: api['NSPrivacyAccessedAPITypeReasons'] for api in privacy['NSPrivacyAccessedAPITypes']}
+        assert 'CA92.1' in reasons['NSPrivacyAccessedAPICategoryUserDefaults']
+        assert '35F9.1' in reasons['NSPrivacyAccessedAPICategorySystemBootTime']
     assert not any(n.endswith(('.p12', '.password')) for n in archive.namelist()), 'Private TLS identity must never be bundled'
 
     print(json.dumps({

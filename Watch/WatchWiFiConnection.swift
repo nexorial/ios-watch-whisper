@@ -43,9 +43,10 @@ final class WatchWiFiConnection: ObservableObject {
     static var configuration: (String, String)? {
         let host = UserDefaults.standard.string(forKey: "wifiHostOverride")
             ?? (Bundle.main.object(forInfoDictionaryKey: "MicodexWiFiHost") as? String ?? "")
-        let pin = Bundle.main.object(forInfoDictionaryKey: "MicodexWiFiPin") as? String ?? ""
-        guard !host.isEmpty, pin.count == 64, pin.allSatisfy({ $0.isHexDigit }) else { return nil }
-        return (host, pin)
+        let pin = UserDefaults.standard.string(forKey: "wifiPinOverride")
+            ?? (Bundle.main.object(forInfoDictionaryKey: "MicodexWiFiPin") as? String ?? "")
+        guard let configuration = WiFiConfiguration(host: host, fingerprint: pin) else { return nil }
+        return (configuration.host, configuration.fingerprint)
     }
     init(host: String, pin: String) throws {
         client = try PinnedHTTPSClient(host: host, fingerprint: pin)

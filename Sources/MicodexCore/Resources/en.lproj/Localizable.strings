@@ -45,6 +45,7 @@
 "Cancellation requested, but Codex still shows recording. Stop it manually in Codex." = "Cancellation requested, but Codex still shows recording. Stop it manually in Codex.";
 "Cannot reach Mac (%@). Check that Mac shows “Wi-Fi Ready” and that its Mac IP matches this address. Retrying automatically; no need to pair again." = "Cannot reach Mac (%@). Check that Mac shows “Wi-Fi Ready” and that its Mac IP matches this address. Retrying automatically; no need to pair again.";
 "Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. A different Mac requires a new Watch app configuration." = "Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. A different Mac requires a new Watch app configuration.";
+"Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. For a different Mac, use “Set Up Another Mac” and copy its connection code." = "Cannot verify the secure connection to Mac. Check that this IP belongs to your paired Mac. For a different Mac, use “Set Up Another Mac” and copy its connection code.";
 "Check Devices" = "Check Devices";
 "Check the Mac local network connection and Local Network permission. The service will retry automatically. Details: %@" = "Check the Mac local network connection and Local Network permission. The service will retry automatically. Details: %@";
 "Check the pairing code on your Watch" = "Check the pairing code on your Watch";
@@ -71,7 +72,9 @@
 "Connection lost. Looking for your Mac again…" = "Connection lost. Looking for your Mac again…";
 "Connection settings" = "Connection settings";
 "Control target" = "Control target";
+"Copy Connection Code" = "Copy Connection Code";
 "Copy IP" = "Copy IP";
+"Copy the connection code from Micodex on your Mac to get started." = "Copy the connection code from Micodex on your Mac to get started.";
 "Could not activate the built-in Apple Watch microphone." = "Could not activate the built-in Apple Watch microphone.";
 "Could not authenticate the Mac status. Please pair again." = "Could not authenticate the Mac status. Please pair again.";
 "Could not authenticate the command. Please pair again." = "Could not authenticate the command. Please pair again.";
@@ -127,6 +130,7 @@
 "Finish dictation before changing the input device." = "Finish dictation before changing the input device.";
 "Finish the current dictation first" = "Finish the current dictation first";
 "Finishing audio…" = "Finishing audio…";
+"For a new Watch installation, copy this Mac’s connection code into the Watch app first." = "For a new Watch installation, copy this Mac’s connection code into the Watch app first.";
 "Forget Mac" = "Forget Mac";
 "Hide" = "Hide";
 "Hide audio settings" = "Hide audio settings";
@@ -149,6 +153,7 @@
 "Mac Bluetooth is off" = "Mac Bluetooth is off";
 "Mac Bluetooth is on, but advertising has not started" = "Mac Bluetooth is on, but advertising has not started";
 "Mac Connected" = "Mac Connected";
+"Mac Connection Code" = "Mac Connection Code";
 "Mac IP" = "Mac IP";
 "Mac IP Address" = "Mac IP Address";
 "Mac IP Address. Enter the address shown in the Mac app." = "Mac IP Address. Enter the address shown in the Mac app.";
@@ -171,6 +176,7 @@
 "No sound detected. Recording stopped." = "No sound detected. Recording stopped.";
 "No task window is available." = "No task window is available.";
 "Not connected to a local network" = "Not connected to a local network";
+"On your Mac, click “Copy Connection Code”. Paste it here using the iPhone keyboard, or enter it exactly. Only use a code from your own Mac." = "On your Mac, click “Copy Connection Code”. Paste it here using the iPhone keyboard, or enter it exactly. Only use a code from your own Mac.";
 "Open Micodex" = "Open Micodex";
 "Open Running Receiver" = "Open Running Receiver";
 "Open Settings" = "Open Settings";
@@ -187,6 +193,7 @@
 "Pairing timed out. Approve it on your Mac, then try again." = "Pairing timed out. Approve it on your Mac, then try again.";
 "Pairing verification failed. Pair again." = "Pairing verification failed. Pair again.";
 "Pairing was not approved. Please try again on your Mac." = "Pairing was not approved. Please try again on your Mac.";
+"Paste the complete connection code from your Mac. It includes the IP and 64-character certificate fingerprint." = "Paste the complete connection code from your Mac. It includes the IP and 64-character certificate fingerprint.";
 "Preparing Bluetooth" = "Preparing Bluetooth";
 "Preparing Wi-Fi direct connection…" = "Preparing Wi-Fi direct connection…";
 "Quit Micodex" = "Quit Micodex";
@@ -217,6 +224,7 @@
 "Select this Mac on your Watch within 60 seconds" = "Select this Mac on your Watch within 60 seconds";
 "Send the text in the Mac input field" = "Send the text in the Mac input field";
 "Sent to your Mac for transcription. Raise your wrist to reconnect." = "Sent to your Mac for transcription. Raise your wrist to reconnect.";
+"Set Up Another Mac" = "Set Up Another Mac";
 "Set dictation input to BlackHole 2ch" = "Set dictation input to BlackHole 2ch";
 "Set the system sound input to BlackHole 2ch, and set Codex to use the default input or BlackHole 2ch." = "Set the system sound input to BlackHole 2ch, and set Codex to use the default input or BlackHole 2ch.";
 "Settings" = "Settings";
@@ -276,6 +284,7 @@
 "Too many pending commands. Stopped." = "Too many pending commands. Stopped.";
 "Too quiet — speak closer" = "Too quiet — speak closer";
 "Transcribing…" = "Transcribing…";
+"Trust This Mac & Connect" = "Trust This Mac & Connect";
 "Try Demo" = "Try Demo";
 "Turn Crown to scroll" = "Turn Crown to scroll";
 "Turn on Bluetooth on your Mac" = "Turn on Bluetooth on your Mac";
@@ -327,6 +336,7 @@
 "Your Mac rejected the command (%@)" = "Your Mac rejected the command (%@)";
 "Your Watch microphone is muted. Unmute it on your Watch first." = "Your Watch microphone is muted. Unmute it on your Watch first.";
 "e.g. 192.168.1.20" = "e.g. 192.168.1.20";
+"micodex:IP:fingerprint" = "micodex:IP:fingerprint";
 "·" = "·";
 "↑ Scroll up" = "↑ Scroll up";
 "↓ Scroll down" = "↓ Scroll down";
