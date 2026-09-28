@@ -12,6 +12,7 @@
 		19CA057FA093318A79B60FE9 /* WatchWiFiConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B586EF779EA2301362C85FBD /* WatchWiFiConnection.swift */; };
 		1DCDCCBF08CFFA4C2BB4071E /* MicodexCore in Frameworks */ = {isa = PBXBuildFile; productRef = D60509EED89C117B33B5991F /* MicodexCore */; };
 		275E6F5BC2ABA49AA07A7C64 /* MicodexStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */; };
+		32EF29EA21D372D9F6020C99 /* CrownScrollingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977DD65A266B8FB39B09B6BA /* CrownScrollingTests.swift */; };
 		34CE10E4DE841A8C199F6E0F /* LocalTLSIdentity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F985FAA4BDB022D28261E6 /* LocalTLSIdentity.swift */; };
 		52328906890CECD6147CA371 /* WiFiNetworkInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA45FD38E0B5B929CEFF3175 /* WiFiNetworkInfo.swift */; };
 		52C1B5FA21806897EA31B233 /* WatchAudioOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */; };
@@ -35,6 +36,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		16D42EDC97A03B8FDA689DC7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0C580EDAB9F4D39A3A360B3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D23DE6C31DEAA6C3DC35E58D;
+			remoteInfo = MicodexWatch;
+		};
 		25111DD06588F483D21E3E44 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0C580EDAB9F4D39A3A360B3E /* Project object */;
@@ -70,7 +78,9 @@
 		75955C7535FC50E2A09E7077 /* AgentController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentController.swift; sourceTree = "<group>"; };
 		8B961F3D384B16D92A4B7D6A /* MicodexStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicodexStyle.swift; sourceTree = "<group>"; };
 		9498FE33FC609DC862C4E853 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		977DD65A266B8FB39B09B6BA /* CrownScrollingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrownScrollingTests.swift; sourceTree = "<group>"; };
 		99C4BA921586A3603CB13845 /* WiFiHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiFiHost.swift; sourceTree = "<group>"; };
+		9F3C34B9017111F5C8ECCD0B /* MicodexWatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MicodexWatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00F4AD8680D677C24EC8172 /* ios-watch-whisper */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "ios-watch-whisper"; path = .; sourceTree = SOURCE_ROOT; };
 		A20BC01991389FA8F5374D3C /* Micodex.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Micodex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE8D2582EE12CF72C0BD6767 /* WatchAudioOutput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchAudioOutput.swift; sourceTree = "<group>"; };
@@ -104,12 +114,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1AE17FEE90EAC94D95DF9E74 /* WatchUITests */ = {
+			isa = PBXGroup;
+			children = (
+				977DD65A266B8FB39B09B6BA /* CrownScrollingTests.swift */,
+			);
+			name = WatchUITests;
+			path = Tests/WatchUITests;
+			sourceTree = "<group>";
+		};
 		956039339418210070DD2B62 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				D948F6D3C1F72D84E65A0931 /* Micodex Watch.app */,
 				A20BC01991389FA8F5374D3C /* Micodex.app */,
 				FB77D33E9B06F1AF13AB7CB2 /* Micodex.app */,
+				9F3C34B9017111F5C8ECCD0B /* MicodexWatchUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -146,6 +166,7 @@
 				F021E9C83DEDEBEC4BAA9B3D /* Packages */,
 				F6937CE24220CF240E1E78BB /* Shared */,
 				EF614F25121B236A27A052DE /* Watch */,
+				1AE17FEE90EAC94D95DF9E74 /* WatchUITests */,
 				956039339418210070DD2B62 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -183,6 +204,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		24F89534F4C622DB2DDE02D2 /* MicodexWatchUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 62C6FEEF2D942CECBAC5D597 /* Build configuration list for PBXNativeTarget "MicodexWatchUITests" */;
+			buildPhases = (
+				F5A481126D7E9C35815CB308 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				415914AD0B797F584E34173B /* PBXTargetDependency */,
+			);
+			name = MicodexWatchUITests;
+			packageProductDependencies = (
+			);
+			productName = MicodexWatchUITests;
+			productReference = 9F3C34B9017111F5C8ECCD0B /* MicodexWatchUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		3DCBF2650B5B0DA4F90E78A5 /* Micodex */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C48179EFA9728D3BA05D4C0E /* Build configuration list for PBXNativeTarget "Micodex" */;
@@ -252,6 +291,11 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					24F89534F4C622DB2DDE02D2 = {
+						DevelopmentTeam = JNN5TPN23D;
+						ProvisioningStyle = Automatic;
+						TestTargetID = D23DE6C31DEAA6C3DC35E58D;
+					};
 					3DCBF2650B5B0DA4F90E78A5 = {
 						DevelopmentTeam = JNN5TPN23D;
 						ProvisioningStyle = Automatic;
@@ -287,6 +331,7 @@
 				55967A5A3F5CFE4990178203 /* MicodexMac */,
 				3DCBF2650B5B0DA4F90E78A5 /* Micodex */,
 				D23DE6C31DEAA6C3DC35E58D /* MicodexWatch */,
+				24F89534F4C622DB2DDE02D2 /* MicodexWatchUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -359,6 +404,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F5A481126D7E9C35815CB308 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				32EF29EA21D372D9F6020C99 /* CrownScrollingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -366,6 +419,11 @@
 			isa = PBXTargetDependency;
 			target = D23DE6C31DEAA6C3DC35E58D /* MicodexWatch */;
 			targetProxy = 25111DD06588F483D21E3E44 /* PBXContainerItemProxy */;
+		};
+		415914AD0B797F584E34173B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D23DE6C31DEAA6C3DC35E58D /* MicodexWatch */;
+			targetProxy = 16D42EDC97A03B8FDA689DC7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -482,7 +540,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -550,7 +608,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 15;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = JNN5TPN23D;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -576,6 +634,23 @@
 			};
 			name = Release;
 		};
+		D59D900A64535A47D83B8D81 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.watchuitests;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = MicodexWatch;
+			};
+			name = Release;
+		};
 		D7CC74E589722228D28A73B9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -590,6 +665,23 @@
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		E242C411E80C246859A46048 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nexorial.watchwhisper.watchuitests;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = MicodexWatch;
 			};
 			name = Debug;
 		};
@@ -630,6 +722,15 @@
 			buildConfigurations = (
 				6BD4785563D1C82E1F4EB911 /* Debug */,
 				94D23369A89D63527B003669 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		62C6FEEF2D942CECBAC5D597 /* Build configuration list for PBXNativeTarget "MicodexWatchUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E242C411E80C246859A46048 /* Debug */,
+				D59D900A64535A47D83B8D81 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

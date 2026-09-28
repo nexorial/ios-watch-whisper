@@ -34,6 +34,15 @@ private struct RemoteView: View {
     @State private var gesture = TalkGesture()
     @State private var fingerDown = false
     @State private var crown = 0.0
+    @State private var previousCrownOffset = 0.0
+    #if DEBUG
+    @State private var crownPixels = 0
+    @State private var crownDistance = 0.0
+    @State private var crownPeakVelocity = 0.0
+    private var crownDiagnostics: String {
+        String(format: "pixels=%d;units=%.4f;velocity=%.4f", crownPixels, crownDistance, crownPeakVelocity)
+    }
+    #endif
     @State private var accumulator = CrownAccumulator()
     @State private var scrollHint = L10n.t("Turn Crown to scroll")
     @FocusState private var crownFocused: Bool
@@ -115,14 +124,28 @@ private struct RemoteView: View {
                 .font(.system(size: 10)).foregroundStyle(.secondary)
                 .lineLimit(2).minimumScaleFactor(0.85)
                 .multilineTextAlignment(.center).frame(height: needsAttention ? 25 : 14)
+                #if DEBUG
+                .accessibilityIdentifier("remote.footer")
+                .accessibilityValue(ProcessInfo.processInfo.arguments.contains("--crown-diagnostics") ? crownDiagnostics : "")
+                #endif
         }.frame(width: geometry.size.width, height: geometry.size.height)
         }
         .padding(.horizontal, 3)
         .focusable().focused($crownFocused)
-        .digitalCrownRotation($crown, from: -10000, through: 10000, by: 0.1, sensitivity: .medium, isContinuous: true, isHapticFeedbackEnabled: true)
-        .onChange(of: crown) { [crown] value in
-            let pixels = accumulator.add(value - crown, at: ProcessInfo.processInfo.systemUptime)
+        .digitalCrownRotation($crown, from: -10000, through: 10000, sensitivity: .medium, isContinuous: true, isHapticFeedbackEnabled: true) { event in
+            let delta = event.offset - previousCrownOffset
+            previousCrownOffset = event.offset
+            let pixels = accumulator.add(delta, velocity: event.velocity)
+            #if DEBUG
+            crownPixels += Int(pixels); crownDistance += delta
+            crownPeakVelocity = max(crownPeakVelocity, abs(event.velocity))
+            #endif
             if pixels != 0 { connection.send(.scroll, value: pixels); scrollHint = pixels > 0 ? L10n.t("↓ Scroll down") : L10n.t("↑ Scroll up") }
+        } onIdle: {
+            accumulator.reset()
+            #if DEBUG
+            ConnectionTrace.record("crown", crownDiagnostics)
+            #endif
         }
         .onChange(of: connection.phase) { gesture.hostChanged($0) }
         .onAppear {

@@ -11,7 +11,7 @@ settings:
   base:
     SWIFT_VERSION: '5.0'
     MARKETING_VERSION: '0.3.0'
-    CURRENT_PROJECT_VERSION: 14
+    CURRENT_PROJECT_VERSION: 15
     DEVELOPMENT_TEAM: JNN5TPN23D
     CODE_SIGN_STYLE: Automatic
 packages:
@@ -113,6 +113,16 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         NSBluetoothAlwaysUsageDescription: "Connect your approved Apple Watch and Mac for scrolling, dictation, and Enter commands."
         NSMicrophoneUsageDescription: "Use the built-in Apple Watch microphone to send your speech to Codex dictation on your paired Mac."
+  MicodexWatchUITests:
+    type: bundle.ui-testing
+    platform: watchOS
+    sources: [Tests/WatchUITests]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nexorial.watchwhisper.watchuitests
+        TEST_TARGET_NAME: MicodexWatch
+    dependencies:
+      - target: MicodexWatch
 schemes:
   MicodexMac:
     build:
@@ -122,6 +132,12 @@ schemes:
     build:
       targets:
         MicodexWatch: all
+  MicodexCrownUITests:
+    build:
+      targets:
+        MicodexWatch: all
+    test:
+      targets: [MicodexWatchUITests]
   Micodex:
     build:
       targets:

@@ -2,6 +2,15 @@
 
 > 当前产品已更名为 **Micodex**（Build 11）。以下历史上传／验证证据保留当时的应用名和原始文件路径。
 
+## 2026-09-28 · 表冠速度修正与 Mac 滚动停顿（Build 15）
+
+- 用户实测 Build 14 快速转动仍然过慢。旧映射仅 12–72 px/单位，且从 SwiftUI binding 更新间隔估速，没有取得真实表冠事件证据；上一轮逻辑测试通过不能代表手感达标。
+- 改用 watchOS 9 起支持的连续 `DigitalCrownEvent.offset / velocity`，去掉 `by: 0.1` 的步进输入；按系统速度映射为 240–2880 px/单位，保留小于像素的累计、双向对称、反向立即生效、idle 清理和 600 px 队列上限。参考 [Apple DigitalCrownEvent](https://developer.apple.com/documentation/swiftui/digitalcrownevent)。
+- 当前 Mac 日志记录每约 3 秒重新定位滚动目标，单次耗时约 0.5–1.3 秒。取消已验证区域的固定 3 秒过期；继续检查前台 PID、窗口身份／标题／几何、编辑器及滚动区几何和落点所属进程，失效时重新定位。没有可靠几何的回退仍保留短期限。诊断增加实际输出像素数；Watch 仅在 idle 写累计输入／峰值速度，不逐事件写文件。
+- 64 项 Swift 测试、英中资源检查及 Mac / Watch Simulator 构建通过。新增独立 `MicodexCrownUITests` scheme，计划对慢转／快转各半圈比较实际回调与距离；常规 Watch 构建／安装不运行该测试。
+- **本次表冠 UI 自动测试未执行成功**：watchOS 27 模拟器中的 `MicodexWatchUITests-Runner` 在连接 XCTest 前因 scene-create watchdog (`0x8BADF00D`) 被系统终止，用户看见的 Runner 报错与此对应。报告主线程处于 UIKit / PepperUICore / WatchKit 建立界面路径，未执行 Crown 测试；不能由此归因于滚动映射，也不能宣称真表主程序崩溃。测试已结束，目标模拟器已关闭，未反复重试。
+- Mac Build 15 已签名安装并启动；原生 UI 显示辅助功能允许、Wi-Fi 接收端就绪和 BlackHole 输出。Ultra 4 的 Build 15 签名构建与 `devicectl` 安装成功，但启动被系统以 `Locked` 拒绝；随后独立已安装版本查询在 20 秒超时，尚无此次真表运行版本和速度反馈。需用户解锁并打开 Micodex，不能将安装成功视为启动或手感验收。
+
 ## 2026-09-28 · 表冠随转速加速（Build 14）
 
 - 表冠由固定 22 px/单位改为按手表本地单调时钟计算转速：慢转 12 px/单位，随速度连续增加至最高 6 倍倍率；约 40 ms 平滑加速，减速立即回落。停顿 250 ms、反向、离开遥控页面会清除加速或残余位移。

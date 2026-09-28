@@ -99,13 +99,13 @@ final class MicodexCoreTests: XCTestCase {
     }
     func testCrownAccumulatesSmallMovesAndRejectsWrapAndInvalidInput() {
         var crown = CrownAccumulator()
-        XCTAssertEqual(crown.add(0.01, at: 0), 0)
-        XCTAssertEqual(crown.add(0.09, at: 0.2), 1)
-        XCTAssertEqual(crown.add(1, at: 1), 12)
-        XCTAssertEqual(crown.add(-2, at: 2), -24)
-        XCTAssertEqual(crown.add(20000, at: 3), 0)
-        XCTAssertEqual(crown.add(.nan, at: 4), 0)
-        XCTAssertEqual(crown.add(.infinity, at: 5), 0)
+        XCTAssertEqual(crown.add(0.001, velocity: 0.2), 0)
+        XCTAssertEqual(crown.add(0.004, velocity: 0.2), 1)
+        XCTAssertEqual(crown.add(1, velocity: 0.2), 240)
+        XCTAssertEqual(crown.add(-2, velocity: -0.2), -480)
+        XCTAssertEqual(crown.add(20000, velocity: 1), 0)
+        XCTAssertEqual(crown.add(.nan, velocity: 1), 0)
+        XCTAssertEqual(crown.add(.infinity, velocity: 1), 0)
     }
     func testDisconnectLeaseAndAbsoluteRecordingLimit() {
         var lease = RecordingLease()
@@ -119,8 +119,8 @@ final class MicodexCoreTests: XCTestCase {
     }
     func testFastCrownTurnDoesNotQueueStaleMotionAfterReversing() {
         var crown = CrownAccumulator()
-        XCTAssertEqual(crown.add(99, at: 0), 600)
-        XCTAssertEqual(crown.add(-1, at: 0.01), -12)
+        XCTAssertEqual(crown.add(99, velocity: 4), 600)
+        XCTAssertEqual(crown.add(-0.01, velocity: -0.2), -2)
     }
     func testDictationLabelsCannotMatchVoiceChatOrSend() {
         for text in ["Start voice chat", "Stop", "Transcribe and send", "转录并发送", "停止任务"] {

@@ -47,37 +47,27 @@ public struct TalkGesture {
     public mutating func restoreLockedRecording() { state = .locked; recordingAcknowledged = true; stopOnRelease = false }
 }
 
+/// Convert continuous Crown units and the system-provided units/second to pixels.
 public struct CrownAccumulator {
-    private var residual: Double = 0
-    private var lastTime: TimeInterval?
-    private var lastDirection = 0.0
-    private var speed = 0.0
+    private var residual = 0.0
+    private var lastDirection = 0
     public init() {}
-    public mutating func add(_ delta: Double, at now: TimeInterval) -> Int16 {
-        guard delta.isFinite, abs(delta) < 100, now.isFinite else { reset(); return 0 }
+    public mutating func add(_ delta: Double, velocity: Double) -> Int16 {
+        guard delta.isFinite, abs(delta) < 100, velocity.isFinite else { reset(); return 0 }
         guard delta != 0 else { return 0 }
-        let direction = delta > 0 ? 1.0 : -1.0
-        let elapsed = lastTime.map { now - $0 }
-        if let elapsed, elapsed > 0, elapsed < 0.25, direction == lastDirection {
-            let measured = abs(delta) / max(elapsed, 1.0 / 120)
-            // Ease acceleration over ~40 ms; slowing down takes effect immediately.
-            speed = min(measured, speed + (measured - speed) * (1 - exp(-elapsed / 0.04)))
-        } else {
-            // A new gesture or reversal starts precise, without stale fractional motion.
-            speed = 0; residual = 0
-        }
-        lastTime = now; lastDirection = direction
-        // Crown units/second: fine control below 1; smoothly reach 6x at 10.
-        let progress = max(0, min(1, (speed - 1) / 9))
-        let gain = 1 + 5 * progress * progress * (3 - 2 * progress)
-        residual = max(-600, min(600, residual + delta * 12 * gain))
+        let direction = delta > 0 ? 1 : -1
+        if direction != lastDirection { residual = 0 }
+        lastDirection = direction
+        // Continuous input preserves subpixel precision. A normal turn should move
+        // lines of desktop text, and a fast turn should traverse whole screens.
+        let progress = max(0, min(1, (abs(velocity) - 0.25) / 3.75))
+        let gain = 1 + 11 * progress * progress * (3 - 2 * progress)
+        residual = max(-600, min(600, residual + delta * 240 * gain))
         let pixels = Int(residual)
         residual -= Double(pixels)
         return Int16(pixels)
     }
-    public mutating func reset() {
-        residual = 0; lastTime = nil; lastDirection = 0; speed = 0
-    }
+    public mutating func reset() { residual = 0; lastDirection = 0 }
 }
 
 public struct RecordingLease {

@@ -31,6 +31,7 @@ final class AgentController: ObservableObject {
     private struct ScrollAnchor {
         let pid: pid_t; let window: AXUIElement; let frame: CGRect; let title: String
         let editor: AXUIElement?; let editorFrame: CGRect?; let point: CGPoint; let created: TimeInterval
+        let area: AXUIElement?; let areaFrame: CGRect?
     }
     private var scrollAnchor: ScrollAnchor?
     private var scrollMotion = ScrollMotion()
@@ -269,26 +270,31 @@ final class AgentController: ObservableObject {
         let cached = scrollAnchor.map { anchor in
             anchor.pid == app.processIdentifier && CFEqual(anchor.window, window)
                 && anchor.frame == frame && anchor.title == title
-                && started - anchor.created < (anchor.editor == nil ? 0.25 : 3)
+                // Valid live geometry keeps the anchor usable. Scanning thousands
+                // of AX nodes every 3 seconds stalled the main actor for 0.5–1.3 s.
+                && (anchor.areaFrame != nil || anchor.editorFrame != nil || started - anchor.created < 0.25)
+                && (anchor.area == nil || anchor.area.flatMap { rect($0) } == anchor.areaFrame)
                 && (anchor.editor == nil || anchor.editor.flatMap { rect($0) } == anchor.editorFrame)
         } ?? false
         if !cached {
             let elements = descendants(window)
             let editor = try? composer(elements, in: window)
             let editorFrame = editor.flatMap { rect($0) }
-            let areas = elements.filter { string($0, kAXRoleAttribute) == kAXScrollAreaRole }.compactMap { element -> CGRect? in
+            let areas = elements.filter { string($0, kAXRoleAttribute) == kAXScrollAreaRole }.compactMap { element -> (element: AXUIElement, frame: CGRect, visible: CGRect)? in
                 guard let r = rect(element), r.width > 240, r.height > 120, r.intersects(frame) else { return nil }
                 let visible = r.intersection(frame)
                 if let editorFrame {
                     guard visible.contains(CGPoint(x: editorFrame.midX, y: visible.midY)), visible.minY < editorFrame.minY - 60 else { return nil }
                 }
-                return visible
+                return (element, r, visible)
             }
-            let area = areas.max { $0.width * $0.height < $1.width * $1.height }
+            let selectedArea = areas.max { $0.visible.width * $0.visible.height < $1.visible.width * $1.visible.height }
+            let area = selectedArea?.visible
             let point = CGPoint(x: editorFrame?.midX ?? area?.midX ?? frame.midX,
                                 y: area.map { min($0.midY, editorFrame.map { $0.minY - 40 } ?? $0.midY) } ?? frame.minY + frame.height * 0.4)
             scrollAnchor = ScrollAnchor(pid: app.processIdentifier, window: window, frame: frame, title: title,
-                                        editor: editor, editorFrame: editorFrame, point: point, created: started)
+                                        editor: editor, editorFrame: editorFrame, point: point, created: started,
+                                        area: selectedArea?.element, areaFrame: selectedArea?.frame)
             ConnectionTrace.record("scroll", String(format: "target resolved in %.1f ms", (ProcessInfo.processInfo.systemUptime - started) * 1000))
         }
         scrollMotion.add(Int(pixels))
@@ -297,10 +303,13 @@ final class AgentController: ObservableObject {
             scrollTask = Task { [weak self] in
                 guard let self else { return }
                 defer { if self.scrollEpoch == token { self.scrollTask = nil } }
-                var frames = 0, totalMS = 0.0
+                var frames = 0, distance = 0, totalMS = 0.0
                 while !Task.isCancelled, self.scrollEpoch == token, self.scrollMotion.pending != 0 {
                     let tick = ProcessInfo.processInfo.systemUptime
-                    do { try self.emitScrollFrame(self.scrollMotion.next()); frames += 1 }
+                    do {
+                        let pixels = self.scrollMotion.next()
+                        try self.emitScrollFrame(pixels); frames += 1; distance += abs(Int(pixels))
+                    }
                     catch {
                         self.scrollMotion.reset(); self.scrollAnchor = nil
                         self.phase = .targetInactive; self.detailMessage = L10n.message("The scroll target changed. Scrolling stopped."); break
@@ -310,7 +319,7 @@ final class AgentController: ObservableObject {
                 }
                 if frames > 0, ProcessInfo.processInfo.systemUptime - self.scrollReportedAt >= 1 {
                     self.scrollReportedAt = ProcessInfo.processInfo.systemUptime
-                    ConnectionTrace.record("scroll", String(format: "burst frames=%d mean-frame-work=%.2f ms", frames, totalMS / Double(frames)))
+                    ConnectionTrace.record("scroll", String(format: "burst pixels=%d frames=%d mean-frame-work=%.2f ms", distance, frames, totalMS / Double(frames)))
                 }
             }
         }
@@ -325,6 +334,7 @@ final class AgentController: ObservableObject {
     private func emitScrollFrame(_ pixels: Int16) throws {
         guard let anchor = scrollAnchor, NSWorkspace.shared.frontmostApplication?.processIdentifier == anchor.pid,
               rect(anchor.window) == anchor.frame,
+              anchor.area == nil || anchor.area.flatMap({ rect($0) }) == anchor.areaFrame,
               anchor.editor == nil || anchor.editor.flatMap({ rect($0) }) == anchor.editorFrame else { throw Failure(.targetInactive, L10n.message("The target window changed.")) }
         var focused: CFTypeRef?
         guard AXUIElementCopyAttributeValue(AXUIElementCreateApplication(anchor.pid), kAXFocusedWindowAttribute as CFString, &focused) == .success,
