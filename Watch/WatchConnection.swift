@@ -235,7 +235,7 @@ final class WatchConnection: NSObject, ObservableObject, @preconcurrency CBCentr
             return
         }
         if action == .scroll, let last = queue.last, last.0 == .scroll {
-            queue[queue.count - 1].1 = Int16(max(-600, min(600, Int(last.1) + Int(value))))
+            queue[queue.count - 1].1 = ScrollMotion.coalescing(last.1, with: value)
         } else {
             if action == .heartbeat && (!queue.isEmpty || inflight != nil) { return }
             // Never let crown traffic crowd out stop/Enter commands.

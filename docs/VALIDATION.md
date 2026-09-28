@@ -2,6 +2,14 @@
 
 > 当前产品已更名为 **Micodex**（Build 11）。以下历史上传／验证证据保留当时的应用名和原始文件路径。
 
+## 2026-09-28 · 表冠随转速加速（Build 14）
+
+- 表冠由固定 22 px/单位改为按手表本地单调时钟计算转速：慢转 12 px/单位，随速度连续增加至最高 6 倍倍率；约 40 ms 平滑加速，减速立即回落。停顿 250 ms、反向、离开遥控页面会清除加速或残余位移。
+- Wi-Fi / BLE 待发滚动合并时，反向会丢弃旧方向的积压，避免快速翻动后的小幅反向被吞掉；每包及 Mac 插值队列仍限制在 600 px，保留现有 Mac 平滑滚动与目标保护。
+- 64 项 Swift 测试通过，覆盖相同转动量在不同速度下的距离、双向对称、减速／停顿／反向恢复、细微累计、30/60/120 Hz 回调一致性、异常时钟／回绕、队列反转和插值停止。331 条英中翻译与 330 个源码键检查通过。
+- watchOS 模拟器与双架构真机签名构建通过；Ultra 4 安装、启动成功，独立设备查询确认 **0.3.0 (14)** 及运行中的进程。证据为本机 `artifacts/micodex-build14-installed-app.json`、`artifacts/micodex-build14-processes.json`；构建／测试日志为 `/tmp/micodex-crown-{tests,simulator,install}.log`。本次仅需更新手表，现有 Mac 接收端兼容像素指令。
+- 真表慢转、快转、急停和反向时的实际手感仍需用户操作验收；自动测试不代表物理表冠手感验证。
+
 ## 2026-09-27 · Device-language UI (Build 13)
 
 - Added 331 English/Simplified Chinese catalog entries, native SwiftPM localization resources, and localized InfoPlist permission prompts for Mac, Watch, and the Watch-only distribution container. English is the development/fallback language. Each app uses its own device/app language without writing a global setting or a user-specific override.

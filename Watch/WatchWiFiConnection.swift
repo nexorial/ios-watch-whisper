@@ -179,7 +179,7 @@ final class WatchWiFiConnection: ObservableObject {
         if action != .scroll && action != .heartbeat { queue.removeAll { $0.0 == .scroll || $0.0 == .heartbeat } }
         if action == .heartbeat && (!queue.isEmpty || controlTask != nil) { return }
         if action == .scroll, let last = queue.last, last.0 == .scroll {
-            queue[queue.count - 1].1 = Int16(max(-600, min(600, Int(last.1) + Int(value))))
+            queue[queue.count - 1].1 = ScrollMotion.coalescing(last.1, with: value)
         } else {
             if queue.count >= 12 { queue.removeAll { $0.0 == .scroll || $0.0 == .heartbeat } }
             guard queue.count < 16 else { fail(L10n.t("Too many pending commands. Stopped.")); return }

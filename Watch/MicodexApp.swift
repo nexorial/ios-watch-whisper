@@ -121,7 +121,7 @@ private struct RemoteView: View {
         .focusable().focused($crownFocused)
         .digitalCrownRotation($crown, from: -10000, through: 10000, by: 0.1, sensitivity: .medium, isContinuous: true, isHapticFeedbackEnabled: true)
         .onChange(of: crown) { [crown] value in
-            let pixels = accumulator.add(value - crown)
+            let pixels = accumulator.add(value - crown, at: ProcessInfo.processInfo.systemUptime)
             if pixels != 0 { connection.send(.scroll, value: pixels); scrollHint = pixels > 0 ? L10n.t("↓ Scroll down") : L10n.t("↑ Scroll up") }
         }
         .onChange(of: connection.phase) { gesture.hostChanged($0) }
@@ -130,6 +130,7 @@ private struct RemoteView: View {
             if connection.recordingLocked { gesture.restoreLockedRecording() }
         }
         .onDisappear {
+            accumulator.reset()
             if !connection.recordingLocked { stop() }
             fingerDown = false; gesture.reset()
         }
