@@ -3,7 +3,7 @@
 Micodex 1.0 is a free Watch-only release with a separately built Mac receiver.
 
 - Primary category: Productivity; secondary: Developer Tools.
-- Localizations: English (U.S.) and Simplified Chinese.
+- Localizations: English (U.S.) and Simplified Chinese. English listing name: `Micodex – Watch Remote` (the bare name is unavailable in that locale); Chinese listing and in-app name: `Micodex`.
 - Age questionnaire: the app has no content feed, web browser, social messaging, ads, health content, gambling, or mature content; Apple calculated 4+.
 - Price: free, no subscriptions or in-app purchases.
 - Support / marketing: https://kiskir.dev/projects/micodex
