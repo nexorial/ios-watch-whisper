@@ -1,0 +1,24 @@
+Control Codex on your Mac from your Apple Watch.
+
+Turn the Digital Crown to scroll a conversation, speak into your Watch, then check the transcription on your Mac and tap Enter when you are ready. Micodex is free and open source, with native English and Simplified Chinese interfaces.
+
+TURN, TALK, SEND
+• Scroll the Codex conversation with the Crown. Faster turns move farther.
+• Hold to talk and release to stop, tap to toggle, or swipe right to lock recording.
+• About two seconds of silence after speech stops capture; recordings are limited to two minutes.
+• Transcription and sending are separate. Micodex never automatically sends your words.
+• Pair over the local network by copying your Mac connection code and approving matching six-digit codes.
+
+WHAT YOU NEED
+An Apple Watch running watchOS 9 or later, a Mac running macOS 15 or later for Wi-Fi, the separate Micodex Mac receiver, and the Codex desktop app. Both devices must be on a reachable local network. The Mac receiver is currently built and installed from public source; the support website links to complete instructions.
+
+Watch dictation also requires the separately installed BlackHole 2ch virtual audio driver, selected as Codex’s input. Allow Micodex Accessibility access on the Mac and microphone access on the Watch. Optional location permission only shows the Wi-Fi name; Micodex does not read or save location coordinates.
+
+PRIVACY AND CONTROL
+Micodex does not save recordings, include ads or analytics SDKs, or operate a cloud transcription service. Watch audio travels to your Mac and into Codex’s own dictation. Codex may process audio through its services under its own account settings and policies. Review the text before sending.
+
+The Watch app is standalone, with no iPhone companion interface. watchOS may dim the screen or interrupt background audio. Bluetooth backup is experimental. Micodex is an independent project, unaffiliated with Apple or OpenAI.
+
+Setup and source: https://kiskir.dev/projects/micodex
+Privacy: https://kiskir.dev/projects/micodex/privacy
+Terms: https://kiskir.dev/projects/micodex/terms

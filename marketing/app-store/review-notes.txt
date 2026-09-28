@@ -1,0 +1,11 @@
+Micodex is a free standalone Apple Watch remote with a separate open-source Mac receiver. It has no iPhone UI, account, subscriptions, ads, or analytics. The iOS bundle is Apple’s Watch-only distribution container.
+
+Requirements: watchOS 9+, macOS 15+ for Wi-Fi, both devices on a reachable local network. Mac receiver source and step-by-step build/install instructions: https://github.com/nexorial/ios-watch-whisper . The receiver is currently installed from source, not through this Watch listing.
+
+Setup: run MicodexMac, select Connect > Copy Connection Code, paste it into the Watch using the iPhone keyboard, and tap Trust This Mac & Connect. On Mac choose Allow Wi-Fi Watch, compare the six-digit codes, then approve. This build contains no developer-specific IP or certificate pin. Grant Micodex Accessibility access to control Codex.
+
+For real dictation install BlackHole 2ch separately, select it as the input used by Codex, allow Codex microphone permission, and allow the Watch microphone. Audio is buffered locally and played to Codex’s own dictation; Micodex does not perform cloud transcription or save recordings. Hold to capture; release or Stop ends capture. Silence after speech also stops it. Review transcription on Mac, then tap Enter separately.
+
+To preview the Watch UI without a Mac, open More Options > Try Demo. It is visibly labeled Demo and does not control another app. Actual wireless audio and control require the setup above. Bluetooth and Claude controls are experimental; Claude dictation is disabled.
+
+Privacy and terms: https://kiskir.dev/projects/micodex/privacy and https://kiskir.dev/projects/micodex/terms . This independent project is not affiliated with Apple or OpenAI.

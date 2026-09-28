@@ -18,3 +18,14 @@ Public URLs:
 - Terms: https://kiskir.dev/projects/micodex/terms
 
 The privacy manifest declares UserDefaults for app-local settings (`CA92.1`) and system uptime for elapsed-time calculations (`35F9.1`). There is no advertising, analytics SDK, tracking, account, or developer-operated audio service. Codex's own dictation processing is described separately in the privacy policy.
+
+## 1.0 (16) preparation — September 28, 2026
+
+- Source published under MIT; GitHub Actions passed the core tests and both app builds.
+- 67 local unit tests passed. Local TLS, pairing, wrong-pin, replay, audio finalization, duplicate receiver and port recovery tests passed.
+- Public Watch-only IPA passed metadata, privacy-manifest and Apple Distribution signature checks. Apple confirmed upload success and processed build 16; the build was selected in version 1.0.
+- The official project, privacy and terms pages are live, with desktop/mobile checks. Website PR #3 was merged into the existing production branch.
+- App Privacy was published as Data Not Collected. Free pricing was configured for all 175 price regions. Age rating is 4+.
+- Owner screenshots and physical acceptance of the public setup flow remain outstanding. No App Review submission or public App Store release is claimed. The Mac receiver is currently installed from source; no notarized Mac binary is published.
+
+See `marketing/app-store/` for the reviewable listing copy. Keep private contact details and raw delivery receipts outside Git.

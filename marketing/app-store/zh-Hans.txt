@@ -1,0 +1,24 @@
+用 Apple Watch 遥控 Mac 上的 Codex。
+
+Micodex 让你转动数码表冠滚动对话、通过手表麦克风说话，在 Mac 上检查转写文字后再点击 Enter 发送。免费、开源，支持英文和简体中文。
+
+主要功能
+• 转动表冠滚动 Codex 对话正文，转得越快移动越快。
+• 按住说话，松开停止；轻点切换或右滑锁定录音。
+• 说话后约两秒安静自动结束，录音最长两分钟。
+• 转写与发送分开，Micodex 不会自动发送你的文字。
+• 局域网加密连接，复制 Mac 连接码并核对六位配对码后批准。
+
+使用要求
+需要 Apple Watch（watchOS 9 或更高版本）、Mac（Wi-Fi 模式需要 macOS 15 或更高版本）、单独运行的 Micodex Mac 接收端和 Codex Mac 版。手表和 Mac 需要处于可互访的局域网。Mac 接收端目前通过公开源码构建安装，完整步骤见支持网站。
+
+语音输入需要单独安装 BlackHole 2ch 虚拟音频驱动，并选择为 Codex 的音频输入。Mac 端需要辅助功能权限，首次录音需要手表麦克风权限。显示 Wi-Fi 名称的定位授权是可选的；Micodex 不读取或保存定位坐标。
+
+隐私与控制
+Micodex 不保存录音，不含广告或分析 SDK，也没有自己的云端转写服务。音频由手表传到 Mac，再交给 Codex 自带听写；Codex 可能按照其服务条款和账户设置处理音频。请核对文字后再发送。
+
+手表 App 独立运行，无 iPhone 配套界面。系统可能使屏幕变暗或中断后台录音。蓝牙备用为实验功能。Micodex 是独立开源项目，与 Apple 或 OpenAI 无隶属关系。
+
+项目与使用说明：https://kiskir.dev/projects/micodex
+隐私政策：https://kiskir.dev/projects/micodex/privacy
+使用条款：https://kiskir.dev/projects/micodex/terms
