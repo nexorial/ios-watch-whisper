@@ -2,8 +2,7 @@ import Foundation
 import Combine
 import MicodexCore
 
-/// One UI and gesture contract over either transport. Only the selected
-/// transport is active; existing BLE pairing remains available as a fallback.
+/// Watch presentation state for the paired, authenticated Wi-Fi connection.
 @MainActor
 final class WatchLink: ObservableObject {
     @Published var connected = false
@@ -11,26 +10,24 @@ final class WatchLink: ObservableObject {
     @Published var phase: HostPhase = .ready
     @Published var macName = "Mac"
     @Published var demo = false
-    @Published var nearby: [WatchConnection.NearbyMac] = []
-    @Published var usesWiFi = false
     @Published var pairingCode: String?
     @Published var microphoneLevel = ""
     @Published var stopping = false
-    @Published var recordingLocked = false
+    @Published var microphoneReady = false
+    @Published var focusedThreadTitle: String?
+    @Published var recordingNotice: String?
     @Published var recordingRequested = false
     @Published var macAddress = ""
     var canUseWiFi: Bool { WatchWiFiConnection.configuration != nil }
-    private var bluetooth: WatchConnection?
     private var wifi: WatchWiFiConnection?
     private var observer: AnyCancellable?
     private var active = true
     init() {
-        if ProcessInfo.processInfo.arguments.contains("--demo") { useBluetooth() }
+        if ProcessInfo.processInfo.arguments.contains("--demo") { enableDemo() }
         else { useWiFi() }
     }
     func useWiFi() {
-        bluetooth?.disconnect(); observer?.cancel()
-        usesWiFi = true
+        observer?.cancel(); demo = false
         guard let (host, pin) = WatchWiFiConnection.configuration else {
             status = L10n.t("Copy the connection code from Micodex on your Mac to get started.")
             connected = false
@@ -38,21 +35,12 @@ final class WatchLink: ObservableObject {
         }
         do {
             if wifi == nil { wifi = try WatchWiFiConnection(host: host, pin: pin) }
-            usesWiFi = true; wifi?.setActive(active)
+            wifi?.setActive(active)
             observer = wifi?.objectWillChange.sink { [weak self] in
                 DispatchQueue.main.async { self?.sync() }
             }
             sync()
         } catch { status = error.localizedDescription }
-    }
-    func useBluetooth() {
-        wifi?.disconnect(); observer?.cancel(); usesWiFi = false
-        if bluetooth == nil { bluetooth = WatchConnection() }
-        bluetooth?.setActive(active)
-        observer = bluetooth?.objectWillChange.sink { [weak self] in
-            DispatchQueue.main.async { self?.sync() }
-        }
-        sync()
     }
     func updateWiFiHost(_ host: String) {
         guard let (_, pin) = WatchWiFiConnection.configuration else { return }
@@ -66,8 +54,8 @@ final class WatchLink: ObservableObject {
         guard !recordingRequested, !stopping else { return }
         do {
             let replacement = try WatchWiFiConnection(host: configuration.host, pin: configuration.fingerprint)
-            wifi?.disconnect(); bluetooth?.disconnect(); observer?.cancel()
-            wifi = replacement; usesWiFi = true
+            wifi?.disconnect(); observer?.cancel()
+            wifi = replacement; demo = false
             UserDefaults.standard.set(configuration.host, forKey: "wifiHostOverride")
             UserDefaults.standard.set(configuration.fingerprint, forKey: "wifiPinOverride")
             wifi?.setActive(active)
@@ -77,36 +65,34 @@ final class WatchLink: ObservableObject {
     }
     func setActive(_ active: Bool) {
         self.active = active
-        if usesWiFi { wifi?.setActive(active) } else { bluetooth?.setActive(active) }
-        sync()
+        if !demo { wifi?.setActive(active); sync() }
     }
     func send(_ action: RemoteAction, value: Int16 = 0) {
-        if usesWiFi { wifi?.send(action, value: value) } else { bluetooth?.send(action, value: value) }
-        sync()
+        if demo {
+            switch action {
+            case .beginDictation:
+                guard !recordingRequested, phase != .transcribing else { return }
+                recordingRequested = true; microphoneReady = true; phase = .listening
+            case .finishDictation, .cancelDictation:
+                recordingRequested = false; microphoneReady = false; phase = .ready
+            default: break
+            }
+        } else { wifi?.send(action, value: value); sync() }
     }
-    func setRecordingLocked(_ value: Bool) {
-        if usesWiFi { wifi?.setRecordingLocked(value) } else { bluetooth?.setRecordingLocked(value) }
-        sync()
+    func forget() { wifi?.forget(); sync() }
+    func enableDemo() {
+        wifi?.disconnect(); observer?.cancel()
+        demo = true; connected = true; phase = .ready
+        recordingRequested = false; microphoneReady = false; stopping = false
+        focusedThreadTitle = L10n.t("Demo thread"); recordingNotice = nil
+        status = L10n.t("Demo · No Mac connection")
     }
-    func forget() { if usesWiFi { wifi?.forget() } else { bluetooth?.forget() }; sync() }
-    func choose(_ mac: WatchConnection.NearbyMac) { bluetooth?.choose(mac); sync() }
-    func enableDemo() { useBluetooth(); bluetooth?.enableDemo(); sync() }
     private func sync() {
-        if usesWiFi, let wifi {
-            connected = wifi.connected; status = wifi.status; phase = wifi.phase; macName = wifi.macName
-            demo = false; nearby = []; pairingCode = wifi.pairingCode
-            microphoneLevel = wifi.microphoneLevel
-            stopping = wifi.stopping
-            recordingLocked = wifi.recordingLocked
-            recordingRequested = wifi.recordingRequested; macAddress = wifi.macAddress
-        } else if let bluetooth {
-            connected = bluetooth.connected; status = bluetooth.status; phase = bluetooth.phase; macName = bluetooth.macName
-            demo = bluetooth.demo; nearby = bluetooth.nearby; pairingCode = nil
-            microphoneLevel = L10n.t("Watch microphone · Up to 2 minutes")
-            stopping = bluetooth.stopping
-            recordingLocked = bluetooth.recordingLocked
-            recordingRequested = bluetooth.recordingRequested || (bluetooth.demo && bluetooth.phase == .listening)
-            macAddress = ""
-        }
+        guard !demo, let wifi else { return }
+        connected = wifi.connected; status = wifi.status; phase = wifi.phase; macName = wifi.macName
+        pairingCode = wifi.pairingCode; microphoneLevel = wifi.microphoneLevel
+        stopping = wifi.stopping; microphoneReady = wifi.microphoneReady
+        focusedThreadTitle = wifi.focusedThreadTitle; recordingNotice = wifi.recordingNotice
+        recordingRequested = wifi.recordingRequested; macAddress = wifi.macAddress
     }
 }

@@ -42,7 +42,6 @@ final class WiFiHost: ObservableObject {
     private struct Session {
         let key: Data; let challenge: Data; let clientNonce: Data
         var gate = ReplayGate(); var audioGate: AudioGate?
-        var silence = SilenceEndpoint()
         var finalized = false
         var draining = false
     }
@@ -250,7 +249,6 @@ final class WiFiHost: ObservableObject {
                       let packets = input.packets, !packets.isEmpty, packets.count <= 32 else {
                     return (409, WiFiReply("error", message: L10n.message("No recording session is active for this Watch")))
                 }
-                var endpoint: SilenceEndpoint.Reason?
                 for packet in packets {
                     guard let data = Data(base64Encoded: packet) else { throw WireError.malformed }
                     let frame = try AudioWire.decode(data, key: session.key, challenge: session.challenge)
@@ -260,9 +258,6 @@ final class WiFiHost: ObservableObject {
                     if !session.finalized {
                         if gap > 0 { try playback.enqueue([Int16](repeating: 0, count: gap)) }
                         try playback.enqueue(frame.samples)
-                        if let reason = session.silence.consume(frame.samples) {
-                            endpoint = reason; session.finalized = true; session.draining = true
-                        }
                     }
                     if frame.ended { ConnectionTrace.record("audio", "Watch end marker received samples=\(frame.offset)") }
                 }
@@ -270,11 +265,6 @@ final class WiFiHost: ObservableObject {
                     ConnectionTrace.record("audio", "first Watch audio batch received")
                 }
                 session.audioGate = gate; sessions[id] = session
-                if let endpoint {
-                    let challenge = session.challenge
-                    ConnectionTrace.record("audio", "silence endpoint=\(endpoint) samples=\(playback.receivedSamples)")
-                    Task { [weak self] in _ = await self?.finishAudio(id: id, challenge: challenge) }
-                }
                 return (200, WiFiReply("ok"))
             }
             guard request.path == "/v1/command", let packet = input.packet.flatMap({ Data(base64Encoded: $0) }) else {
@@ -302,7 +292,7 @@ final class WiFiHost: ObservableObject {
                     phase = await controller.perform(.beginDictation)
                     if phase == .listening {
                         owner = id; sessions[id]?.audioGate = AudioGate(stream: command.sequence)
-                        sessions[id]?.silence = SilenceEndpoint(); sessions[id]?.finalized = false
+                        sessions[id]?.finalized = false
                     }
                     else { playback.stop() }
                 } catch {
@@ -323,7 +313,8 @@ final class WiFiHost: ObservableObject {
             if status != newStatus { status = newStatus }
             return (200, WiFiReply("ok", message: controller.detailMessage,
                                   packet: try Wire.status(phase, sequence: command.sequence, key: session.key,
-                                                          challenge: session.challenge).base64EncodedString()))
+                                                          challenge: session.challenge).base64EncodedString(),
+                                  focusedThreadTitle: controller.focusedThreadTitle()))
         } catch {
             ConnectionTrace.record("wifi", "request failed path=\(request.path) samples=\(playback.receivedSamples) error=\(error.localizedDescription)")
             if request.path == "/v1/audio", owner == id {

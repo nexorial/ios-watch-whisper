@@ -26,6 +26,9 @@ final class AgentController: ObservableObject {
     private var leaseTask: Task<Void, Never>?
     private let demo: Bool
     private var accessibilityPreparedPID: pid_t?
+    private var titleUpdatedAt: TimeInterval = 0
+    private var titleTarget: Target?
+    private var cachedThreadTitle: String?
     var drainBeforePreserving: (() async -> Void)?
     private var stopDeadline: TimeInterval?
     private struct ScrollAnchor {
@@ -41,7 +44,10 @@ final class AgentController: ObservableObject {
 
     init(demo: Bool = false) {
         self.demo = demo
-        if demo { detailMessage = L10n.message("Demo mode: other apps will not be controlled.") }
+        if demo {
+            detailMessage = L10n.message("Demo mode: other apps will not be controlled.")
+            lastOperation = detailMessage.localizedString
+        }
         leaseTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 500_000_000)
@@ -63,6 +69,52 @@ final class AgentController: ObservableObject {
     var isRecording: Bool { recordingWindow != nil || (demo && phase == .listening) }
     var isFinishing: Bool { pendingTranscription }
     var isBusy: Bool { busy }
+
+    func focusedThreadTitle() -> String? {
+        if demo { return L10n.t("Demo thread") }
+        // Scroll commands arrive much faster than status heartbeats. Never walk
+        // the full accessibility tree for every Crown increment.
+        let now = ProcessInfo.processInfo.systemUptime
+        if titleTarget == target, now - titleUpdatedAt < 0.8 { return cachedThreadTitle }
+        titleTarget = target; titleUpdatedAt = now
+        cachedThreadTitle = readFocusedThreadTitle()
+        return cachedThreadTitle
+    }
+
+    private func readFocusedThreadTitle() -> String? {
+        guard accessibilityGranted,
+              let app = NSRunningApplication.runningApplications(withBundleIdentifier: target.bundleID).first else { return nil }
+        let root = AXUIElementCreateApplication(app.processIdentifier)
+        prepareAccessibility(root, pid: app.processIdentifier)
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(root, kAXFocusedWindowAttribute as CFString, &value) == .success,
+              let value, CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
+        let window = unsafeBitCast(value, to: AXUIElement.self)
+        let elements = descendants(window)
+        // Only report a task with a usable composer, not Settings or a search window.
+        guard (try? composer(elements, in: window)) != nil else { return nil }
+        if let title = ThreadTitle.clean(string(window, kAXTitleAttribute), application: target.rawValue) { return title }
+        guard let frame = rect(window) else { return nil }
+        // Electron can leave the window title at its app name. In that case use
+        // an unambiguous heading in the top content header, never sidebar rows
+        // or transcript headings. Missing/ambiguous titles deliberately stay nil.
+        let headings = elements.filter {
+            guard string($0, kAXRoleAttribute) == "AXHeading", let rect = rect($0) else { return false }
+            return rect.minX > frame.minX + 140 && rect.minY >= frame.minY && rect.maxY < frame.minY + 110
+        }
+        let titles = Set(headings.compactMap { heading -> String? in
+            let parts = [string(heading, kAXTitleAttribute), string(heading, kAXValueAttribute)]
+                + descendants(heading).filter { string($0, kAXRoleAttribute) == kAXStaticTextRole }.map { string($0, kAXValueAttribute) }
+            return parts.compactMap { ThreadTitle.clean($0, application: target.rawValue) }.first
+        })
+        return titles.count == 1 ? titles.first : nil
+    }
+
+    private func prepareAccessibility(_ root: AXUIElement, pid: pid_t) {
+        guard accessibilityPreparedPID != pid else { return }
+        _ = AXUIElementSetAttributeValue(root, "AXManualAccessibility" as CFString, kCFBooleanTrue)
+        accessibilityPreparedPID = pid
+    }
 
     func requestAccessibility() {
         // Only a user click calls this. The OS permission remains a user decision.
@@ -364,12 +416,7 @@ final class AgentController: ObservableObject {
             throw Failure(.targetInactive, L10n.message("Bring the %@ task window to the front. Keystrokes will not be sent to other apps.", target.rawValue))
         }
         let root = AXUIElementCreateApplication(app.processIdentifier)
-        if accessibilityPreparedPID != app.processIdentifier {
-            // Chromium only creates its complete web accessibility tree when an
-            // assistive client requests it. This uses the user's existing AX grant.
-            _ = AXUIElementSetAttributeValue(root, "AXManualAccessibility" as CFString, kCFBooleanTrue)
-            accessibilityPreparedPID = app.processIdentifier
-        }
+        prepareAccessibility(root, pid: app.processIdentifier)
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(root, kAXFocusedWindowAttribute as CFString, &value) == .success,
               let value, CFGetTypeID(value) == AXUIElementGetTypeID() else {

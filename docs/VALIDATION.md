@@ -2,7 +2,7 @@
 
 Use `./scripts/build.sh` for localization, core tests, and unsigned Mac / Watch simulator builds. Use `./scripts/test-wifi-security.sh` for the real local TLS and authenticated protocol flow against a demo target.
 
-The project has previous physical Watch pairing, reconnection, and Crown-scrolling evidence. The public setup flow and each release still require device acceptance. Do not infer live dictation, release timing, locked screen-off continuity, or App Store approval from a successful build.
+The project has previous physical Watch pairing, reconnection, and Crown-scrolling evidence. The public setup flow and each release still require device acceptance. Do not infer live dictation, tap-to-stop timing, screen-off continuity, or App Store approval from a successful build.
 
 Before a public release, record:
 
@@ -10,11 +10,30 @@ Before a public release, record:
 - [ ] Reopen both apps and reconnect; update DHCP IP without losing identity.
 - [ ] Crown scrolls the Codex conversation body at different turn speeds.
 - [ ] Watch speech reaches Codex; Mac microphone is not silently substituted.
-- [ ] Releasing excludes speech spoken afterward; Stop and silence timeout work.
-- [ ] Locked wrist-down recording preserves speech received by the Mac.
+- [ ] Second tap excludes speech spoken afterward; speech pauses do not stop capture.
+- [ ] Tap-started wrist-down recording preserves speech received by the Mac.
 - [ ] Interruptions preserve received audio and never automatically send.
 - [ ] Enter sends only after transcription and user confirmation.
+- [ ] Double start haptics occur only after actual capture, never after a quick stop.
+- [ ] Watch header follows the focused Codex thread; unavailable titles clear.
+- [ ] Mac scrollbars fade when idle and disclosure labels toggle the full row.
 - [ ] English/Chinese and small/large Watch layouts remain usable.
 - [ ] App Store export contains the privacy manifest and no developer endpoint.
 
 Keep raw device logs and account-specific upload receipts in ignored `artifacts/`. The release checklist distinguishes archive, upload, Apple processing, review preparation, submission, and public availability.
+
+## Build 17 interaction update (2026-09-29)
+
+- Core regression suite: 62 tests passed. English/Chinese catalogs checked.
+- Mac and Watch simulator builds passed; signed physical Watch build passed.
+- Local TLS smoke passed: authenticated thread metadata, no title in discovery,
+  speech-pause continuity, interruption finalization, late audio/stop/cancel
+  handling, replay rejection, pairing/revocation, and receiver recovery.
+- Mac Build 17 installed and opened. Native UI checks confirmed the indicator
+  appears during scrolling and disappears when idle, Bluetooth Backup is absent,
+  and both More Settings and Last Action toggle by clicking their labels.
+- Physical Watch install returned success. Subsequent launch/read-back failed
+  with a developer tunnel timeout; double haptics, thread-title accuracy, and
+  wrist-down microphone/transcription continuity remain device acceptance items.
+- The Watch UI-test target compiled, but the simulator test run did not reach
+  a test case and was stopped after remaining stalled. No UI-test pass is claimed.

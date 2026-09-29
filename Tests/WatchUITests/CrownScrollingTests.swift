@@ -1,6 +1,23 @@
 import XCTest
 
 final class CrownScrollingTests: XCTestCase {
+    func testTapRecordingStaysOnUntilSecondTapAndSettingsUseBack() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--demo"]
+        app.launch()
+        let record = app.buttons["remote.record"]
+        XCTAssertTrue(record.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["remote.thread"].exists)
+        record.tap()
+        XCTAssertEqual(record.label, "Stop Dictation")
+        record.tap()
+        XCTAssertEqual(record.label, "Start dictation with the Watch microphone")
+        app.buttons["Connection settings"].tap()
+        XCTAssertTrue(app.buttons["Back"].waitForExistence(timeout: 3))
+        app.buttons["Back"].tap()
+        XCTAssertTrue(record.exists)
+    }
+
     func testRealCrownEventsMakeFastTurnsTravelScreensWhileSlowTurnsStayPrecise() throws {
         func turn(velocity: CGFloat) throws -> (pixels: Double, units: Double, velocity: Double) {
             let app = XCUIApplication()

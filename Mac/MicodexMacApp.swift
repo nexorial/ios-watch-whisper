@@ -4,19 +4,17 @@ import MicodexCore
 @main
 struct MicodexMacApp: App {
     @StateObject private var controller: AgentController
-    @StateObject private var host: BluetoothHost
     @StateObject private var wifi: WiFiHost
     private let demo = ProcessInfo.processInfo.arguments.contains("--demo")
     init() {
         let demo = ProcessInfo.processInfo.arguments.contains("--demo")
         let controller = AgentController(demo: demo)
         _controller = StateObject(wrappedValue: controller)
-        _host = StateObject(wrappedValue: BluetoothHost(controller: controller, demo: demo, enabled: false))
         _wifi = StateObject(wrappedValue: WiFiHost(controller: controller, demo: demo))
     }
     var body: some Scene {
         WindowGroup(L10n.t("Micodex"), id: "control") {
-            HostView(host: host, wifi: wifi, controller: controller, demo: demo)
+            HostView(wifi: wifi, controller: controller, demo: demo)
         }
         .defaultSize(width: 420, height: 550)
         .windowResizability(.contentSize)
@@ -50,7 +48,6 @@ private struct HostMenu: View {
 }
 
 private struct HostView: View {
-    @ObservedObject var host: BluetoothHost
     @ObservedObject var wifi: WiFiHost
     @ObservedObject var controller: AgentController
     let demo: Bool
@@ -58,6 +55,7 @@ private struct HostView: View {
     @State private var showingConnection = false
     @State private var showingAdvanced = false
     @State private var copiedAddress = false
+    @State private var showingLastAction = false
 
     private var needsAttention: Bool {
         [.permissionRequired, .targetInactive, .unavailable, .failed].contains(controller.phase)
@@ -102,7 +100,7 @@ private struct HostView: View {
             }.font(.system(size: 12)).padding(.bottom, 14)
             Divider()
 
-            ScrollView {
+            AutoHidingScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     connectionSection
                     Divider()
@@ -121,7 +119,7 @@ private struct HostView: View {
                 Image(systemName: "digitalcrown.horizontal.arrow.clockwise")
                 Text(L10n.t("Crown to scroll"))
                 Text(L10n.t("·")).padding(.horizontal, 3)
-                Text(L10n.t("Hold to talk"))
+                Text(L10n.t("Tap to talk"))
                 Text(L10n.t("·")).padding(.horizontal, 3)
                 Text(L10n.t("Enter to send"))
                 Spacer(minLength: 0)
@@ -142,7 +140,7 @@ private struct HostView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            controller.objectWillChange.send(); host.audio.refresh(); host.refreshRadio(); wifi.audio.refresh()
+            controller.objectWillChange.send(); wifi.audio.refresh()
             wifi.refreshAddressIfNeeded(); network.refresh()
         }
     }
@@ -263,31 +261,17 @@ private struct HostView: View {
     }
 
     private var advancedSection: some View {
-        DisclosureGroup(L10n.t("More Settings"), isExpanded: $showingAdvanced) {
+        ExpandableSection(title: L10n.t("More Settings"), isExpanded: $showingAdvanced) {
             VStack(alignment: .leading, spacing: 14) {
-                DisclosureGroup(L10n.t("Bluetooth Backup")) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(host.connection)
-                        Text(host.radioStatus).foregroundStyle(.secondary)
-                        HStack {
-                            Button(L10n.t("Enable Bluetooth Backup")) { host.enableBluetooth() }
-                            Button(L10n.t("Allow Bluetooth Watch")) { host.allowPairing() }.disabled(host.pairingOpen)
-                        }
-                        if let pending = host.pendingWatch {
-                            Text(L10n.t("Watch request · %@", pending))
-                            Button(L10n.t("Allow This Watch")) { host.approve() }
-                        }
-                    }.padding(.top, 8)
-                }.disabled(demo)
                 if !controller.lastOperation.isEmpty {
-                    DisclosureGroup(L10n.t("Last Action")) {
+                    ExpandableSection(title: L10n.t("Last Action"), isExpanded: $showingLastAction) {
                         Text(controller.lastOperation).textSelection(.enabled).padding(.top, 8)
                     }
                 }
-                Text(L10n.t("Swipe right to lock recording. It stops after about 2 seconds of silence after speech, or at 2 minutes. Speech is transcribed without sending."))
+                Text(L10n.t("Tap once to record, then tap again to stop. Recording continues with the screen off, for up to two minutes."))
                     .foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                Button(L10n.t("Remove All Pairings"), role: .destructive) { host.revokeAll(); wifi.revokeAll() }
-                    .disabled(demo || (host.pairedCount == 0 && wifi.pairedCount == 0))
+                Button(L10n.t("Remove All Pairings"), role: .destructive) { wifi.revokeAll() }
+                    .disabled(demo || wifi.pairedCount == 0)
                 if demo {
                     HStack {
                         Button(L10n.t("Start Demo")) { Task { _ = await controller.perform(.beginDictation) } }

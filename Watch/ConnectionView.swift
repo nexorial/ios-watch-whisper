@@ -23,7 +23,7 @@ struct ConnectionView: View {
                     Text(connection.status).font(.caption2).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if connection.usesWiFi || connection.canUseWiFi {
+                if !connection.demo {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(L10n.t("Watch Wi-Fi")).font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
                         Text(network.name ?? L10n.t("Name unavailable")).font(.system(size: 13, weight: .medium))
@@ -43,9 +43,9 @@ struct ConnectionView: View {
                     }.padding(.vertical, 4)
                 }
                 if connection.connected {
-                    Button(L10n.t("Back to Remote")) { showingConnection = false }.buttonStyle(.borderedProminent)
+                    Button(L10n.t("Back")) { showingConnection = false }.buttonStyle(.borderedProminent)
                 }
-                if connection.usesWiFi && (!connection.canUseWiFi || showingSetup) {
+                if !connection.canUseWiFi || showingSetup {
                     VStack(alignment: .leading, spacing: 7) {
                         Text(L10n.t("Mac Connection Code")).font(.headline)
                         Text(L10n.t("On your Mac, click “Copy Connection Code”. Paste it here using the iPhone keyboard, or enter it exactly. Only use a code from your own Mac."))
@@ -66,7 +66,7 @@ struct ConnectionView: View {
                         if let addressError { Text(addressError).font(.caption2).foregroundStyle(.orange) }
                     }
                 }
-                if connection.usesWiFi && connection.canUseWiFi {
+                if connection.canUseWiFi {
                     VStack(alignment: .leading, spacing: 7) {
                         Text(L10n.t("Mac IP Address")).font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
                         Text(L10n.t("Enter the “Mac IP” shown in the Mac app, not your watch’s IP."))
@@ -87,12 +87,7 @@ struct ConnectionView: View {
                     }
                 }
                 if !connection.connected {
-                    ForEach(connection.nearby) { mac in
-                        Button { connection.choose(mac) } label: {
-                            Label(mac.name, systemImage: "laptopcomputer").font(.caption)
-                        }
-                    }
-                    Text(connection.usesWiFi ? L10n.t("Keep Micodex open on your Mac with “Wi-Fi Ready” showing. For first-time pairing, click “Allow Wi-Fi Watch” on the Mac and check the code. Paired devices do not need to pair again.") : L10n.t("Enable Bluetooth Backup in Micodex on your Mac, then choose your computer."))
+                    Text(L10n.t("Keep Micodex open on your Mac with “Wi-Fi Ready” showing. For first-time pairing, click “Allow Wi-Fi Watch” on the Mac and check the code. Paired devices do not need to pair again."))
                         .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }
                 Divider()
@@ -112,16 +107,16 @@ struct ConnectionView: View {
                         } else {
                             Button(L10n.t("Pair Again")) { connection.forget() }
                             Button(L10n.t("Try Demo")) { connection.enableDemo(); showingConnection = false }
-                            if connection.usesWiFi { Button(L10n.t("Use Bluetooth Backup")) { connection.useBluetooth() } }
-                            else { Button(L10n.t("Use Direct Wi-Fi")) { connection.useWiFi() } }
                         }
-                        if connection.usesWiFi && connection.canUseWiFi {
+                        if connection.canUseWiFi {
                             Button(L10n.t("Set Up Another Mac")) { showingSetup.toggle() }
                                 .disabled(connection.recordingRequested || connection.stopping)
                         }
                         Button(L10n.t("Screen & Recording")) { showingScreenHelp.toggle() }
                         if showingScreenHelp {
-                            Text(L10n.t("Swipe right to lock recording and keep recording with your wrist down. It stops after about 2 seconds of silence after speech, or at 2 minutes, and transcribes without sending. Enable Always On in Settings → Display & Brightness; the screen will still dim."))
+                            Text(L10n.t("Tap once to record and tap again to stop. Recording continues with your wrist down, for up to 2 minutes. Transcription does not send a message. The screen may dim."))
+                                .font(.caption2).foregroundStyle(.secondary)
+                            Text(L10n.t("If Siri opens while you speak, turn off Raise to Speak and Listen for Siri in Watch Settings → Siri. Micodex cannot change these system settings."))
                                 .font(.caption2).foregroundStyle(.secondary)
                         }
                     }.font(.caption)

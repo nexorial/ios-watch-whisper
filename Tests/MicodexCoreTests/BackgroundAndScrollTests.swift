@@ -2,20 +2,16 @@ import XCTest
 @testable import MicodexCore
 
 final class BackgroundAndScrollTests: XCTestCase {
-    func testScreenOffKeepsOnlyLockedRecordingAlive() {
-        XCTAssertEqual(RecordingVisibility.onHide(locked: true, recording: true, stopping: false), .stayActive)
-        XCTAssertEqual(RecordingVisibility.onHide(locked: false, recording: true, stopping: false), .finishAndSuspend)
-        XCTAssertEqual(RecordingVisibility.onHide(locked: true, recording: false, stopping: false), .disconnect)
-        XCTAssertEqual(RecordingVisibility.onHide(locked: false, recording: false, stopping: true), .finishAndSuspend)
+    func testScreenOffKeepsTapRecordingAliveWithoutAGestureLock() {
+        XCTAssertEqual(RecordingVisibility.onHide(recording: true, stopping: false), .stayActive)
+        XCTAssertEqual(RecordingVisibility.onHide(recording: false, stopping: false), .disconnect)
     }
-    func testRepeatedHideDuringFinishNeverResumesLockedCapture() {
+    func testRepeatedHideDuringFinishNeverResumesCapture() {
         for recording in [true, false] {
-            for locked in [true, false] {
-                // watchOS delivers inactive and background separately, including
-                // while the final audio and stop acknowledgement are in flight.
-                for _ in 0..<2 {
-                    XCTAssertEqual(RecordingVisibility.onHide(locked: locked, recording: recording, stopping: true), .finishAndSuspend)
-                }
+            // watchOS delivers inactive and background separately, including
+            // while final audio and the stop acknowledgement are in flight.
+            for _ in 0..<2 {
+                XCTAssertEqual(RecordingVisibility.onHide(recording: recording, stopping: true), .finishAndSuspend)
             }
         }
     }

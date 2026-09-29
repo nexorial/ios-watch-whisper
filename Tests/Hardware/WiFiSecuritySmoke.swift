@@ -16,7 +16,8 @@ struct WiFiSecuritySmoke {
         // Production TLS/pairing/session implementation, isolated credentials and
         // a demo controller: this test cannot operate Codex or send user messages.
         let playback = TestPlayback()
-        let host = WiFiHost(controller: AgentController(demo: true), demo: false, preferences: preferences,
+        let controller = AgentController(demo: true)
+        let host = WiFiHost(controller: controller, demo: false, preferences: preferences,
                             accountPrefix: prefix, port: 8767, audioOverride: playback)
         defer { host.shutdown(); try? KeychainStore.delete(prefix + id); preferences.removePersistentDomain(forName: suite) }
         let client = try PinnedHTTPSClient(host: address, port: 8767, fingerprint: identity.fingerprint)
@@ -54,6 +55,8 @@ struct WiFiSecuritySmoke {
         guard let data = reply.packet.flatMap({ Data(base64Encoded: $0) }) else { throw Failure("Signed acknowledgement") }
         let (_, sequence) = try Wire.decodeStatus(data, key: key, challenge: challenge)
         try require(sequence == 1, "Authenticated heartbeat")
+        try require(reply.focusedThreadTitle == L10n.t("Demo thread"), "Authenticated status carries the focused thread title")
+        try require(try await client.request("v1/hello").focusedThreadTitle == nil, "Discovery never discloses a thread title")
         try require(try await client.request("v1/command", command).packet == nil, "Replay rejected")
         // Exercise real authenticated commands/audio against a demo controller
         // and in-memory sample counter: no audio device or other app is touched.
@@ -77,29 +80,34 @@ struct WiFiSecuritySmoke {
             try require(result.status == "ok", "Authenticated audio accepted")
             offset += UInt32(block.count)
         }
+        try require(playback.drains == 0 && controller.isRecording, "A speech pause must not end tap recording")
+        // Simulate a system interruption: all locally queued audio above is
+        // delivered, then the receiver preserves it through an explicit finish.
+        let interrupted = Task { @MainActor in try await send(.finishReceivedAudio, 3) }
         for _ in 0..<20 {
             if playback.drains > 0 { break }
             try await Task.sleep(nanoseconds: 10_000_000)
         }
-        try require(playback.drains == 1, "Silence starts exactly one finalization")
-        try require(try await send(.cancelDictation, 3) == .transcribing, "Cleanup cancel preserves draining transcript")
+        try require(playback.drains == 1, "Interruption starts exactly one finalization")
+        try require(try await send(.cancelDictation, 4) == .transcribing, "Cleanup cancel preserves draining transcript")
         let received = playback.receivedSamples
         audioSequence += 1
         let late = try AudioWire.encode(samples: [2000], stream: 2, sequence: audioSequence, offset: offset, key: key, challenge: challenge)
         try require(try await client.request("v1/audio", WiFiRequest(id: id, packets: [late.base64EncodedString()])).status == "ok", "Late audio validated")
         try require(playback.receivedSamples == received, "Late audio never reaches dictation")
         playback.completeDrain()
+        try require(try await interrupted.value == .ready, "Interrupted audio was finalized")
         for _ in 0..<20 {
             if playback.stops > 0 { break }
             try await Task.sleep(nanoseconds: 10_000_000)
         }
-        try require(try await send(.heartbeat, 4) == .ready, "Automatic stop acknowledged")
-        try require(try await send(.finishDictation, 5) == .ready && playback.drains == 1, "Late release is idempotent")
-        try require(try await send(.cancelDictation, 6) == .ready && playback.drains == 1, "Late cleanup is idempotent")
-        try require(try await send(.beginDictation, 7) == .listening, "New recording starts after finalization")
-        let end = try AudioWire.encode(samples: [], stream: 7, sequence: 1, offset: 0, ended: true, key: key, challenge: challenge)
+        try require(try await send(.heartbeat, 5) == .ready, "Explicit stop acknowledged")
+        try require(try await send(.finishDictation, 6) == .ready && playback.drains == 1, "Late stop is idempotent")
+        try require(try await send(.cancelDictation, 7) == .ready && playback.drains == 1, "Late cleanup is idempotent")
+        try require(try await send(.beginDictation, 8) == .listening, "New recording starts after finalization")
+        let end = try AudioWire.encode(samples: [], stream: 8, sequence: 1, offset: 0, ended: true, key: key, challenge: challenge)
         try require(try await client.request("v1/audio", WiFiRequest(id: id, packets: [end.base64EncodedString()])).status == "ok", "New stream accepts its end marker")
-        try require(try await send(.finishDictation, 8) == .ready && playback.drains == 2, "Manual release still finalizes normally")
+        try require(try await send(.finishDictation, 9) == .ready && playback.drains == 2, "Manual stop still finalizes normally")
         host.refreshNetwork()
         var refreshed = false
         for _ in 0..<20 {
@@ -163,7 +171,7 @@ struct WiFiSecuritySmoke {
         try await Task.sleep(nanoseconds: 100_000_000)
         try require(!recovering.serviceReady, "Shutdown never restarts a pending recovery")
         print("PASS: 8 rapid refresh cycles, duplicate receiver exclusion, pairing readiness, real EADDRINUSE and automatic recovery, repeated shutdown")
-        print("PASS: pinned HTTPS, pairing approval, ticket binding, authenticated session, replay rejection, silence stop, late cancel/release/audio protection, new stream and manual stop, network refresh/reconnect, wrong-pin rejection, revocation")
+        print("PASS: pinned HTTPS, pairing approval, ticket binding, authenticated session, replay rejection, pause continuity, interruption finalization, late cancel/stop/audio protection, new stream and manual stop, network refresh/reconnect, wrong-pin rejection, revocation")
     }
     @MainActor static func waitForReady(_ host: WiFiHost) async throws {
         for _ in 0..<160 {

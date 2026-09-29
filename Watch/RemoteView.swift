@@ -5,8 +5,6 @@ import MicodexCore
 struct RemoteView: View {
     @ObservedObject var connection: WatchLink
     @Binding var showingConnection: Bool
-    @State private var gesture = TalkGesture()
-    @State private var fingerDown = false
     @State private var crown = 0.0
     @State private var previousCrownOffset = 0.0
     #if DEBUG
@@ -27,7 +25,10 @@ struct RemoteView: View {
         VStack(spacing: 6) {
             HStack(spacing: 5) {
                 Circle().fill(connection.demo ? Color.orange : MicodexStyle.accent).frame(width: 4, height: 4)
-                Text(L10n.t("Micodex")).font(.system(size: 13, weight: .semibold, design: .rounded))
+                Text(connection.focusedThreadTitle ?? L10n.t("No active thread"))
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .lineLimit(2).truncationMode(.tail)
+                    .accessibilityIdentifier("remote.thread")
                 Spacer()
                 Button {
                     stop(); showingConnection = true
@@ -36,44 +37,30 @@ struct RemoteView: View {
                         .frame(width: 44, height: 32).contentShape(Rectangle())
                 }
                 .buttonStyle(.plain).accessibilityLabel(L10n.t("Connection settings"))
-            }.foregroundStyle(.secondary).frame(height: 26)
+            }.foregroundStyle(.secondary).frame(height: 32)
+            Button {
+                if talking { stop() } else { connection.send(.beginDictation) }
+            } label: {
             VStack(spacing: 7) {
-                Image(systemName: connection.stopping ? "ellipsis" : (talking ? (gesture.state == .locked ? "lock.fill" : "waveform") : "mic.fill"))
+                Image(systemName: connection.stopping ? "ellipsis" : (talking ? "waveform" : "mic.fill"))
                     .font(.system(size: geometry.size.height < 180 ? 24 : 30, weight: .medium))
-                Text(connection.stopping ? L10n.t("Transcribing…") : (talking ? (gesture.state == .locked ? L10n.t("Tap to stop") : L10n.t("Release to stop")) : L10n.t("Hold to talk")))
+                Text(connection.stopping ? L10n.t("Transcribing…") : (talking ? (connection.microphoneReady ? L10n.t("Speak now") : L10n.t("Starting microphone…")) : L10n.t("Tap to talk")))
                     .font(.system(size: 13, weight: .semibold)).lineLimit(1).minimumScaleFactor(0.8)
+                if talking {
+                    Text(L10n.t("Tap to stop")).font(.system(size: 11))
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .foregroundStyle(talking ? MicodexStyle.ink : MicodexStyle.accent)
             .background(talking ? MicodexStyle.accent : MicodexStyle.accent.opacity(0.15), in: RoundedRectangle(cornerRadius: 28))
             .contentShape(RoundedRectangle(cornerRadius: 28))
-            .gesture(DragGesture(minimumDistance: 0)
-                .onChanged { value in
-                    guard connection.phase != .transcribing else { return }
-                    if !fingerDown {
-                        fingerDown = true
-                        if let action = gesture.touchDown(at: ProcessInfo.processInfo.systemUptime) { connection.send(action) }
-                    }
-                    if gesture.drag(right: value.translation.width) {
-                        connection.setRecordingLocked(true); WKInterfaceDevice.current().play(.click)
-                    }
-                }
-                .onEnded { _ in
-                    guard fingerDown else { return }; fingerDown = false
-                    if let action = gesture.release(at: ProcessInfo.processInfo.systemUptime) { connection.send(action) }
-                    connection.setRecordingLocked(gesture.state == .locked)
-                })
+            }
+            .buttonStyle(.plain)
+            .disabled(connection.stopping || connection.phase == .transcribing)
+            .accessibilityIdentifier("remote.record")
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(talking ? L10n.t("Stop Dictation") : L10n.t("Start dictation with the Watch microphone"))
-            .accessibilityHint(connection.recordingLocked ? L10n.t("Locked recording continues with the screen off, for up to two minutes") : L10n.t("Tap or swipe right to lock recording"))
-            .accessibilityAddTraits(.isButton)
-            .accessibilityAction {
-                if talking { stop() }
-                else {
-                    _ = gesture.touchDown(at: 0); _ = gesture.drag(right: 44); connection.send(.beginDictation)
-                    connection.setRecordingLocked(true)
-                }
-            }
+            .accessibilityHint(L10n.t("Tap once to record, then tap again to stop. Recording continues with the screen off, for up to two minutes."))
             HStack(spacing: 8) {
                 Button { stop() } label: {
                     Image(systemName: "stop.fill").font(.system(size: 13))
@@ -121,30 +108,26 @@ struct RemoteView: View {
             ConnectionTrace.record("crown", crownDiagnostics)
             #endif
         }
-        .onChange(of: connection.phase) { gesture.hostChanged($0) }
         .onAppear {
             crownFocused = true
-            if connection.recordingLocked { gesture.restoreLockedRecording() }
         }
         .onDisappear {
             accumulator.reset()
-            if !connection.recordingLocked { stop() }
-            fingerDown = false; gesture.reset()
         }
     }
     private var needsAttention: Bool {
-        [.permissionRequired, .targetInactive, .unavailable, .failed].contains(connection.phase)
+        connection.recordingNotice != nil || [.permissionRequired, .targetInactive, .unavailable, .failed].contains(connection.phase)
     }
 
     private var footer: String {
         if connection.demo { return L10n.t("Demo · No Mac connection") }
         if connection.stopping { return L10n.t("Finishing audio…") }
-        if talking { return gesture.state == .locked ? connection.microphoneLevel : L10n.t("Swipe right to lock") }
+        if let notice = connection.recordingNotice { return notice }
+        if talking { return connection.microphoneLevel }
         return connection.phase == .ready ? scrollHint : connection.phase.caption
     }
 
     private func stop() {
-        let action = gesture.stop()
-        if action != nil || connection.phase == .listening { connection.send(.finishDictation) }
+        if connection.recordingRequested || connection.phase == .listening { connection.send(.finishDictation) }
     }
 }

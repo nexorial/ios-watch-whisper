@@ -11,9 +11,9 @@ Micodex is a free, open-source native Watch remote and Mac receiver. Turn the Di
 ## What it does
 
 - **Crown scrolling:** scroll the Codex conversation body, with faster movement as you turn faster.
-- **Watch dictation:** hold to talk, tap to toggle, or swipe right to lock recording. Release or Stop ends capture; about two seconds of silence after speech also stops it. Recordings are limited to two minutes.
+- **Watch dictation:** tap once to start, feel two taps when the microphone is capturing, then tap again to stop. Pauses do not end capture. The active Mac thread name appears above the recording button. Recordings are limited to two minutes.
 - **Deliberate sending:** transcription stays in the editor. Enter is a separate action; Micodex does not automatically send your words.
-- **Private local connection:** pinned HTTPS over your local network, explicit pairing approval, authenticated commands, and replay protection. Bluetooth is an optional fallback.
+- **Private local connection:** pinned HTTPS over your local network, explicit pairing approval, authenticated commands, and replay protection.
 - **Native interface:** SwiftUI, bright purple controls, and independent English / Simplified Chinese localization on each device.
 
 Micodex routes audio to **Codex's own dictation**. It does not include a transcription model, call a transcription API, or store recordings. Codex may send audio to its own services under its own settings and policies. Micodex is an independent project, unaffiliated with OpenAI or Apple.
@@ -23,7 +23,7 @@ Micodex routes audio to **Codex's own dictation**. It does not include a transcr
 | Component | Requirement |
 | --- | --- |
 | Apple Watch | watchOS 9 or later; a physical Watch for microphone and wireless testing |
-| Mac | macOS 15 or later for the recommended Wi-Fi connection; macOS 13+ supports the experimental Bluetooth path |
+| Mac | macOS 15 or later for the Wi-Fi connection |
 | Codex | The Mac desktop app, with dictation available and microphone permission enabled |
 | Audio | [BlackHole 2ch](https://github.com/ExistentialAudio/BlackHole), installed separately, for Watch dictation |
 | Network | Watch and Mac on a local network that allows devices to reach each other |
@@ -67,7 +67,7 @@ Once the first release is approved, download **Micodex – Watch Remote** from t
 3. **Approve pairing.** Click **Allow Wi-Fi Watch** on the Mac. Compare the six-digit code on both devices, then click **Codes Match — Allow**. Your devices reconnect using their saved pairing.
 4. **Allow control.** Grant Micodex Accessibility access in macOS System Settings. Open a Codex task and turn the Crown to scroll the conversation.
 5. **Enable Watch dictation.** Install BlackHole 2ch, use the Mac receiver's audio controls to select it as the dictation input, and allow the Watch microphone when asked. Codex must use BlackHole or the system default input. See the [audio guide](docs/WATCH-AUDIO.md).
-6. **Talk, check, send.** Hold to talk; wait until the Watch says it is recording. Release, wait for transcription, check the text on your Mac, and tap Enter to send.
+6. **Talk, check, send.** Tap to talk; two haptic taps and “Speak now” confirm that the Watch microphone is capturing. Tap again to stop, wait for transcription, check the text on your Mac, and tap Enter to send.
 
 Changing the default input also affects other apps that use it. Switch back to your usual microphone when finished. Location permission is optional and is used only to display the Wi-Fi name; Micodex does not read or store location coordinates.
 
@@ -141,7 +141,7 @@ The developer Watch installer can preconfigure your own Mac's public certificate
 | Crown moves the wrong area | Open one Codex task; close side editors, browser, and terminal panels. Codex UI changes can affect Accessibility matching. |
 | Enter does nothing | Stop recording, wait for transcription, ensure the editor is nonempty and the chosen target is foreground. |
 
-Locked recording uses watchOS background audio, but the system can dim the display or interrupt recording. Screen-off continuity, release timing, and transcription quality need real-device checks; automated tests do not establish those outcomes. Bluetooth audio and Claude scrolling/Enter are experimental; Claude dictation is disabled. Side-button remapping, automatic sending, remote wake, and internet relay are not supported.
+Recording uses watchOS background audio, but the system can dim the display or interrupt recording. Screen-off continuity, tap-to-stop timing, and transcription quality need real-device checks; automated tests do not establish those outcomes. Claude scrolling/Enter is experimental; Claude dictation is disabled. Side-button remapping, automatic sending, remote wake, and internet relay are not supported. Siri can still interrupt recording: if it activates while you speak, disable Raise to Speak and voice activation in Watch Settings → Siri. Micodex cannot change these system preferences. A microphone interruption finalizes buffered audio without automatically sending a message.
 
 ## Code map
 

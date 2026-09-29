@@ -1,0 +1,15 @@
+{
+  "No active thread": "暂无活动线程",
+  "Tap to talk": "点击说话",
+  "Speak now": "请开始说话",
+  "Starting microphone…": "正在启动麦克风…",
+  "Back": "返回",
+  "Demo thread": "演示线程",
+  "Expanded": "已展开",
+  "Collapsed": "已收起",
+  "Tap once to record, then tap again to stop. Recording continues with the screen off, for up to two minutes.": "点击开始录音，再次点击结束。熄屏后仍会继续录音，最长两分钟。",
+  "Tap once to record and tap again to stop. Recording continues with your wrist down, for up to 2 minutes. Transcription does not send a message. The screen may dim.": "点击开始录音，再次点击结束。放下手腕后仍会继续录音，最长两分钟。转写不会发送消息，屏幕可能会变暗。",
+  "If Siri opens while you speak, turn off Raise to Speak and Listen for Siri in Watch Settings → Siri. Micodex cannot change these system settings.": "如果说话时 Siri 被唤醒，请在手表「设置 → Siri」中关闭「抬腕对话」和 Siri 语音唤醒。Micodex 无法更改这些系统设置。",
+  "Recording interrupted by the system. Review the captured audio on your Mac, then tap to record again.": "录音被系统中断。请在 Mac 上检查已录内容，再点击开始新的录音。",
+  "Recording reached the 2-minute limit.": "录音已达到两分钟上限。"
+}

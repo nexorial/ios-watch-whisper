@@ -11,7 +11,10 @@ final class WatchWiFiConnection: ObservableObject {
     @Published var pairingCode: String?
     @Published var microphoneLevel = ""
     @Published private(set) var stopping = false
-    @Published private(set) var recordingLocked = false
+    @Published private(set) var microphoneReady = false
+    @Published private(set) var focusedThreadTitle: String?
+    @Published private(set) var recordingNotice: String?
+    private var startHaptics: Task<Void, Never>?
     private let client: PinnedHTTPSClient
     private let account: String
     private let id: UUID
@@ -105,6 +108,7 @@ final class WatchWiFiConnection: ObservableObject {
                     let (phase, sequence) = try Wire.decodeStatus(data, key: key, challenge: challenge)
                     guard sequence == 1 else { throw WireError.replay }
                     self.connected = true; self.phase = phase; self.status = L10n.t("Connected to %@ over Wi-Fi", self.macName)
+                    self.focusedThreadTitle = acknowledgement.focusedThreadTitle
                     ConnectionTrace.record("wifi", "authenticated HTTPS heartbeat received")
                 } catch {
                     guard self.epoch == token, !Task.isCancelled else { return }
@@ -119,7 +123,7 @@ final class WatchWiFiConnection: ObservableObject {
         visible = value
         if value { active = true; suspendAfterFinish = false; connect(); return }
         queue.removeAll { $0.0 == .scroll || $0.0 == .heartbeat }
-        switch RecordingVisibility.onHide(locked: recordingLocked, recording: recordingRequested, stopping: stopping) {
+        switch RecordingVisibility.onHide(recording: recordingRequested, stopping: stopping) {
         case .stayActive:
             active = true // An actual foreground-started audio recording supplies background runtime.
         case .finishAndSuspend:
@@ -129,7 +133,6 @@ final class WatchWiFiConnection: ObservableObject {
             reset(preserveReceivedAudio: false); status = L10n.t("Raise your wrist to reconnect over Wi-Fi.")
         }
     }
-    func setRecordingLocked(_ locked: Bool) { recordingLocked = locked && recordingRequested && !stopping }
     func disconnect() { visible = false; reset(preserveReceivedAudio: true) }
     func forget() {
         reset(preserveReceivedAudio: true); try? KeychainStore.delete(account)
@@ -138,17 +141,17 @@ final class WatchWiFiConnection: ObservableObject {
     func send(_ action: RemoteAction, value: Int16 = 0) {
         guard connected else { return }
         if action == .beginDictation {
-            guard visible, !recordingRequested, !stopping else { return }
-            clearAudio(); recordingRequested = true; status = L10n.t("Starting the Watch microphone…")
+            guard visible, !recordingRequested, !stopping, phase != .transcribing else { return }
+            clearAudio(); recordingNotice = nil; recordingRequested = true; status = L10n.t("Starting the Watch microphone…")
             microphoneLevel = L10n.t("Starting the Watch microphone…")
             let token = epoch
             micTask = Task { [weak self] in
                 guard let self else { return }
                 do {
-                    try await self.microphone.start(onSilence: { [weak self] reason in
+                    try await self.microphone.start(onLimit: { [weak self] in
                         self?.send(.finishDictation)
-                        self?.microphoneLevel = reason == .quietAfterSound ? L10n.t("Recording stopped after 2 seconds of silence") : L10n.t("No sound detected. Recording stopped.")
-                    }, onFailure: { [weak self] in self?.fail($0) }) { [weak self] in self?.capture($0) }
+                        self?.recordingNotice = L10n.t("Recording reached the 2-minute limit.")
+                    }, onFailure: { [weak self] in self?.microphoneInterrupted($0) }) { [weak self] in self?.capture($0) }
                     try self.check(token)
                     guard self.recordingRequested else { self.microphone.stop(); return }
                     self.enqueue(.beginDictation)
@@ -162,8 +165,8 @@ final class WatchWiFiConnection: ObservableObject {
             guard recordingRequested else { enqueue(action); return }
             guard !finishing else { return }
             suspendAfterFinish = !visible
-            microphone.stop(); finishing = true
-            recordingLocked = false
+            microphone.stop(); startHaptics?.cancel(); microphoneReady = false; finishing = true
+            WKInterfaceDevice.current().play(.stop)
             stopping = true; phase = .transcribing
             status = L10n.t("Watch recording stopped. Sending the remaining audio…")
             microphoneLevel = L10n.t("Recording stopped")
@@ -207,15 +210,16 @@ final class WatchWiFiConnection: ObservableObject {
                     }
                     let (phase, returnedSequence) = try Wire.decodeStatus(data, key: key, challenge: challenge)
                     guard sequence == returnedSequence else { throw WireError.replay }
+                    self.focusedThreadTitle = reply.focusedThreadTitle
                     // A late begin/heartbeat acknowledgement cannot put the UI
-                    // back into listening after the finger has already lifted.
+                    // back into listening after the user has already tapped Stop.
                     self.phase = self.stopping && phase == .listening ? .transcribing : phase
                     if !(self.stopping && phase == .listening) { self.status = reply.localizedMessage ?? phase.caption }
                     if action == .beginDictation {
-                        if phase == .listening { self.audioAccepted = true; self.drainAudio(); WKInterfaceDevice.current().play(.start) }
+                        if phase == .listening { self.audioAccepted = true; self.drainAudio() }
                         else { self.clearAudio() }
                     } else if action == .finishDictation || action == .cancelDictation {
-                        self.clearAudio(); WKInterfaceDevice.current().play(.stop)
+                        self.clearAudio()
                         if self.suspendAfterFinish && !self.visible {
                             self.reset(preserveReceivedAudio: false)
                             self.status = L10n.t("Sent to your Mac for transcription. Raise your wrist to reconnect."); return
@@ -231,9 +235,20 @@ final class WatchWiFiConnection: ObservableObject {
     }
     private func capture(_ chunk: [Int16]) {
         guard recordingRequested, !finishing else { return }
+        if !microphoneReady {
+            // Cue actual local capture, independently of the Mac's network/AX delay.
+            microphoneReady = true
+            startHaptics = Task { [weak self] in
+                guard !Task.isCancelled, self?.microphoneReady == true, self?.stopping == false else { return }
+                WKInterfaceDevice.current().play(.click)
+                do { try await Task.sleep(nanoseconds: 200_000_000) } catch { return }
+                guard let self, self.microphoneReady, !self.stopping else { return }
+                WKInterfaceDevice.current().play(.click)
+            }
+        }
         if visible { var level = AudioLevel(); level.append(chunk); microphoneLevel = level.caption }
         guard Int(audioOffset) + samples.count + chunk.count <= 1_920_000,
-              samples.count + chunk.count <= 32_000, audioPackets.count < 80 else { fail(L10n.t("Audio transfer fell behind or recording reached its limit.")); return }
+              samples.count + chunk.count <= 32_000, audioPackets.count < 160 else { fail(L10n.t("Audio transfer fell behind or recording reached its limit.")); return }
         samples.append(contentsOf: chunk); packAudio(); drainAudio()
     }
     private func packAudio(ending: Bool = false) {
@@ -279,11 +294,19 @@ final class WatchWiFiConnection: ObservableObject {
         }
     }
     private func clearAudio() {
+        startHaptics?.cancel(); startHaptics = nil; microphoneReady = false
         audioEpoch = UUID()
         micTask?.cancel(); micTask = nil; microphone.stop(); audioTask?.cancel(); audioTask = nil
         samples = []; audioPackets = []; stream = 0; audioSequence = 0; audioOffset = 0
         recordingRequested = false; finishing = false; audioAccepted = false; stopping = false
-        recordingLocked = false
+    }
+    private func microphoneInterrupted(_ message: String) {
+        guard recordingRequested, !stopping else { return }
+        // Finalize buffered Watch audio as well as audio already on the Mac.
+        // Do not restart capture behind Siri or silently continue after a gap.
+        send(.finishDictation)
+        recordingNotice = message
+        ConnectionTrace.record("microphone", message)
     }
     private func reset(preserveReceivedAudio: Bool) {
         if preserveReceivedAudio, connected, let key, let challenge, recordingRequested || audioAccepted || stopping {
@@ -294,7 +317,7 @@ final class WatchWiFiConnection: ObservableObject {
             }
         }
         epoch = UUID(); connecting?.cancel(); connecting = nil; controlTask?.cancel(); controlTask = nil
-        clearAudio(); queue = []; challenge = nil; connected = false; phase = .ready
+        clearAudio(); queue = []; challenge = nil; connected = false; phase = .ready; focusedThreadTitle = nil
         active = visible; suspendAfterFinish = false
     }
     private func fail(_ message: String) {

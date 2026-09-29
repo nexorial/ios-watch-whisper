@@ -68,35 +68,6 @@ final class MicodexCoreTests: XCTestCase {
         try gate.accept(Command(.heartbeat, sequence: 11))
         XCTAssertThrowsError(try gate.accept(Command(.enter, sequence: 10)))
     }
-    func testHoldStartsOnceAndReleaseFinishesOnce() {
-        var gesture = TalkGesture()
-        XCTAssertEqual(gesture.touchDown(at: 1), .beginDictation)
-        XCTAssertNil(gesture.touchDown(at: 1.1))
-        XCTAssertEqual(gesture.release(at: 3), .finishDictation)
-        XCTAssertNil(gesture.release(at: 4)); XCTAssertEqual(gesture.state, .idle)
-    }
-    func testShortTapLatchesAndSecondTapStopsWithoutRestarting() {
-        var gesture = TalkGesture()
-        XCTAssertEqual(gesture.touchDown(at: 0), .beginDictation)
-        XCTAssertNil(gesture.release(at: 0.1)); XCTAssertEqual(gesture.state, .locked)
-        XCTAssertEqual(gesture.touchDown(at: 5), .finishDictation)
-        XCTAssertNil(gesture.release(at: 5.1)); XCTAssertEqual(gesture.state, .idle)
-    }
-    func testRightDragLocksAndReleaseDoesNotStop() {
-        var gesture = TalkGesture()
-        _ = gesture.touchDown(at: 0)
-        XCTAssertFalse(gesture.drag(right: 30)); XCTAssertFalse(gesture.drag(right: -100))
-        XCTAssertTrue(gesture.drag(right: 50)); XCTAssertFalse(gesture.drag(right: 70))
-        XCTAssertNil(gesture.release(at: 8)); XCTAssertEqual(gesture.state, .locked)
-        XCTAssertEqual(gesture.stop(), .finishDictation); XCTAssertNil(gesture.stop())
-    }
-    func testBackgroundOrDisconnectResetsGesture() {
-        var gesture = TalkGesture()
-        _ = gesture.touchDown(at: 0); _ = gesture.drag(right: 50)
-        XCTAssertEqual(gesture.stop(cancel: true), .cancelDictation)
-        gesture.reset()
-        XCTAssertNil(gesture.release(at: 20)); XCTAssertEqual(gesture.state, .idle)
-    }
     func testCrownAccumulatesSmallMovesAndRejectsWrapAndInvalidInput() {
         var crown = CrownAccumulator()
         XCTAssertEqual(crown.add(0.001, velocity: 0.2), 0)

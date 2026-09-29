@@ -36,8 +36,6 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Connect your approved Apple Watch and Mac for scrolling, dictation, and Enter commands.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Show the current Wi-Fi name to help you check your Mac and Watch connection. Micodex does not collect location coordinates.</string>
 	<key>NSMicrophoneUsageDescription</key>

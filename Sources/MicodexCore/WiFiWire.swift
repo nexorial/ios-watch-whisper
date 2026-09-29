@@ -22,14 +22,17 @@ public struct WiFiReply: Codable, Sendable {
     public var key: String?
     public var challenge: String?
     public var packet: String?
+    /// Only populated on authenticated command replies, never discovery/pairing.
+    public var focusedThreadTitle: String?
     public init(_ status: String, message: String? = nil, name: String? = nil, key: String? = nil,
-                challenge: String? = nil, packet: String? = nil) {
+                challenge: String? = nil, packet: String? = nil, focusedThreadTitle: String? = nil) {
         self.status = status; self.message = message; self.name = name; self.key = key
         self.challenge = challenge; self.packet = packet
+        self.focusedThreadTitle = focusedThreadTitle
     }
     public init(_ status: String, message: LocalizedMessage, name: String? = nil, key: String? = nil,
-                challenge: String? = nil, packet: String? = nil) {
-        self.init(status, message: message.localizedString, name: name, key: key, challenge: challenge, packet: packet)
+                challenge: String? = nil, packet: String? = nil, focusedThreadTitle: String? = nil) {
+        self.init(status, message: message.localizedString, name: name, key: key, challenge: challenge, packet: packet, focusedThreadTitle: focusedThreadTitle)
         messageKey = message.key; messageArguments = message.arguments
     }
     public var localizedMessage: String? { renderedMessage() }

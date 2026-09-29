@@ -30,6 +30,7 @@
 "Audio transfer timed out. Your Mac was asked to keep the audio it received." = "Audio transfer timed out. Your Mac was asked to keep the audio it received.";
 "Audio was not received." = "Audio was not received.";
 "Authenticating your Mac…" = "Authenticating your Mac…";
+"Back" = "Back";
 "Back to Remote" = "Back to Remote";
 "BlackHole 2ch is not installed. The Mac microphone will not be used." = "BlackHole 2ch is not installed. The Mac microphone will not be used.";
 "BlackHole 2ch receives audio from your watch. When set as the dictation input, Codex and other apps using the default microphone will use it." = "BlackHole 2ch receives audio from your watch. When set as the dictation input, Codex and other apps using the default microphone will use it.";
@@ -59,6 +60,7 @@
 "Codes Match — Allow" = "Codes Match — Allow";
 "Codex is still recording or transcribing. Wait before sending." = "Codex is still recording or transcribing. Wait before sending.";
 "Codex shows Retry dictation; no transcription was confirmed. Retry or clear the error on your Mac." = "Codex shows Retry dictation; no transcription was confirmed. Retry or clear the error on your Mac.";
+"Collapsed" = "Collapsed";
 "Confirming the previous dictation has stopped. Wait before starting again." = "Confirming the previous dictation has stopped. Wait before starting again.";
 "Connect" = "Connect";
 "Connect Mac to your local network first." = "Connect Mac to your local network first.";
@@ -110,6 +112,7 @@
 "Demo mode · Mac control is off" = "Demo mode · Mac control is off";
 "Demo mode · No Bluetooth connection" = "Demo mode · No Bluetooth connection";
 "Demo mode: other apps will not be controlled." = "Demo mode: other apps will not be controlled.";
+"Demo thread" = "Demo thread";
 "Demo · No Mac connection" = "Demo · No Mac connection";
 "Demo: Enter pressed" = "Demo: Enter pressed";
 "Demo: scrolling down" = "Demo: scrolling down";
@@ -127,6 +130,7 @@
 "Enter this address in “Mac IP Address” on your watch." = "Enter this address in “Mac IP Address” on your watch.";
 "Enter to send" = "Enter to send";
 "Enter was sent to the task input. Check Codex for the task status." = "Enter was sent to the task input. Check Codex for the task status.";
+"Expanded" = "Expanded";
 "Finish dictation before changing the input device." = "Finish dictation before changing the input device.";
 "Finish the current dictation first" = "Finish the current dictation first";
 "Finishing audio…" = "Finishing audio…";
@@ -137,6 +141,7 @@
 "Hide connection settings" = "Hide connection settings";
 "Hold to talk" = "Hold to talk";
 "IP copied" = "IP copied";
+"If Siri opens while you speak, turn off Raise to Speak and Listen for Siri in Watch Settings → Siri. Micodex cannot change these system settings." = "If Siri opens while you speak, turn off Raise to Speak and Listen for Siri in Watch Settings → Siri. Micodex cannot change these system settings.";
 "Install the BlackHole 2ch virtual microphone" = "Install the BlackHole 2ch virtual microphone";
 "Invalid Mac address: %@" = "Invalid Mac address: %@";
 "Invalid pairing request format" = "Invalid pairing request format";
@@ -168,6 +173,7 @@
 "Name unavailable" = "Name unavailable";
 "No Watch recording yet" = "No Watch recording yet";
 "No Wi-Fi connection, or the system did not provide its name." = "No Wi-Fi connection, or the system did not provide its name.";
+"No active thread" = "No active thread";
 "No error code was provided by the system" = "No error code was provided by the system";
 "No local network" = "No local network";
 "No network connection on Watch. Check Settings → Wi-Fi and use the same local network as your Mac." = "No network connection on Watch. Check Settings → Wi-Fi and use the same local network as your Mac.";
@@ -206,7 +212,9 @@
 "Receiver unavailable · Retrying automatically" = "Receiver unavailable · Retrying automatically";
 "Reconnect Network" = "Reconnect Network";
 "Reconnecting to the local network…" = "Reconnecting to the local network…";
+"Recording interrupted by the system. Review the captured audio on your Mac, then tap to record again." = "Recording interrupted by the system. Review the captured audio on your Mac, then tap to record again.";
 "Recording reached its limit or Bluetooth fell behind. Your Mac was asked to keep the audio it received." = "Recording reached its limit or Bluetooth fell behind. Your Mac was asked to keep the audio it received.";
+"Recording reached the 2-minute limit." = "Recording reached the 2-minute limit.";
 "Recording stopped" = "Recording stopped";
 "Recording stopped after 2 seconds of silence" = "Recording stopped after 2 seconds of silence";
 "Recording stopped. Wait for Codex to transcribe, review the text, then tap Enter on your Watch." = "Recording stopped. Wait for Codex to transcribe, review the text, then tap Enter on your Watch.";
@@ -232,9 +240,11 @@
 "Show audio settings" = "Show audio settings";
 "Show connection settings" = "Show connection settings";
 "Silent" = "Silent";
+"Speak now" = "Speak now";
 "Start Demo" = "Start Demo";
 "Start dictation with the Watch microphone" = "Start dictation with the Watch microphone";
 "Starting Bluetooth" = "Starting Bluetooth";
+"Starting microphone…" = "Starting microphone…";
 "Starting the Watch microphone…" = "Starting the Watch microphone…";
 "Starting the receiver…" = "Starting the receiver…";
 "Stop" = "Stop";
@@ -246,8 +256,11 @@
 "Swipe right to lock" = "Swipe right to lock";
 "Swipe right to lock recording and keep recording with your wrist down. It stops after about 2 seconds of silence after speech, or at 2 minutes, and transcribes without sending. Enable Always On in Settings → Display & Brightness; the screen will still dim." = "Swipe right to lock recording and keep recording with your wrist down. It stops after about 2 seconds of silence after speech, or at 2 minutes, and transcribes without sending. Enable Always On in Settings → Display & Brightness; the screen will still dim.";
 "Swipe right to lock recording. It stops after about 2 seconds of silence after speech, or at 2 minutes. Speech is transcribed without sending." = "Swipe right to lock recording. It stops after about 2 seconds of silence after speech, or at 2 minutes. Speech is transcribed without sending.";
+"Tap once to record and tap again to stop. Recording continues with your wrist down, for up to 2 minutes. Transcription does not send a message. The screen may dim." = "Tap once to record and tap again to stop. Recording continues with your wrist down, for up to 2 minutes. Transcription does not send a message. The screen may dim.";
+"Tap once to record, then tap again to stop. Recording continues with the screen off, for up to two minutes." = "Tap once to record, then tap again to stop. Recording continues with the screen off, for up to two minutes.";
 "Tap or swipe right to lock recording" = "Tap or swipe right to lock recording";
 "Tap to stop" = "Tap to stop";
+"Tap to talk" = "Tap to talk";
 "The Mac Wi-Fi service is unavailable." = "The Mac Wi-Fi service is unavailable.";
 "The Mac is handling another pairing request" = "The Mac is handling another pairing request";
 "The Mac receiver port is in use. Close other Micodex or older Watch Whisper instances. Keep the Watch IP and pairing; connection will recover when the port is free." = "The Mac receiver port is in use. Close other Micodex or older Watch Whisper instances. Keep the Watch IP and pairing; connection will recover when the port is free.";

@@ -6,8 +6,8 @@ final class WatchMicrophone {
     private var engine: AVAudioEngine?
     private var captureID: UUID?
     private var observers: [NSObjectProtocol] = []
-    private var silenceEndpoint = SilenceEndpoint()
-    func start(onSilence: @escaping (SilenceEndpoint.Reason) -> Void = { _ in }, onFailure: @escaping (String) -> Void = { _ in }, onSamples: @escaping ([Int16]) -> Void) async throws {
+    private var capturedSamples = 0
+    func start(onLimit: @escaping () -> Void = {}, onFailure: @escaping (String) -> Void = { _ in }, onSamples: @escaping ([Int16]) -> Void) async throws {
         let granted = await withCheckedContinuation { continuation in
             AVAudioSession.sharedInstance().requestRecordPermission { continuation.resume(returning: $0) }
         }
@@ -17,6 +17,10 @@ final class WatchMicrophone {
         // Speech capture needs normal input processing, not measurement mode's
         // reduced dynamics processing. Never override an OS microphone mute.
         try session.setCategory(.record, mode: .default)
+        try session.setAllowHapticsAndSystemSoundsDuringRecording(true)
+        // Ringtones/alerts can defer to capture. Siri and accepted calls still
+        // own the microphone; this preference does not disable system Siri.
+        try session.setPrefersNoInterruptionsFromSystemAlerts(true)
         try session.setActive(true)
         if #available(watchOS 10.0, *), AVAudioApplication.shared.isInputMuted {
             try? session.setActive(false)
@@ -33,13 +37,15 @@ final class WatchMicrophone {
         let converter: MicrophoneSamples
         do { converter = try MicrophoneSamples(source: source) }
         catch { try? session.setActive(false); throw MicFailure(L10n.t("The Watch audio format is unavailable.")) }
-        let id = UUID(); captureID = id; silenceEndpoint = SilenceEndpoint()
+        let id = UUID(); captureID = id; capturedSamples = 0
         observers.append(NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: session, queue: .main) { [weak self] notification in
             guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
                   raw == AVAudioSession.InterruptionType.began.rawValue else { return }
             Task { @MainActor in
                 guard self?.captureID == id else { return }
-                self?.stop(); onFailure(L10n.t("Recording was interrupted by the system. Your Mac was asked to keep the audio it received."))
+                let reason = notification.userInfo?[AVAudioSessionInterruptionReasonKey] as? UInt
+                ConnectionTrace.record("microphone", "system interruption reason=\(reason.map(String.init) ?? "unknown")")
+                self?.stop(); onFailure(L10n.t("Recording interrupted by the system. Review the captured audio on your Mac, then tap to record again."))
             }
         })
         observers.append(NotificationCenter.default.addObserver(forName: AVAudioSession.routeChangeNotification, object: session, queue: .main) { [weak self] _ in
@@ -53,11 +59,12 @@ final class WatchMicrophone {
                 let samples = try converter.convert(buffer)
                 guard !samples.isEmpty else { return }
                 Task { @MainActor in
-                    guard self?.captureID == id else { return }
-                    onSamples(samples)
                     guard let self, self.captureID == id else { return }
-                    if let reason = self.silenceEndpoint.consume(samples) {
-                        self.stop(); onSilence(reason)
+                    let count = min(samples.count, 1_920_000 - self.capturedSamples)
+                    self.capturedSamples += count
+                    onSamples(Array(samples.prefix(count)))
+                    if self.captureID == id && self.capturedSamples >= 1_920_000 {
+                        self.stop(); onLimit()
                     }
                 }
             } catch {

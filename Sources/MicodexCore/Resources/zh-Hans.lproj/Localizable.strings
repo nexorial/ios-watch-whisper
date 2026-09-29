@@ -30,6 +30,7 @@
 "Audio transfer timed out. Your Mac was asked to keep the audio it received." = "音频发送超时，已请求保留 Mac 收到的内容";
 "Audio was not received." = "音频未被接收";
 "Authenticating your Mac…" = "正在认证 Mac…";
+"Back" = "返回";
 "Back to Remote" = "返回遥控";
 "BlackHole 2ch is not installed. The Mac microphone will not be used." = "尚未安装 BlackHole 2ch；不会改用 Mac 麦克风。";
 "BlackHole 2ch receives audio from your watch. When set as the dictation input, Codex and other apps using the default microphone will use it." = "使用 BlackHole 2ch 接收手表声音。设为听写输入后，Codex 和其他使用默认麦克风的应用都会使用它。";
@@ -59,6 +60,7 @@
 "Codes Match — Allow" = "核对一致，允许";
 "Codex is still recording or transcribing. Wait before sending." = "Codex 还在收音或转写，请稍后发送。";
 "Codex shows Retry dictation; no transcription was confirmed. Retry or clear the error on your Mac." = "Codex 显示重试听写，本次未确认生成文字。请在 Mac 重试或清除错误。";
+"Collapsed" = "已收起";
 "Confirming the previous dictation has stopped. Wait before starting again." = "正在确认上一次听写已停止，请稍后再开始。";
 "Connect" = "连接";
 "Connect Mac to your local network first." = "请先连接 Mac 的局域网。";
@@ -110,6 +112,7 @@
 "Demo mode · Mac control is off" = "界面演示 · 不控制 Mac";
 "Demo mode · No Bluetooth connection" = "演示模式 · 无蓝牙连接";
 "Demo mode: other apps will not be controlled." = "演示模式：不会操作任何其他应用。";
+"Demo thread" = "演示线程";
 "Demo · No Mac connection" = "演示 · 不连接 Mac";
 "Demo: Enter pressed" = "演示：已点击 Enter";
 "Demo: scrolling down" = "演示：向下滚动";
@@ -127,6 +130,7 @@
 "Enter this address in “Mac IP Address” on your watch." = "请在手表的「Mac IP 地址」输入这里显示的地址。";
 "Enter to send" = "Enter 发送";
 "Enter was sent to the task input. Check Codex for the task status." = "已向目标输入框发送 Enter。请以 Codex 实际任务状态为准。";
+"Expanded" = "已展开";
 "Finish dictation before changing the input device." = "请先结束当前听写，再更改输入设备。";
 "Finish the current dictation first" = "请先结束当前听写";
 "Finishing audio…" = "正在传完尾音，请稍候";
@@ -137,6 +141,7 @@
 "Hide connection settings" = "收起连接设置";
 "Hold to talk" = "按住说话";
 "IP copied" = "已复制 IP";
+"If Siri opens while you speak, turn off Raise to Speak and Listen for Siri in Watch Settings → Siri. Micodex cannot change these system settings." = "如果说话时 Siri 被唤醒，请在手表「设置 → Siri」中关闭「抬腕对话」和 Siri 语音唤醒。Micodex 无法更改这些系统设置。";
 "Install the BlackHole 2ch virtual microphone" = "需要安装 BlackHole 2ch 虚拟麦克风";
 "Invalid Mac address: %@" = "Mac 地址无效：%@";
 "Invalid pairing request format" = "配对请求格式错误";
@@ -168,6 +173,7 @@
 "Name unavailable" = "名称未获取";
 "No Watch recording yet" = "尚无 Watch 录音";
 "No Wi-Fi connection, or the system did not provide its name." = "未连接 Wi-Fi，或系统未提供名称";
+"No active thread" = "暂无活动线程";
 "No error code was provided by the system" = "系统未提供错误码";
 "No local network" = "未连接局域网";
 "No network connection on Watch. Check Settings → Wi-Fi and use the same local network as your Mac." = "手表暂无可用网络。请在「设置 → Wi-Fi」核对网络，并与 Mac 连接同一局域网。";
@@ -206,7 +212,9 @@
 "Receiver unavailable · Retrying automatically" = "接收服务暂不可用 · 自动重试中";
 "Reconnect Network" = "重新连接网络";
 "Reconnecting to the local network…" = "正在重新连接局域网…";
+"Recording interrupted by the system. Review the captured audio on your Mac, then tap to record again." = "录音被系统中断。请在 Mac 上检查已录内容，再点击开始新的录音。";
 "Recording reached its limit or Bluetooth fell behind. Your Mac was asked to keep the audio it received." = "录音达到上限或蓝牙积压，已请求保留 Mac 收到的内容";
+"Recording reached the 2-minute limit." = "录音已达到两分钟上限。";
 "Recording stopped" = "收音已停止";
 "Recording stopped after 2 seconds of silence" = "安静 2 秒，已停止收音";
 "Recording stopped. Wait for Codex to transcribe, review the text, then tap Enter on your Watch." = "已停止收音，等待 Codex 转写；检查文字后在手表点 Enter。";
@@ -232,9 +240,11 @@
 "Show audio settings" = "展开音频设置";
 "Show connection settings" = "展开连接设置";
 "Silent" = "静音";
+"Speak now" = "请开始说话";
 "Start Demo" = "演示开始";
 "Start dictation with the Watch microphone" = "开始听写，使用 Watch 麦克风";
 "Starting Bluetooth" = "正在启动蓝牙";
+"Starting microphone…" = "正在启动麦克风…";
 "Starting the Watch microphone…" = "正在开启 Watch 麦克风…";
 "Starting the receiver…" = "正在启动接收服务…";
 "Stop" = "停止";
@@ -246,8 +256,11 @@
 "Swipe right to lock" = "右滑锁定";
 "Swipe right to lock recording and keep recording with your wrist down. It stops after about 2 seconds of silence after speech, or at 2 minutes, and transcribes without sending. Enable Always On in Settings → Display & Brightness; the screen will still dim." = "右滑锁定后，放下手腕仍可录音。说话后安静约 2 秒自动停止，只转写不发送，最长 2 分钟。常亮可在系统「显示与亮度 → 始终显示」中设置，屏幕仍会调暗。";
 "Swipe right to lock recording. It stops after about 2 seconds of silence after speech, or at 2 minutes. Speech is transcribed without sending." = "右滑可锁定录音；说话后安静约 2 秒自动停止。只转写，不自动发送，最长 2 分钟。";
+"Tap once to record and tap again to stop. Recording continues with your wrist down, for up to 2 minutes. Transcription does not send a message. The screen may dim." = "点击开始录音，再次点击结束。放下手腕后仍会继续录音，最长两分钟。转写不会发送消息，屏幕可能会变暗。";
+"Tap once to record, then tap again to stop. Recording continues with the screen off, for up to two minutes." = "点击开始录音，再次点击结束。熄屏后仍会继续录音，最长两分钟。";
 "Tap or swipe right to lock recording" = "短按或向右滑锁定录音";
 "Tap to stop" = "点击停止";
+"Tap to talk" = "点击说话";
 "The Mac Wi-Fi service is unavailable." = "Mac Wi-Fi 服务不可用";
 "The Mac is handling another pairing request" = "Mac 正在处理另一条配对请求";
 "The Mac receiver port is in use. Close other Micodex or older Watch Whisper instances. Keep the Watch IP and pairing; connection will recover when the port is free." = "Mac 的接收端口被占用。请关闭其他 Micodex 或旧版 Watch Whisper；无需改手表 IP 或重新配对。端口释放后会自动恢复。";

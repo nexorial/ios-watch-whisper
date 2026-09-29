@@ -21,7 +21,7 @@ open -a Micodex
 
 The tap uses this project's existing repository. The fully qualified cask name selects this project's package explicitly. Homebrew checks the release ZIP's SHA-256 and installs `Micodex.app` into Applications. The package contains Apple Silicon and Intel executables, a Developer ID signature, hardened runtime, and a stapled Apple notarization ticket.
 
-Wi-Fi setup requires **macOS 15+**. The binary also supports macOS 13+ for the experimental Bluetooth path. No compilation, personal signing team, or developer-mode setup is part of the normal Mac installation.
+Wi-Fi setup requires **macOS 15+**. No compilation, personal signing team, or developer-mode setup is part of the normal Mac installation.
 
 Without Homebrew, download the Mac ZIP from [Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest), unzip it, and drag `Micodex.app` into Applications.
 
