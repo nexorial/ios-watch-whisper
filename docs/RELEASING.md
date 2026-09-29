@@ -56,3 +56,11 @@ brew install --cask nexorial/micodex/micodex
 ```
 
 For a verification install on a development Mac, use a fresh temporary `--appdir` so the existing receiver is not overwritten. Do not run two receivers; inspect signatures and notarization independently from any physical Watch acceptance.
+
+### Published Mac release — September 29, 2026
+
+Mac **1.0 (16)** is published at [mac-v1.0-16](https://github.com/nexorial/ios-watch-whisper/releases/tag/mac-v1.0-16). The Cask uses version `1.0-16`, matching the release tag. The ZIP SHA-256 is `15d76b5e5e675a2e48f18ebd6cf1444f21c59cc36c1ecbcd468c9d68bdb13520`.
+
+The public Homebrew command was tested with a temporary app directory. Download, checksum validation and installation succeeded; the installed app retained quarantine and passed strict code-signature verification, stapled-ticket validation, and Gatekeeper assessment as **Notarized Developer ID**. Both `arm64` and `x86_64` slices were present. Cask style and online audit passed. The temporary test installation was then removed without changing the existing receiver or pairing data.
+
+This verifies Mac distribution and installation, not new physical Watch behavior. The Watch App Store release remains pending owner screenshots and review.
