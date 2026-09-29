@@ -81,7 +81,7 @@ private struct HostView: View {
                     .frame(width: 58, height: 64)
                     .background(MicodexStyle.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 20))
                 VStack(alignment: .leading, spacing: 7) {
-                    Text(controller.phase == .ready ? L10n.t("Raise your wrist. Begin.") : controller.phase.caption)
+                    Text(controller.phase == .ready ? L10n.t("Tap/Scroll on Watch app to control.") : controller.phase.caption)
                         .font(.system(size: 22, weight: .medium))
                     Text(controller.detail)
                         .font(.system(size: 12)).foregroundStyle(.secondary)

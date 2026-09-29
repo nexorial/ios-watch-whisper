@@ -204,7 +204,6 @@
 "Preparing Wi-Fi direct connection…" = "Preparing Wi-Fi direct connection…";
 "Quit Micodex" = "Quit Micodex";
 "Raise your wrist to reconnect over Wi-Fi." = "Raise your wrist to reconnect over Wi-Fi.";
-"Raise your wrist. Begin." = "Raise your wrist. Begin.";
 "Reading network name…" = "Reading network name…";
 "Ready" = "Ready";
 "Received 0.0 seconds this session" = "Received 0.0 seconds this session";
@@ -261,6 +260,7 @@
 "Tap or swipe right to lock recording" = "Tap or swipe right to lock recording";
 "Tap to stop" = "Tap to stop";
 "Tap to talk" = "Tap to talk";
+"Tap/Scroll on Watch app to control." = "Tap/Scroll on Watch app to control.";
 "The Mac Wi-Fi service is unavailable." = "The Mac Wi-Fi service is unavailable.";
 "The Mac is handling another pairing request" = "The Mac is handling another pairing request";
 "The Mac receiver port is in use. Close other Micodex or older Watch Whisper instances. Keep the Watch IP and pairing; connection will recover when the port is free." = "The Mac receiver port is in use. Close other Micodex or older Watch Whisper instances. Keep the Watch IP and pairing; connection will recover when the port is free.";

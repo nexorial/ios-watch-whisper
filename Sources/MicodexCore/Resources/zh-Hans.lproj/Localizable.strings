@@ -204,7 +204,6 @@
 "Preparing Wi-Fi direct connection…" = "正在准备 Wi-Fi 直连…";
 "Quit Micodex" = "退出 Micodex";
 "Raise your wrist to reconnect over Wi-Fi." = "抬腕后恢复 Wi-Fi 连接";
-"Raise your wrist. Begin." = "抬腕，即可开始。";
 "Reading network name…" = "正在读取网络名称…";
 "Ready" = "准备好了";
 "Received 0.0 seconds this session" = "本次已接收 0.0 秒";
@@ -261,6 +260,7 @@
 "Tap or swipe right to lock recording" = "短按或向右滑锁定录音";
 "Tap to stop" = "点击停止";
 "Tap to talk" = "点击说话";
+"Tap/Scroll on Watch app to control." = "在手表 App 上轻点或滚动，即可控制。";
 "The Mac Wi-Fi service is unavailable." = "Mac Wi-Fi 服务不可用";
 "The Mac is handling another pairing request" = "Mac 正在处理另一条配对请求";
 "The Mac receiver port is in use. Close other Micodex or older Watch Whisper instances. Keep the Watch IP and pairing; connection will recover when the port is free." = "Mac 的接收端口被占用。请关闭其他 Micodex 或旧版 Watch Whisper；无需改手表 IP 或重新配对。端口释放后会自动恢复。";
