@@ -1,8 +1,8 @@
 cask "micodex" do
-  version "1.0,16"
+  version "1.0-16"
   sha256 "15d76b5e5e675a2e48f18ebd6cf1444f21c59cc36c1ecbcd468c9d68bdb13520"
 
-  url "https://github.com/nexorial/ios-watch-whisper/releases/download/mac-v#{version.csv.first}-#{version.csv.second}/Micodex-#{version.csv.first}-#{version.csv.second}-macOS-universal.zip"
+  url "https://github.com/nexorial/ios-watch-whisper/releases/download/mac-v#{version}/Micodex-#{version}-macOS-universal.zip"
   name "Micodex"
   desc "Remote receiver for Codex"
   homepage "https://kiskir.dev/projects/micodex"
