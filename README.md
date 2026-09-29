@@ -6,7 +6,7 @@ Micodex is a free, open-source native Watch remote and Mac receiver. Turn the Di
 
 [简体中文](README.zh-CN.md) · [Project & setup](https://kiskir.dev/projects/micodex) · [Privacy](https://kiskir.dev/projects/micodex/privacy) · [Terms](https://kiskir.dev/projects/micodex/terms) · [Report an issue](https://github.com/nexorial/ios-watch-whisper/issues)
 
-> **Release status:** public source is available; the first App Store release is in preparation. There is no public App Store download yet. Build from source using the steps below. The Mac receiver is required and is distributed separately from the Watch app.
+> **Availability:** the Mac app is available through Homebrew and GitHub Releases. The Apple Watch app will be installed from the App Store; its first release is still awaiting screenshots and App Review. The Watch download is not live yet.
 
 ## What it does
 
@@ -27,23 +27,70 @@ Micodex routes audio to **Codex's own dictation**. It does not include a transcr
 | Codex | The Mac desktop app, with dictation available and microphone permission enabled |
 | Audio | [BlackHole 2ch](https://github.com/ExistentialAudio/BlackHole), installed separately, for Watch dictation |
 | Network | Watch and Mac on a local network that allows devices to reach each other |
-| Building | Xcode 27 (tested), XcodeGen, and your own Apple signing team for device installation |
 
 The Watch app is standalone. Apple uses an iOS distribution container for it, but Micodex has **no iPhone companion interface**. An iPhone can assist with Watch installation and keyboard input.
 
-## Quick start
+## Installation
 
-1. **Build and open the Mac receiver.** Follow [Build from source](#build-from-source), or open `Micodex.xcodeproj` and run `MicodexMac`. Keep the receiver running.
-2. **Install the Watch app.** Select your signing team and run the `MicodexWatch` scheme on your paired physical Watch.
-3. **Connect your Mac.** In the Mac receiver, expand **Connect** and click **Copy Connection Code**. In the Watch connection screen, paste the complete code using the iPhone keyboard, or enter it exactly. Tap **Trust This Mac & Connect**. Only copy a code from your own Mac: it contains the full certificate fingerprint that identifies that computer.
-4. **Approve pairing.** Click **Allow Wi-Fi Watch** on the Mac. Compare the six-digit code on both devices, then click **Codes Match — Allow**. Your devices reconnect using their saved pairing.
-5. **Allow control.** Grant Micodex Accessibility access in macOS System Settings. Open a Codex task and turn the Crown to scroll the conversation.
-6. **Enable Watch dictation.** Install BlackHole 2ch, use the Mac receiver's audio controls to select it as the dictation input, and allow the Watch microphone when asked. Codex must use BlackHole or the system default input. See the [audio guide](docs/WATCH-AUDIO.md).
-7. **Talk, check, send.** Hold to talk; wait until the Watch says it is recording. Release, wait for transcription, check the text on your Mac, and tap Enter to send.
+### 1. Mac — Homebrew
+
+Install [Homebrew](https://brew.sh/) if you do not already have it, then run:
+
+```sh
+brew tap nexorial/micodex https://github.com/nexorial/ios-watch-whisper
+brew install --cask nexorial/micodex/micodex
+open -a Micodex
+```
+
+This installs a **prebuilt, Developer ID-signed and Apple-notarized Mac app** for Apple Silicon and Intel. You do **not** need Xcode, XcodeGen, or an Apple Developer account. The cask is maintained in this repository; it is not part of Homebrew's official cask collection.
+
+Prefer a direct download? Get the Mac ZIP from [GitHub Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest), unzip it, and move **Micodex.app** into **Applications**.
+
+For Watch dictation, also install the separate audio driver:
+
+```sh
+brew install --cask blackhole-2ch
+```
+
+BlackHole may request an administrator password and a restart. Afterward, select **BlackHole 2ch** as the input used by Codex using Micodex's audio controls. Scrolling and Enter do not need BlackHole. See the [audio guide](docs/WATCH-AUDIO.md).
+
+### 2. Apple Watch — App Store
+
+Once the first release is approved, download **Micodex – Watch Remote** from the **App Store on your Apple Watch**. In the Simplified Chinese storefront, search for **Micodex**. The app is free and has no subscription or in-app purchase. No Xcode or developer setup is required for App Store installation.
+
+**Not available yet:** the first Watch release is still awaiting the owner's screenshots and App Review. [App Store destination](https://apps.apple.com/app/id6816016796) will become available after release. Installing the Mac app does not install the Watch app. The project page will reflect public availability when it is verified.
+
+### 3. Pair and start using Micodex
+
+1. Keep Micodex running on the Mac and connect both devices to a reachable local network.
+2. **Connect your Mac.** In the Mac receiver, expand **Connect** and click **Copy Connection Code**. In the Watch connection screen, paste the complete code using the iPhone keyboard, or enter it exactly. Tap **Trust This Mac & Connect**. Only copy a code from your own Mac: it contains the full certificate fingerprint that identifies that computer.
+3. **Approve pairing.** Click **Allow Wi-Fi Watch** on the Mac. Compare the six-digit code on both devices, then click **Codes Match — Allow**. Your devices reconnect using their saved pairing.
+4. **Allow control.** Grant Micodex Accessibility access in macOS System Settings. Open a Codex task and turn the Crown to scroll the conversation.
+5. **Enable Watch dictation.** Install BlackHole 2ch, use the Mac receiver's audio controls to select it as the dictation input, and allow the Watch microphone when asked. Codex must use BlackHole or the system default input. See the [audio guide](docs/WATCH-AUDIO.md).
+6. **Talk, check, send.** Hold to talk; wait until the Watch says it is recording. Release, wait for transcription, check the text on your Mac, and tap Enter to send.
 
 Changing the default input also affects other apps that use it. Switch back to your usual microphone when finished. Location permission is optional and is used only to display the Wi-Fi name; Micodex does not read or store location coordinates.
 
-## Build from source
+### Updating and uninstalling
+
+Finish dictation and quit Micodex before updating:
+
+```sh
+brew update
+brew upgrade --cask nexorial/micodex/micodex
+```
+
+To remove the Mac app:
+
+```sh
+brew uninstall --cask nexorial/micodex/micodex
+```
+
+Normal upgrades and uninstall keep pairing settings and the Mac certificate. See [local privacy controls](docs/PRIVACY.md) if you also want to remove that data. If you previously installed a development copy in `~/Applications`, quit it and keep only one receiver running. Detailed installation and migration help: [Installation guide](docs/INSTALLATION.md).
+
+## Build from source (developers)
+
+The steps below are for contributors and custom builds. Ordinary users should use **Homebrew on Mac and the App Store on Apple Watch**. Development needs Xcode 27 (tested), XcodeGen, and a signing team for physical-device installation.
 
 ```sh
 git clone https://github.com/nexorial/ios-watch-whisper.git
@@ -107,6 +154,7 @@ Locked recording uses watchOS background audio, but the system can dim the displ
 | `Tests/` | Unit tests, isolated Mac integration tests, and Watch UI tests |
 | `Localization/` | Reviewed English → Chinese source catalogs |
 | `Config/`, `scripts/` | Reproducible builds, signing templates, and release verification |
+| `Casks/` | Homebrew installation of the signed, notarized Mac release |
 
 Read [Architecture](docs/ARCHITECTURE.md), [Contributing](CONTRIBUTING.md), [Security](SECURITY.md), and the [release checklist](docs/RELEASING.md). Legacy bundle IDs and Keychain namespaces intentionally retain `watchwhisper` so existing installations keep their pairing keys. When upgrading from a developer-provisioned build to the public build, copy your Mac connection code once; the same Mac identity reuses its saved key.
 

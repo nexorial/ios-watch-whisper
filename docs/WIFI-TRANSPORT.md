@@ -1,6 +1,6 @@
 # Wi-Fi connection
 
-Use the [README setup steps](../README.md#quick-start). Wi-Fi requires macOS 15+, an awake Mac receiver, and a reachable IPv4 local network. The service listens on TCP 8766.
+Use the [README setup steps](../README.md#3-pair-and-start-using-micodex). Wi-Fi requires macOS 15+, an awake Mac receiver, and a reachable IPv4 local network. The service listens on TCP 8766.
 
 First installation uses **Copy Connection Code** on the Mac and **Trust This Mac & Connect** on the Watch. The code carries the full certificate fingerprint; obtain it directly from your own Mac. A six-digit pairing comparison is a second approval step and cannot substitute for this full pin.
 

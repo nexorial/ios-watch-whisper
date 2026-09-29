@@ -6,19 +6,39 @@
 
 [English / 完整文档](README.md) · [项目页](https://kiskir.dev/projects/micodex) · [隐私政策](https://kiskir.dev/projects/micodex/privacy) · [使用条款](https://kiskir.dev/projects/micodex/terms)
 
-首个 App Store 版本正在准备，尚无公开商店下载。现在可以从源码构建。需要 watchOS 9+、macOS 15+（推荐 Wi-Fi 模式）、Codex Mac 版；语音输入还需要单独安装 BlackHole 2ch。
+Mac 应用通过 Homebrew 或 GitHub Releases 安装。Apple Watch 端通过 App Store 安装；首个手表版本仍在等待截图及审核，目前尚未公开下载。推荐使用 macOS 15+ 和 watchOS 9+。
 
-## 快速开始
+## Installation / 安装
+
+### 1. Mac：用 Homebrew 安装
+
+如果还没有 Homebrew，请先通过 [Homebrew 官网](https://brew.sh/) 安装，然后运行：
 
 ```sh
-git clone https://github.com/nexorial/ios-watch-whisper.git
-cd ios-watch-whisper
-brew install xcodegen
-./scripts/build.sh
-cp Config/Local.xcconfig.example Config/Local.xcconfig
+brew tap nexorial/micodex https://github.com/nexorial/ios-watch-whisper
+brew install --cask nexorial/micodex/micodex
+open -a Micodex
 ```
 
-在 `Config/Local.xcconfig` 填写自己的 Apple 开发者团队 ID。使用不同团队时，也要将 `project.yml` 中的 Bundle ID 改为你的团队拥有的标识。运行 `xcodegen generate`，打开 `Micodex.xcodeproj`，分别运行 `MicodexMac` 和 `MicodexWatch`。
+安装的是已经完成 **Developer ID 签名和 Apple 公证**的 Mac 通用应用，支持 Apple Silicon 和 Intel。普通用户**无需安装 Xcode、XcodeGen，也不需要 Apple 开发者账号**。此 Cask 由本项目维护，不属于 Homebrew 官方 Cask 仓库。
+
+也可以从 [GitHub Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest) 下载 Mac ZIP，解压后把 **Micodex.app** 拖入 **Applications（应用程序）**。
+
+需要语音输入时，再单独安装 BlackHole 2ch：
+
+```sh
+brew install --cask blackhole-2ch
+```
+
+驱动安装可能要求管理员密码和重启。安装后，在 Mac 接收端把 BlackHole 2ch 设为 Codex 的听写输入。仅滚动和 Enter 不需要此驱动。
+
+### 2. Apple Watch：从 App Store 下载
+
+首个版本审核通过后，在手表上的 **App Store** 搜索 **Micodex**；英文商店名称为 **Micodex – Watch Remote**。免费，无订阅和内购，不需要开发者模式或 Xcode。
+
+**当前尚未上架：**正在等待截图和 App Review。[App Store 目标页面](https://apps.apple.com/app/id6816016796) 会在正式发布后开放。安装 Mac 应用不会自动安装手表应用。
+
+### 3. 配对并开始使用
 
 1. 两端连接可互访的局域网，Mac 接收端保持运行。
 2. Mac 点“连接 → 复制连接码”，在手表连接页通过 iPhone 键盘粘贴完整内容，点“信任此 Mac 并连接”。只使用你自己 Mac 上复制的连接码。
@@ -28,6 +48,27 @@ cp Config/Local.xcconfig.example Config/Local.xcconfig
 6. 按住说话，松开停止；也可轻点开始/停止或右滑锁定。说话后约两秒安静会结束，最长两分钟。转写后检查文字，再点 Enter 发送。
 
 选择 BlackHole 作为默认输入也会影响其他使用默认输入的 App；用完可切回原麦克风。显示 Wi-Fi 名称的定位授权是可选的，不读取或保存坐标。
+
+### 更新和卸载
+
+先结束听写并退出 Micodex，再更新：
+
+```sh
+brew update
+brew upgrade --cask nexorial/micodex/micodex
+```
+
+卸载 Mac 应用：
+
+```sh
+brew uninstall --cask nexorial/micodex/micodex
+```
+
+常规更新和卸载会保留配对设置与 Mac 证书。清除这些数据的方法见 [本地隐私控制](docs/PRIVACY.md)。如果之前在 `~/Applications` 安装过开发版，请先退出旧版，只运行一个接收端。更多说明见 [安装指南](docs/INSTALLATION.md)。
+
+## 从源码构建（开发者）
+
+普通用户使用上面的 **Mac Homebrew + Watch App Store** 路径。只有开发、贡献或自定义构建才需要 Xcode、XcodeGen 和真机签名设置，完整步骤见 [英文开发者指南](README.md#build-from-source-developers)。
 
 ## 隐私与限制
 

@@ -26,6 +26,33 @@ The privacy manifest declares UserDefaults for app-local settings (`CA92.1`) and
 - Public Watch-only IPA passed metadata, privacy-manifest and Apple Distribution signature checks. Apple confirmed upload success and processed build 16; the build was selected in version 1.0.
 - The official project, privacy and terms pages are live, with desktop/mobile checks. Website PR #3 was merged into the existing production branch.
 - App Privacy was published as Data Not Collected. Free pricing was configured for all 175 price regions. Age rating is 4+.
-- Owner screenshots and physical acceptance of the public setup flow remain outstanding. No App Review submission or public App Store release is claimed. The Mac receiver is currently installed from source; no notarized Mac binary is published.
+- Owner screenshots and physical acceptance of the public setup flow remain outstanding. No App Review submission or public App Store release is claimed. At that preparation checkpoint the Mac receiver was installed from source; the Homebrew distribution workflow below supersedes that installation limitation.
 
 See `marketing/app-store/` for the reviewable listing copy. Keep private contact details and raw delivery receipts outside Git.
+
+## Mac app and Homebrew
+
+Public installation is **Homebrew on Mac + App Store on Watch**. The Mac ZIP is a universal prebuilt app, independent of the Watch listing. Its cask lives in `Casks/micodex.rb` in this repository and is tapped with an explicit Git URL. Do not advertise the Watch listing as available until it is public.
+
+Use the existing Xcode account and signing team to submit a universal Mac archive for Developer ID signing and Apple notarization:
+
+```sh
+./scripts/prepare-mac-release.sh /tmp/Micodex-RELEASE.xcarchive
+```
+
+Xcode can use its cloud-managed Developer ID certificate when no local distribution identity is installed. This is separate from Apple Development signing and from the Watch's App Store distribution signature. After Apple has accepted notarization:
+
+```sh
+./scripts/export-mac-release.sh /tmp/Micodex-RELEASE.xcarchive /absolute/path/new-output
+```
+
+The export script checks the actual signature, both CPU architectures, stapled notarization ticket and Gatekeeper acceptance before packaging. It exports outside synced folders so Finder metadata does not contaminate bundle verification. It does not disable Gatekeeper, remove quarantine from a downloaded app, or publish an unsigned fallback.
+
+Publish an immutable GitHub Release named `mac-vVERSION-BUILD` with the generated `Micodex-VERSION-BUILD-macOS-universal.zip`. Update the cask's `version`, SHA-256 and matching URL; use `brew style`, a Cask audit and a real install from the public URL before claiming the command works. Never overwrite an existing release asset with different bytes. Keep raw signing and upload logs under ignored `artifacts/`.
+
+```sh
+brew tap nexorial/micodex https://github.com/nexorial/ios-watch-whisper
+brew install --cask nexorial/micodex/micodex
+```
+
+For a verification install on a development Mac, use a fresh temporary `--appdir` so the existing receiver is not overwritten. Do not run two receivers; inspect signatures and notarization independently from any physical Watch acceptance.

@@ -1,6 +1,6 @@
 # App Store metadata
 
-Micodex 1.0 is a free Watch-only release with a separately built Mac receiver.
+Micodex 1.0 is a free Watch-only release with a separate Mac receiver installed through Homebrew or its notarized GitHub release.
 
 - Primary category: Productivity; secondary: Developer Tools.
 - Localizations: English (U.S.) and Simplified Chinese. English listing name: `Micodex – Watch Remote` (the bare name is unavailable in that locale); Chinese listing and in-app name: `Micodex`.

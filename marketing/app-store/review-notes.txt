@@ -1,6 +1,6 @@
 Micodex is a free standalone Apple Watch remote with a separate open-source Mac receiver. It has no iPhone UI, account, subscriptions, ads, or analytics. The iOS bundle is Apple’s Watch-only distribution container.
 
-Requirements: watchOS 9+, macOS 15+ for Wi-Fi, both devices on a reachable local network. Mac receiver source and step-by-step build/install instructions: https://github.com/nexorial/ios-watch-whisper . The receiver is currently installed from source, not through this Watch listing.
+Requirements: watchOS 9+, macOS 15+ for Wi-Fi, both devices on a reachable local network. Mac receiver downloads, source and installation instructions: https://github.com/nexorial/ios-watch-whisper . The receiver is distributed separately from this Watch listing as a Developer ID-signed, Apple-notarized universal app. Install with: brew tap nexorial/micodex https://github.com/nexorial/ios-watch-whisper ; brew install --cask nexorial/micodex/micodex . A direct Mac ZIP is also available in GitHub Releases.
 
 Setup: run MicodexMac, select Connect > Copy Connection Code, paste it into the Watch using the iPhone keyboard, and tap Trust This Mac & Connect. On Mac choose Allow Wi-Fi Watch, compare the six-digit codes, then approve. This build contains no developer-specific IP or certificate pin. Grant Micodex Accessibility access to control Codex.
 

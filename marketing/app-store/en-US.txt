@@ -10,7 +10,7 @@ TURN, TALK, SEND
 • Pair over the local network by copying your Mac connection code and approving matching six-digit codes.
 
 WHAT YOU NEED
-An Apple Watch running watchOS 9 or later, a Mac running macOS 15 or later for Wi-Fi, the separate Micodex Mac receiver, and the Codex desktop app. Both devices must be on a reachable local network. The Mac receiver is currently built and installed from public source; the support website links to complete instructions.
+An Apple Watch running watchOS 9 or later, a Mac running macOS 15 or later for Wi-Fi, the separate Micodex Mac receiver, and the Codex desktop app. Both devices must be on a reachable local network. Install the free Mac receiver using Homebrew or the notarized Mac download from GitHub Releases; the support website links to complete instructions.
 
 Watch dictation also requires the separately installed BlackHole 2ch virtual audio driver, selected as Codex’s input. Allow Micodex Accessibility access on the Mac and microphone access on the Watch. Optional location permission only shows the Wi-Fi name; Micodex does not read or save location coordinates.
 
