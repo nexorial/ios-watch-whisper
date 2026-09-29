@@ -25,7 +25,7 @@ Micodex routes audio to **Codex's own dictation**. It does not include a transcr
 | Apple Watch | watchOS 9 or later; a physical Watch for microphone and wireless testing |
 | Mac | macOS 15 or later for the Wi-Fi connection |
 | Codex | The Mac desktop app, with dictation available and microphone permission enabled |
-| Audio | [BlackHole 2ch](https://github.com/ExistentialAudio/BlackHole), installed separately, for Watch dictation |
+| Audio | [BlackHole 2ch](https://github.com/ExistentialAudio/BlackHole), installed automatically by the Micodex Homebrew cask |
 | Network | Watch and Mac on a local network that allows devices to reach each other |
 
 The Watch app is standalone. Apple uses an iOS distribution container for it, but Micodex has **no iPhone companion interface**. An iPhone can assist with Watch installation and keyboard input.
@@ -46,13 +46,18 @@ This installs a **prebuilt, Developer ID-signed and Apple-notarized Mac app** fo
 
 Prefer a direct download? Get the Mac ZIP from [GitHub Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest), unzip it, and move **Micodex.app** into **Applications**.
 
-For Watch dictation, also install the separate audio driver:
+**BlackHole 2ch is installed automatically as a Homebrew dependency.** You do not need a second install command. Its system installer may ask for an administrator password and a restart; follow those prompts before opening Micodex again.
 
-```sh
-brew install --cask blackhole-2ch
-```
+On first launch, Micodex opens **Setup Guide**:
 
-BlackHole may request an administrator password and a restart. Afterward, select **BlackHole 2ch** as the input used by Codex using Micodex's audio controls. Scrolling and Enter do not need BlackHole. See the [audio guide](docs/WATCH-AUDIO.md).
+1. **Audio:** check BlackHole and explicitly select it as the dictation input.
+2. **Permissions:** enable Micodex Accessibility access on Mac, Codex microphone access on Mac, Micodex microphone access on Watch, and Local Network when prompted. Location is optional.
+3. **Pair Watch:** copy the connection code, compare the six-digit codes, and approve your Watch.
+4. **Try It:** test Crown scrolling and a short Watch dictation, then confirm the results.
+
+The guide can be skipped and reopened from **Setup Guide** in the Mac panel. It reads actual local device/settings state; it does not silently grant permissions or switch your default microphone. Selecting BlackHole explicitly also affects other apps using the system default input.
+
+If you use the **direct ZIP download**, Homebrew is not involved, so install the driver with `brew install --cask blackhole-2ch` or the official BlackHole installer. The guide detects a missing driver and explains installation or restart recovery. See the [full installation guide](docs/INSTALLATION.md).
 
 ### 2. Apple Watch — App Store
 
@@ -66,7 +71,7 @@ Once the first release is approved, download **Micodex – Watch Remote** from t
 2. **Connect your Mac.** In the Mac receiver, expand **Connect** and click **Copy Connection Code**. In the Watch connection screen, paste the complete code using the iPhone keyboard, or enter it exactly. Tap **Trust This Mac & Connect**. Only copy a code from your own Mac: it contains the full certificate fingerprint that identifies that computer.
 3. **Approve pairing.** Click **Allow Wi-Fi Watch** on the Mac. Compare the six-digit code on both devices, then click **Codes Match — Allow**. Your devices reconnect using their saved pairing.
 4. **Allow control.** Grant Micodex Accessibility access in macOS System Settings. Open a Codex task and turn the Crown to scroll the conversation.
-5. **Enable Watch dictation.** Install BlackHole 2ch, use the Mac receiver's audio controls to select it as the dictation input, and allow the Watch microphone when asked. Codex must use BlackHole or the system default input. See the [audio guide](docs/WATCH-AUDIO.md).
+5. **Enable Watch dictation.** Follow **Setup Guide → Audio and Permissions** to select BlackHole as the dictation input and allow the Watch microphone when asked. Codex must use BlackHole or the system default input. See the [audio guide](docs/WATCH-AUDIO.md).
 6. **Talk, check, send.** Tap to talk; two haptic taps and “Speak now” confirm that the Watch microphone is capturing. Tap again to stop, wait for transcription, check the text on your Mac, and tap Enter to send.
 
 Changing the default input also affects other apps that use it. Switch back to your usual microphone when finished. Location permission is optional and is used only to display the Wi-Fi name; Micodex does not read or store location coordinates.

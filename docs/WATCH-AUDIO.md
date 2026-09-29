@@ -4,8 +4,8 @@ Micodex keeps Codex's built-in dictation:
 
 **Watch microphone → pinned HTTPS → Mac receiver → BlackHole 2ch → Codex dictation.**
 
-1. Install BlackHole with `brew install --cask blackhole-2ch`, or use [its official project](https://github.com/ExistentialAudio/BlackHole). It is a separate system audio driver with its own license and installer permissions.
-2. In the Mac receiver, check the audio device, then explicitly select BlackHole as the dictation input. Codex must use BlackHole or the system default input. Other apps using the default input are also affected; switch back afterward. Micodex does not change the speaker output.
+1. Homebrew installs BlackHole 2ch automatically with Micodex. Complete its administrator/restart prompts. Direct ZIP users need `brew install --cask blackhole-2ch` or [the official installer](https://github.com/ExistentialAudio/BlackHole). It remains a separate system driver with its own license.
+2. Open **Setup Guide → Audio** in the Mac receiver, check the detected device, then explicitly select BlackHole as the dictation input. Codex must use BlackHole or the system default input. Other apps using the default input are also affected; switch back afterward. Micodex does not change the speaker output.
 3. Allow Codex microphone access and Micodex Accessibility access on the Mac. Allow the Watch microphone when starting a recording.
 4. Tap to talk; two haptic taps and “Speak now” indicate actual local capture. Tap again to stop capture, allow the tail to drain and transcription to finish, then inspect the text before tapping Enter.
 

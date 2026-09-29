@@ -25,17 +25,30 @@ Wi-Fi setup requires **macOS 15+**. No compilation, personal signing team, or de
 
 Without Homebrew, download the Mac ZIP from [Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest), unzip it, and drag `Micodex.app` into Applications.
 
-### Dictation audio driver
+### Automatic BlackHole installation
 
-For voice input only:
+The Micodex Cask declares `depends_on cask: "blackhole-2ch"`. Homebrew installs that driver before Micodex when needed. You do not need a separate driver command for the normal Homebrew installation.
 
-```sh
-brew install --cask blackhole-2ch
-```
+BlackHole is a system audio driver with its own license and official installer. macOS may request an administrator password and a restart. Neither Micodex nor Homebrew bypasses those prompts. If installation is interrupted, finish the system installer and run the Micodex installation command again.
 
-This is the separate official BlackHole 2ch cask. Its installer can request an administrator password and a restart. Micodex does not install it silently. Scrolling and Enter do not require it.
+For the **direct ZIP download**, install BlackHole separately with `brew install --cask blackhole-2ch` or its official installer. A ZIP cannot install the system dependency by itself.
 
-In Micodex's Mac audio controls, select BlackHole as the input used by Codex. Allow Codex microphone permission and Micodex Accessibility access when setting up those functions. Selecting a default input also affects other apps that use it; switch back to your usual microphone after dictation if needed.
+### First-launch Setup Guide
+
+The guide opens for a new, unpaired installation. Existing paired users keep their normal panel and can click **Setup Guide** at any time. Choosing **Set Up Later** remembers the dismissal without marking setup complete.
+
+| Step | What the guide does | What you do |
+| --- | --- | --- |
+| Audio | Detects the BlackHole audio device and whether it is the default input; distinguishes driver files waiting to load | Finish installer/restart if needed; click **Use BlackHole for Dictation** |
+| Permissions | Checks Micodex Accessibility access and provides settings links | Allow Micodex Accessibility and Local Network; allow **Codex** microphone access on Mac and **Micodex** microphone access on Watch |
+| Pair Watch | Shows receiver readiness, copies its connection code and offers explicit pairing approval | Open the Watch app, paste the code, compare the six digits, then approve |
+| Try It | Keeps detection separate from real control/transcription | Test Crown scrolling and one spoken sentence; confirm only after seeing the results |
+
+The guide never automatically changes the default input or grants permissions. The input button affects other apps using the system default microphone, but leaves speaker output unchanged. Select System Default or BlackHole 2ch in Codex. Switching back to your normal microphone later may require choosing BlackHole again before Watch dictation.
+
+Codex may appear as **ChatGPT** in macOS permission lists. Mac Micodex does not need the Mac microphone. Codex and Watch microphone permission cannot be verified by checking the Mac receiver's own permissions, so the final step uses your actual test. Location is optional and only displays the Wi-Fi name. A saved Watch pairing does not prove a currently live connection or successful speech recognition.
+
+You can uncheck **Set up voice input too** and finish the guide for scrolling/Enter first. Homebrew still installs BlackHole as a dependency; the guide does not force microphone use.
 
 ## Apple Watch installation
 

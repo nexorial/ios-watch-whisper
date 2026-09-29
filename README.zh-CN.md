@@ -24,13 +24,18 @@ open -a Micodex
 
 也可以从 [GitHub Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest) 下载 Mac ZIP，解压后把 **Micodex.app** 拖入 **Applications（应用程序）**。
 
-需要语音输入时，再单独安装 BlackHole 2ch：
+**Homebrew 会自动将 BlackHole 2ch 作为依赖一并安装，无需再输入第二条安装命令。** 系统安装器可能要求管理员密码和重启，请按提示完成后重新打开 Micodex。
 
-```sh
-brew install --cask blackhole-2ch
-```
+首次打开时，Mac 应用会显示 **设置指南**，分四步完成：
 
-驱动安装可能要求管理员密码和重启。安装后，在 Mac 接收端把 BlackHole 2ch 设为 Codex 的听写输入。仅滚动和 Enter 不需要此驱动。
+1. **音频：**检查 BlackHole，点击按钮将其设为听写输入。
+2. **权限：**开启 Mac 上 Micodex 的辅助功能权限、Mac 上 Codex 的麦克风权限、手表上 Micodex 的麦克风权限，并允许本地网络。定位仅用于显示 Wi-Fi 名称，是可选项。
+3. **配对手表：**复制连接码，核对两端六位码后批准配对。
+4. **试用：**实际测试表冠滚动和一句语音转写，再确认完成。
+
+可以选择“稍后设置”，也能随时从 Mac 面板重新打开“设置指南”。向导会读取真实的本机状态，不会自动代替用户授予权限或切换默认麦克风。明确选择 BlackHole 后，其他使用系统默认输入的 App 也会改用它。
+
+如果使用 **ZIP 直接下载**，需要另行运行 `brew install --cask blackhole-2ch` 或使用 BlackHole 官方安装器。向导会在未检测到驱动时提供安装或重启指引。详见 [安装指南](docs/INSTALLATION.md)。
 
 ### 2. Apple Watch：从 App Store 下载
 
@@ -44,7 +49,7 @@ brew install --cask blackhole-2ch
 2. Mac 点“连接 → 复制连接码”，在手表连接页通过 iPhone 键盘粘贴完整内容，点“信任此 Mac 并连接”。只使用你自己 Mac 上复制的连接码。
 3. Mac 点“允许 Wi-Fi 手表”，核对两端六位码后批准。
 4. 在 Mac 系统设置中允许 Micodex 的辅助功能权限。打开 Codex 任务，转动表冠滚动正文。
-5. 安装 [BlackHole 2ch](https://github.com/ExistentialAudio/BlackHole)，在 Mac 接收端设为听写输入。Codex 需使用 BlackHole 或系统默认输入；手表首次录音需允许麦克风。
+5. 按“设置指南 → 音频与权限”将 BlackHole 2ch 设为听写输入。Codex 需使用 BlackHole 或系统默认输入；手表首次录音需允许麦克风。
 6. 点击开始录音，麦克风实际收音时震动两下并显示「请开始说话」；再次点击结束。停顿不会自动结束，最长两分钟，熄屏继续录音。顶部显示当前 Mac 线程名称。转写后检查文字，再点 Enter 发送。
 
 选择 BlackHole 作为默认输入也会影响其他使用默认输入的 App；用完可切回原麦克风。显示 Wi-Fi 名称的定位授权是可选的，不读取或保存坐标。

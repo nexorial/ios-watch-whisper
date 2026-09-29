@@ -27,6 +27,10 @@ final class WatchAudioOutput: ObservableObject, WatchAudioPlayback {
     private var level = AudioLevel()
     private let format = AVAudioFormat(standardFormatWithSampleRate: 16_000, channels: 1)!
     var installed: Bool { loopbackDevice() != nil }
+    var selectedForDictation: Bool {
+        guard let id = loopbackDevice() else { return false }
+        return defaultInput() == id
+    }
 
     init() { refresh() }
     func refresh() {

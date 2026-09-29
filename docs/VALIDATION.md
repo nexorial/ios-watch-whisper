@@ -46,3 +46,12 @@ Keep raw device logs and account-specific upload receipts in ignored `artifacts/
 - The isolated local TLS integration test passed, including authenticated title metadata and no title disclosure during discovery. It does not read or operate a real Codex window.
 - Mac Build 18 was signed, installed and opened with Accessibility still allowed and the receiver ready. The existing Watch title display consumes the corrected metadata; this fix does not require reinstalling the Watch app.
 - The exact live conversation title on the physical Watch still needs user confirmation. Automated access to the Codex UI was unavailable, so the fixture tests are not recorded as live title acceptance.
+
+## Build 19 installation and setup guide (2026-09-29)
+
+- Added a Homebrew Cask dependency on the official `blackhole-2ch` package. Installer administrator/restart prompts remain native; ZIP users get a manual recovery path.
+- Added a four-step Mac Setup Guide: audio, permissions, pairing, and a real Watch test. Fresh unpaired users see it once; existing users can reopen it. Dismissal and completion are separate local preferences.
+- Completion requires actual local driver/input/Accessibility/receiver/pairing checks plus explicit user confirmation of scrolling and transcription. Scrolling-only setup does not require audio. Neither a paired Watch nor a detected driver is treated as transcription proof.
+- 71 core tests passed, including missing prerequisites, unconfirmed tests, scrolling-only use and revoked state. English/Chinese localization checks and both app builds passed. A later permission-copy clarification passed localization validation and the universal Mac release build.
+- Native UI checks covered all four steps, ready driver/input indicators, disabled Finish Setup before real-test confirmation, and Set Up Later. The microphone-settings link opened the correct macOS pane; no permission switch or audio input was changed during verification.
+- Developer ID signing, both CPU architectures, stapled notarization and Gatekeeper assessment passed for the final Mac ZIP. Fresh privileged driver installation/reboot and real Watch speech remain separate user/device acceptance checks; this Mac already has the BlackHole driver installed outside Homebrew.

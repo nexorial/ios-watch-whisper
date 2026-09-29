@@ -12,7 +12,7 @@ Micodex 让你转动数码表冠滚动对话、通过手表麦克风说话，在
 使用要求
 需要 Apple Watch（watchOS 9 或更高版本）、Mac（Wi-Fi 模式需要 macOS 15 或更高版本）、单独运行的 Micodex Mac 接收端和 Codex Mac 版。手表和 Mac 需要处于可互访的局域网。Mac 接收端可通过 Homebrew 或 GitHub Releases 中经过 Apple 公证的安装包安装，完整步骤见支持网站。
 
-语音输入需要单独安装 BlackHole 2ch 虚拟音频驱动，并选择为 Codex 的音频输入。Mac 端需要辅助功能权限，首次录音需要手表麦克风权限。显示 Wi-Fi 名称的定位授权是可选的；Micodex 不读取或保存定位坐标。
+通过 Homebrew 安装 Mac 接收端时，会自动一并安装 BlackHole 2ch 虚拟音频驱动；系统安装器可能要求管理员密码和重启。ZIP 下载用户需要另行安装驱动。Mac 首次设置指南会逐步引导音频输入、权限授权、手表配对和滚动/转写测试。Mac 端需要辅助功能权限，首次录音需要手表麦克风权限。显示 Wi-Fi 名称的定位授权是可选的；Micodex 不读取或保存定位坐标。
 
 隐私与控制
 Micodex 不保存录音，不含广告或分析 SDK，也没有自己的云端转写服务。音频由手表传到 Mac，再交给 Codex 自带听写；Codex 可能按照其服务条款和账户设置处理音频。请核对文字后再发送。

@@ -56,6 +56,9 @@ private struct HostView: View {
     @State private var showingAdvanced = false
     @State private var copiedAddress = false
     @State private var showingLastAction = false
+    @State private var showingSetup = false
+    @AppStorage("setupGuideSeenVersion") private var setupGuideSeenVersion = 0
+    @AppStorage("setupGuideCompletedVersion") private var setupGuideCompletedVersion = 0
 
     private var needsAttention: Bool {
         [.permissionRequired, .targetInactive, .unavailable, .failed].contains(controller.phase)
@@ -69,6 +72,9 @@ private struct HostView: View {
                     .foregroundStyle(MicodexStyle.accent)
                 Text(L10n.t("Micodex")).font(.system(size: 22, weight: .semibold, design: .rounded))
                 Spacer()
+                Button(L10n.t("Setup Guide")) { showingSetup = true }
+                    .font(.system(size: 11)).buttonStyle(.borderless)
+                    .accessibilityIdentifier("setup.open")
                 Text(demo ? L10n.t("UI DEMO") : L10n.t("WATCH → MAC"))
                     .font(.system(size: 9, weight: .medium)).tracking(1.3).foregroundStyle(.secondary)
             }
@@ -133,7 +139,24 @@ private struct HostView: View {
         .padding(.horizontal, 26).padding(.top, 36).padding(.bottom, 20)
         .frame(width: 420, height: 550)
         .tint(MicodexStyle.accent)
+        .sheet(isPresented: $showingSetup, onDismiss: {
+            if !demo { setupGuideSeenVersion = 1 }
+        }) {
+            SetupGuideView(controller: controller, wifi: wifi, demo: demo) { completed in
+                if !demo {
+                    setupGuideSeenVersion = 1
+                    if completed { setupGuideCompletedVersion = 1 }
+                }
+                showingSetup = false
+            }
+        }
         .task {
+            if ProcessInfo.processInfo.arguments.contains("--setup-guide") || (!demo && setupGuideSeenVersion == 0 && wifi.pairedCount == 0) {
+                showingSetup = true
+            } else if !demo && setupGuideSeenVersion == 0 {
+                // Existing paired users can reopen the guide without a surprise tour.
+                setupGuideSeenVersion = 1
+            }
             while !Task.isCancelled {
                 network.refresh()
                 try? await Task.sleep(nanoseconds: 5_000_000_000)

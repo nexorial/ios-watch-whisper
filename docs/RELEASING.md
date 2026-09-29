@@ -64,3 +64,11 @@ Mac **1.0 (16)** is published at [mac-v1.0-16](https://github.com/nexorial/ios-w
 The public Homebrew command was tested with a temporary app directory. Download, checksum validation and installation succeeded; the installed app retained quarantine and passed strict code-signature verification, stapled-ticket validation, and Gatekeeper assessment as **Notarized Developer ID**. Both `arm64` and `x86_64` slices were present. Cask style and online audit passed. The temporary test installation was then removed without changing the existing receiver or pairing data.
 
 This verifies Mac distribution and installation, not new physical Watch behavior. The Watch App Store release remains pending owner screenshots and review.
+
+### Mac 1.0 (19): automatic driver dependency and Setup Guide
+
+`Casks/micodex.rb` now depends on the official `blackhole-2ch` cask. Homebrew owns dependency installation and its native administrator/restart flow. The app does not execute a privileged installer itself. Direct ZIP users receive installation/restart recovery guidance in the app.
+
+The Mac guide checks local driver/input, Accessibility, receiver and pairing state, and separately asks users to test Crown scrolling and Watch transcription. Skipping the guide persists dismissal without claiming completion. Existing paired users can open it from the panel; a fresh unpaired installation opens it once. All copy is localized in English and Simplified Chinese. The guide notes that macOS may list Codex as ChatGPT.
+
+The notarized universal Mac ZIP for `mac-v1.0-19` has SHA-256 `6ddf56e367de1431022a1d657941fe08061c2f16b736e7a59fe9cc20c43d248d`. Keep cold driver installation/reboot, local setup checks and physical Watch transcription as distinct verification steps. This development Mac already has BlackHole installed through the vendor installer; do not uninstall/reinstall a working system audio driver just to simulate a clean machine.

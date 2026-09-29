@@ -11,3 +11,5 @@ Watch connection preferences are local to the app. Forgetting a Mac removes its 
 Do not paste connection diagnostics or audio containing private information into public issues. Use GitHub private vulnerability reporting for security-sensitive reports.
 
 The paired Watch receives the active target thread name over authenticated, pinned HTTPS so you can identify the current control target. Thread titles are not included in discovery/pairing replies or diagnostic logs.
+
+Setup Guide stores only local dismissal/completion preferences. Device/input and Accessibility checks are read locally; Codex and Watch microphone access are confirmed by the user’s test. Setup progress and test confirmations are not uploaded to the developer.
