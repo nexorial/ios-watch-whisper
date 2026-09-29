@@ -37,3 +37,12 @@ Keep raw device logs and account-specific upload receipts in ignored `artifacts/
   wrist-down microphone/transcription continuity remain device acceptance items.
 - The Watch UI-test target compiled, but the simulator test run did not reach
   a test case and was stopped after remaining stalled. No UI-test pass is claimed.
+
+## Build 18 focused conversation title fix (2026-09-29)
+
+- The Mac receiver now treats both `Codex` and its `ChatGPT` window-title alias as application names, not conversation titles.
+- A unique title in the active composer's top content column takes priority over the OS window title. Heading, static-text and title-button representations are supported; sidebar rows, transcript headings, hidden geometry and ambiguous headers are rejected.
+- Added regressions for the reported Chinese thread name, stale window titles, application aliases, non-heading headers, ambiguity and duplicate accessibility nodes. All 67 core tests and Mac / Watch simulator builds passed.
+- The isolated local TLS integration test passed, including authenticated title metadata and no title disclosure during discovery. It does not read or operate a real Codex window.
+- Mac Build 18 was signed, installed and opened with Accessibility still allowed and the receiver ready. The existing Watch title display consumes the corrected metadata; this fix does not require reinstalling the Watch app.
+- The exact live conversation title on the physical Watch still needs user confirmation. Automated access to the Codex UI was unavailable, so the fixture tests are not recorded as live title acceptance.

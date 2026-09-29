@@ -92,22 +92,35 @@ final class AgentController: ObservableObject {
         let window = unsafeBitCast(value, to: AXUIElement.self)
         let elements = descendants(window)
         // Only report a task with a usable composer, not Settings or a search window.
-        guard (try? composer(elements, in: window)) != nil else { return nil }
-        if let title = ThreadTitle.clean(string(window, kAXTitleAttribute), application: target.rawValue) { return title }
-        guard let frame = rect(window) else { return nil }
-        // Electron can leave the window title at its app name. In that case use
-        // an unambiguous heading in the top content header, never sidebar rows
-        // or transcript headings. Missing/ambiguous titles deliberately stay nil.
-        let headings = elements.filter {
-            guard string($0, kAXRoleAttribute) == "AXHeading", let rect = rect($0) else { return false }
-            return rect.minX > frame.minX + 140 && rect.minY >= frame.minY && rect.maxY < frame.minY + 110
+        guard let editor = try? composer(elements, in: window),
+              let editorFrame = rect(editor), let frame = rect(window) else { return nil }
+        // A chat title may be a heading, plain text, or the label of a title
+        // button. Restrict candidates to the composer's top content column.
+        // Do not read arbitrary sidebar rows or transcript headings as titles.
+        let header = elements.filter {
+            guard let bounds = rect($0) else { return false }
+            return bounds.minY >= frame.minY && bounds.maxY <= frame.minY + 112
         }
-        let titles = Set(headings.compactMap { heading -> String? in
-            let parts = [string(heading, kAXTitleAttribute), string(heading, kAXValueAttribute)]
-                + descendants(heading).filter { string($0, kAXRoleAttribute) == kAXStaticTextRole }.map { string($0, kAXValueAttribute) }
-            return parts.compactMap { ThreadTitle.clean($0, application: target.rawValue) }.first
-        })
-        return titles.count == 1 ? titles.first : nil
+        let candidates = header.flatMap { element -> [ThreadTitle.Candidate] in
+            let role = string(element, kAXRoleAttribute)
+            let kind: ThreadTitle.Kind
+            switch role {
+            case "AXHeading": kind = .heading
+            case kAXStaticTextRole: kind = .text
+            case kAXButtonRole, kAXPopUpButtonRole: kind = .control
+            default: return []
+            }
+            guard let bounds = rect(element) else { return [] }
+            // Descriptions/help on icon buttons are commands, not thread names.
+            var parts = [string(element, kAXTitleAttribute), string(element, kAXValueAttribute)]
+            if kind == .heading {
+                parts += descendants(element).filter { string($0, kAXRoleAttribute) == kAXStaticTextRole }
+                    .map { string($0, kAXValueAttribute) }
+            }
+            return parts.filter { !$0.isEmpty }.map { .init($0, frame: bounds, kind: kind) }
+        }
+        return ThreadTitle.select(candidates, window: frame, composer: editorFrame,
+                                  windowTitle: string(window, kAXTitleAttribute), application: target.rawValue)
     }
 
     private func prepareAccessibility(_ root: AXUIElement, pid: pid_t) {
