@@ -44,9 +44,17 @@ open -a Micodex
 
 This installs a **prebuilt, Developer ID-signed and Apple-notarized Mac app** for Apple Silicon and Intel. You do **not** need Xcode, XcodeGen, or an Apple Developer account. The cask is maintained in this repository; it is not part of Homebrew's official cask collection.
 
-Prefer a direct download? Get the Mac ZIP from [GitHub Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest), unzip it, and move **Micodex.app** into **Applications**.
-
 **BlackHole 2ch is installed automatically as a Homebrew dependency.** You do not need a second install command. Its system installer may ask for an administrator password and a restart; follow those prompts before opening Micodex again.
+
+### 2. Mac — DMG download
+
+Download [Micodex 1.0 (19) for Mac](https://github.com/nexorial/ios-watch-whisper/releases/download/mac-v1.0-19/Micodex-1.0-19-macOS-universal.dmg). Quit an existing receiver, open the DMG, drag **Micodex.app** onto **Applications**, eject the disk image, then open Micodex from Applications.
+
+The enclosed app has the same Developer ID signature and stapled Apple notarization as the Homebrew app. The **DMG container itself is unsigned and has no stapled notarization ticket**; normal macOS download confirmations may appear. Do not disable Gatekeeper or remove quarantine to bypass a security warning. See the [installation checks](docs/INSTALLATION.md#installation-checks).
+
+Unlike Homebrew, the DMG does not install BlackHole. For Watch dictation, install [BlackHole 2ch](https://existential.audio/blackhole/) separately, or run `brew install --cask blackhole-2ch`. Follow its administrator/restart prompts. The original [Mac ZIP](https://github.com/nexorial/ios-watch-whisper/releases/download/mac-v1.0-19/Micodex-1.0-19-macOS-universal.zip) remains available as a fallback and also requires separate driver installation.
+
+### Mac setup — both installation methods
 
 On first launch, Micodex opens **Setup Guide**:
 
@@ -57,15 +65,15 @@ On first launch, Micodex opens **Setup Guide**:
 
 The guide can be skipped and reopened from **Setup Guide** in the Mac panel. It reads actual local device/settings state; it does not silently grant permissions or switch your default microphone. Selecting BlackHole explicitly also affects other apps using the system default input.
 
-If you use the **direct ZIP download**, Homebrew is not involved, so install the driver with `brew install --cask blackhole-2ch` or the official BlackHole installer. The guide detects a missing driver and explains installation or restart recovery. See the [full installation guide](docs/INSTALLATION.md).
+The guide detects a missing driver and explains installation or restart recovery. See the [full installation guide](docs/INSTALLATION.md).
 
-### 2. Apple Watch — App Store
+### 3. Apple Watch — App Store
 
 Once the first release is approved, download **Micodex – Watch Remote** from the **App Store on your Apple Watch**. In the Simplified Chinese storefront, search for **Micodex**. The app is free and has no subscription or in-app purchase. No Xcode or developer setup is required for App Store installation.
 
 **Not available yet:** the first Watch release is still awaiting the owner's screenshots and App Review. [App Store destination](https://apps.apple.com/app/id6816016796) will become available after release. Installing the Mac app does not install the Watch app. The project page will reflect public availability when it is verified.
 
-### 3. Pair and start using Micodex
+### 4. Pair and start using Micodex
 
 1. Keep Micodex running on the Mac and connect both devices to a reachable local network.
 2. **Connect your Mac.** In the Mac receiver, expand **Connect** and click **Copy Connection Code**. In the Watch connection screen, paste the complete code using the iPhone keyboard, or enter it exactly. Tap **Trust This Mac & Connect**. Only copy a code from your own Mac: it contains the full certificate fingerprint that identifies that computer.
@@ -95,7 +103,7 @@ Normal upgrades and uninstall keep pairing settings and the Mac certificate. See
 
 ## Build from source (developers)
 
-The steps below are for contributors and custom builds. Ordinary users should use **Homebrew on Mac and the App Store on Apple Watch**. Development needs Xcode 27 (tested), XcodeGen, and a signing team for physical-device installation.
+The steps below are for contributors and custom builds. Ordinary users should use **Homebrew or the DMG on Mac and the App Store on Apple Watch**. Development needs Xcode 27 (tested), XcodeGen, and a signing team for physical-device installation.
 
 ```sh
 git clone https://github.com/nexorial/ios-watch-whisper.git

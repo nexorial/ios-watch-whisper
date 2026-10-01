@@ -1,6 +1,6 @@
 # Installation
 
-For ordinary users: **Homebrew on the Mac, App Store on Apple Watch**. Xcode and an Apple Developer account are only needed when developing Micodex from source.
+For ordinary users: **Homebrew (first option) or the DMG (second option) on Mac, App Store on Apple Watch**. Xcode and an Apple Developer account are only needed when developing Micodex from source.
 
 ## Availability
 
@@ -10,6 +10,8 @@ For ordinary users: **Homebrew on the Mac, App Store on Apple Watch**. Xcode and
 The Mac app requires a Watch app to provide remote controls. Installing one does not install the other.
 
 ## Mac installation
+
+### 1. Homebrew
 
 Install [Homebrew](https://brew.sh/) once, then:
 
@@ -23,7 +25,20 @@ The tap uses this project's existing repository. The fully qualified cask name s
 
 Wi-Fi setup requires **macOS 15+**. No compilation, personal signing team, or developer-mode setup is part of the normal Mac installation.
 
-Without Homebrew, download the Mac ZIP from [Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest), unzip it, and drag `Micodex.app` into Applications.
+### 2. DMG download
+
+Download [Micodex-1.0-19-macOS-universal.dmg](https://github.com/nexorial/ios-watch-whisper/releases/download/mac-v1.0-19/Micodex-1.0-19-macOS-universal.dmg), then:
+
+1. Quit the existing Micodex receiver before replacing it. Keep any old app recoverable until the new copy works; pairing data lives separately from the app bundle.
+2. Open the DMG and drag `Micodex.app` onto its Applications shortcut. Finder copy/paste into `/Applications` is equivalent.
+3. Eject the disk image and open `/Applications/Micodex.app`.
+4. For Watch dictation, install [BlackHole 2ch](https://existential.audio/blackhole/) separately, or run `brew install --cask blackhole-2ch`. Finish any administrator/restart prompts, then follow Setup Guide.
+
+DMG SHA-256: `e86a50ce7b177fad4da0dbd8220fbbb4b48f323aaf60f9c95177f82e0bc53abb`.
+
+The **app** is Developer ID-signed, has hardened runtime and a stapled Apple notarization ticket. The **DMG container** is unsigned and has no stapled ticket; its primary-signature `spctl --type open` assessment reports `no usable signature`. Assessing the installed app with `spctl --type execute` is a separate check. Do not disable Gatekeeper or strip quarantine if macOS blocks opening a download. Normal download confirmation prompts are not a promise of an otherwise warning-free installation.
+
+The original [Mac ZIP](https://github.com/nexorial/ios-watch-whisper/releases/download/mac-v1.0-19/Micodex-1.0-19-macOS-universal.zip) remains available as a fallback: unzip and move `Micodex.app` into Applications. Direct DMG and ZIP installation does not register the app as a Homebrew-managed installation.
 
 ### Automatic BlackHole installation
 
@@ -31,7 +46,7 @@ The Micodex Cask declares `depends_on cask: "blackhole-2ch"`. Homebrew installs 
 
 BlackHole is a system audio driver with its own license and official installer. macOS may request an administrator password and a restart. Neither Micodex nor Homebrew bypasses those prompts. If installation is interrupted, finish the system installer and run the Micodex installation command again.
 
-For the **direct ZIP download**, install BlackHole separately with `brew install --cask blackhole-2ch` or its official installer. A ZIP cannot install the system dependency by itself.
+For **direct DMG or ZIP downloads**, install BlackHole separately with `brew install --cask blackhole-2ch` or its official installer. Neither package installs the system dependency by itself.
 
 ### First-launch Setup Guide
 
@@ -78,6 +93,8 @@ brew uninstall --cask nexorial/micodex/micodex
 ```
 
 Pairing preferences, Keychain items, and the Mac TLS identity are preserved. The Cask has no data-wiping `zap` action. See [Privacy controls](PRIVACY.md) for deliberate data removal.
+
+For a DMG installation, update by quitting Micodex and replacing the app with a newer verified download. To uninstall, move `/Applications/Micodex.app` to Trash. This leaves pairing data in place. To switch to Homebrew, first move the stopped direct-download app aside, then run the Homebrew installation command; do not force an overwrite.
 
 If you previously built Micodex yourself, quit the old receiver before opening the Homebrew copy in `/Applications`. A development copy in `~/Applications` is a separate app bundle; archive or remove that old bundle yourself when no longer needed. Do not run both receivers. Keep the existing bundle identity and local TLS directory to retain pairing; a new signature can require confirming the app's Accessibility permission again in macOS.
 

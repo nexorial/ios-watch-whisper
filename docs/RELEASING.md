@@ -32,7 +32,7 @@ See `marketing/app-store/` for the reviewable listing copy. Keep private contact
 
 ## Mac app and Homebrew
 
-Public installation is **Homebrew on Mac + App Store on Watch**. The Mac ZIP is a universal prebuilt app, independent of the Watch listing. Its cask lives in `Casks/micodex.rb` in this repository and is tapped with an explicit Git URL. Do not advertise the Watch listing as available until it is public.
+Public installation is **Homebrew first or DMG second on Mac + App Store on Watch**. The Mac packages are independent of the Watch listing. Homebrew continues using the original universal ZIP through `Casks/micodex.rb`, tapped with an explicit Git URL. Do not advertise the Watch listing as available until it is public.
 
 Use the existing Xcode account and signing team to submit a universal Mac archive for Developer ID signing and Apple notarization:
 
@@ -74,3 +74,13 @@ The Mac guide checks local driver/input, Accessibility, receiver and pairing sta
 The notarized universal Mac ZIP for `mac-v1.0-19` has SHA-256 `6ddf56e367de1431022a1d657941fe08061c2f16b736e7a59fe9cc20c43d248d`. Keep cold driver installation/reboot, local setup checks and physical Watch transcription as distinct verification steps. This development Mac already has BlackHole installed through the vendor installer; do not uninstall/reinstall a working system audio driver just to simulate a clean machine.
 
 Release verification: Homebrew's public installation preflight lists `blackhole-2ch` as a dependency; cask style and online audit passed. The Mac 1.0 (19) release is public, the local receiver is updated, and the website installation copy is live. Updated App Store explanatory copy is prepared in `marketing/app-store/`; its live synchronization remains pending because the web session expired. The Watch submission has not been sent for review.
+
+### Mac 1.0 (19): optional DMG — October 1, 2026
+
+The DMG packages the existing release app without rebuilding or modifying it. Its contents are `Micodex.app`, an Applications shortcut, English/Chinese installation instructions and the MIT license. The existing ZIP and Homebrew cask remain unchanged. The DMG does not bundle or install BlackHole; direct-download users install that system driver separately.
+
+DMG SHA-256: `e86a50ce7b177fad4da0dbd8220fbbb4b48f323aaf60f9c95177f82e0bc53abb`.
+
+Image checksum verification, read-only mounting, and temporary copied-install checks passed. All 13 application files matched the source release after packaging and copying. The quarantined DMG also opened in Finder, and Finder copy/paste installed the app in `/Applications` with quarantine retained. The actual installed app passed strict/deep code-signature verification, stapled-ticket validation and Gatekeeper execute assessment as Notarized Developer ID. Its process launched from `/Applications` and the local receiver listened on its configured port; a one-second process sample showed the normal AppKit event loop. The visible control panel was confirmed in the owner's screenshot, showing Wi-Fi Ready and the BlackHole route. This does not verify physical Watch transcription or a clean-machine driver setup.
+
+The DMG container itself is **unsigned and has no stapled notarization ticket**. Its primary-signature open assessment reports `no usable signature`; this differs from the successful execute assessment of the enclosed app. Do not claim a warning-free download experience or remove quarantine to bypass a block. Any future container signing/notarization must retain the verified application and use an explicitly authorized Apple submission. Publish the new asset only after confirming actual installation and launch; preserve the ZIP and never overwrite an asset with different bytes.

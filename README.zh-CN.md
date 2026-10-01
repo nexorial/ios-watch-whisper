@@ -22,9 +22,17 @@ open -a Micodex
 
 安装的是已经完成 **Developer ID 签名和 Apple 公证**的 Mac 通用应用，支持 Apple Silicon 和 Intel。普通用户**无需安装 Xcode、XcodeGen，也不需要 Apple 开发者账号**。此 Cask 由本项目维护，不属于 Homebrew 官方 Cask 仓库。
 
-也可以从 [GitHub Releases](https://github.com/nexorial/ios-watch-whisper/releases/latest) 下载 Mac ZIP，解压后把 **Micodex.app** 拖入 **Applications（应用程序）**。
-
 **Homebrew 会自动将 BlackHole 2ch 作为依赖一并安装，无需再输入第二条安装命令。** 系统安装器可能要求管理员密码和重启，请按提示完成后重新打开 Micodex。
+
+### 2. Mac：下载 DMG 安装
+
+下载 [Micodex 1.0（19）Mac DMG](https://github.com/nexorial/ios-watch-whisper/releases/download/mac-v1.0-19/Micodex-1.0-19-macOS-universal.dmg)。先退出旧接收端，打开 DMG，将 **Micodex.app** 拖到 **Applications（应用程序）**，推出磁盘映像，再从应用程序打开 Micodex。
+
+包内应用保留了与 Homebrew 版相同的 Developer ID 签名和 Apple 公证票据。**DMG 容器本身未签名，也没有装订公证票据**，macOS 可能显示正常的下载确认提示。若出现安全阻拦，请勿关闭 Gatekeeper 或删除隔离属性来绕过。详见 [安装检查](docs/INSTALLATION.md#installation-checks)。
+
+DMG 不会自动安装 BlackHole。手表语音输入需要另行安装 [BlackHole 2ch](https://existential.audio/blackhole/)，或运行 `brew install --cask blackhole-2ch`，按系统提示完成管理员授权和重启。原有 [Mac ZIP](https://github.com/nexorial/ios-watch-whisper/releases/download/mac-v1.0-19/Micodex-1.0-19-macOS-universal.zip) 仍保留供备用下载，同样需要单独安装驱动。
+
+### Mac 设置：两种安装方式通用
 
 首次打开时，Mac 应用会显示 **设置指南**，分四步完成：
 
@@ -35,15 +43,15 @@ open -a Micodex
 
 可以选择“稍后设置”，也能随时从 Mac 面板重新打开“设置指南”。向导会读取真实的本机状态，不会自动代替用户授予权限或切换默认麦克风。明确选择 BlackHole 后，其他使用系统默认输入的 App 也会改用它。
 
-如果使用 **ZIP 直接下载**，需要另行运行 `brew install --cask blackhole-2ch` 或使用 BlackHole 官方安装器。向导会在未检测到驱动时提供安装或重启指引。详见 [安装指南](docs/INSTALLATION.md)。
+向导会在未检测到驱动时提供安装或重启指引。详见 [安装指南](docs/INSTALLATION.md)。
 
-### 2. Apple Watch：从 App Store 下载
+### 3. Apple Watch：从 App Store 下载
 
 首个版本审核通过后，在手表上的 **App Store** 搜索 **Micodex**；英文商店名称为 **Micodex – Watch Remote**。免费，无订阅和内购，不需要开发者模式或 Xcode。
 
 **当前尚未上架：**正在等待截图和 App Review。[App Store 目标页面](https://apps.apple.com/app/id6816016796) 会在正式发布后开放。安装 Mac 应用不会自动安装手表应用。
 
-### 3. 配对并开始使用
+### 4. 配对并开始使用
 
 1. 两端连接可互访的局域网，Mac 接收端保持运行。
 2. Mac 点“连接 → 复制连接码”，在手表连接页通过 iPhone 键盘粘贴完整内容，点“信任此 Mac 并连接”。只使用你自己 Mac 上复制的连接码。
@@ -73,7 +81,7 @@ brew uninstall --cask nexorial/micodex/micodex
 
 ## 从源码构建（开发者）
 
-普通用户使用上面的 **Mac Homebrew + Watch App Store** 路径。只有开发、贡献或自定义构建才需要 Xcode、XcodeGen 和真机签名设置，完整步骤见 [英文开发者指南](README.md#build-from-source-developers)。
+普通用户使用上面的 **Mac Homebrew 或 DMG + Watch App Store** 路径。只有开发、贡献或自定义构建才需要 Xcode、XcodeGen 和真机签名设置，完整步骤见 [英文开发者指南](README.md#build-from-source-developers)。
 
 ## 隐私与限制
 
